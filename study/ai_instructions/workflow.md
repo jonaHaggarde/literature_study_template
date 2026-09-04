@@ -5,6 +5,12 @@ How to actually operate in this repo, once `scope.md` is real (see
 
 ## Processing new PDFs
 
+For a large backlog processed in parallel via subagents (especially an
+unattended/overnight run), see `batch-orchestration.md` first — it
+covers worker scoping and a real, documented rogue-agent failure mode
+this template's design specifically guards against. The steps below are
+per-document and apply whether run serially or inside a worker.
+
 1. User drops PDFs into `PDFs/` (subfolders are fine, the script
    recurses).
 2. Run `python scripts/convert.py` from `study/`. It hashes every PDF,
@@ -97,7 +103,10 @@ candidates in mind yet.
 such source is known — something already cited by a document in this
 catalog may be exactly it. Report matches as unverified leads
 (title/authors/venue/year only, never read) — this repo has no way to
-fetch or download sources itself.
+fetch or download sources itself. If `project_documents/source-access.md`
+exists, use it to point the user at where they might actually get the
+paper (institutional access, open access, or Google Scholar to locate it
+first) instead of leaving "go find this" with nowhere to go.
 
 ## Gap-flagging
 
@@ -121,7 +130,8 @@ on something that's actually in scope.
    uncovered is not a gap, it's expected — don't flag it as one.
 4. When a real gap is identified, ask the user directly whether they can
    source more material in that area, rather than silently working around
-   the hole.
+   the hole — check `project_documents/source-access.md` first (if it
+   exists) so the suggestion points at somewhere real to look.
 
 ## Decisions grounded in the literature
 

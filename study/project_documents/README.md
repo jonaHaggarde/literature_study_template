@@ -11,6 +11,9 @@ Typical contents:
 - A project description or brief
 - A proposal or statement of purpose
 - Existing drafts, outlines, or requirements this study needs to inform
+- `source-access.md` — where papers can actually be sourced from
+  (institutional/subscription access, open access, discovery tools), so
+  gap-flagging recommendations point somewhere real
 - Anything else that's ground truth for what this study is actually for
 
 ## How this relates to `ai_instructions/scope.md`
@@ -27,5 +30,8 @@ below as they're added so this README stays a useful index.
 
 ## Files in this folder
 
-<!-- List added documents here as they're dropped in, one line each with
-     a short description of what it is. -->
+- `source-access.md` — institutional/open access channels for sourcing
+  papers, used by gap-flagging recommendations.
+
+<!-- List further documents here as they're dropped in, one line each
+     with a short description of what it is. -->

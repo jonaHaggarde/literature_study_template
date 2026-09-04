@@ -23,6 +23,16 @@ this repo:
    touches which file) — useful for a fast orientation before reading the
    full text version.
 
+Situational, read only when they apply — not part of the standard read
+order above, since most sessions don't need either:
+
+- **`batch-orchestration.md`** — launching parallel subagents on a real
+  backlog.
+- **`long-running-sessions.md`** — the user asks for an overnight,
+  multi-hour, or multi-session autonomous run. Read this *before*
+  starting one, not after — it's a checklist of what to nail down first,
+  since these requests are almost always under-specified.
+
 ## Why scope.md matters so much
 
 The single hardest judgment call this template asks Claude to make is:
