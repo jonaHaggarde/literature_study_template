@@ -1,0 +1,12 @@
+# Source PDFs: kept local only. Large binaries + copyright, not repo material.
+/study/PDFs/**
+!/study/PDFs/.gitkeep
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,21 @@
+name: Validate literature study
+
+on:
+  push:
+    paths:
+      - "study/**"
+  pull_request:
+    paths:
+      - "study/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run structural validation (catalog/notes/manifest sync, schema, dossiers)
+        working-directory: study
+        run: python scripts/validate_repo.py
