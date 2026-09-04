@@ -13,11 +13,12 @@ to be complete.
 
 Everything that matters lives under `study/` — see `study/README.md` for
 setup and day-to-day usage, and `study/ai_instructions/README.md` for how
-Claude should operate in this repo (it's auto-loaded via
-`study/CLAUDE.md`, so you don't need to point it there yourself). For a
-graphical walkthrough of the whole process (onboarding, the PDF batch
-pipeline, how a question gets answered, which script touches which
-file), see `study/workflow-diagram.md`. A GitHub Actions check
+Claude should operate in this repo (`study/CLAUDE.md` points there
+automatically, *if Claude Code is started with `study/` itself as the
+working directory* — see step 6 below, this matters). For a graphical
+walkthrough of the whole process (onboarding, the PDF batch pipeline,
+how a question gets answered, which script touches which file), see
+`study/workflow-diagram.md`. A GitHub Actions check
 (`.github/workflows/validate.yml`) runs `study/scripts/validate_repo.py`
 on every push, so structural mistakes (a broken catalog entry, a stale
 quick-reference list) surface automatically, without needing a Claude
@@ -41,9 +42,13 @@ session to catch them.
 5. Drop any of your own project materials (a project description, a
    brief, existing drafts — anything that defines *why* this study exists)
    into `study/project_documents/`.
-6. Open Claude Code in this repo (from `study/`, or anywhere above it —
-   `study/CLAUDE.md` gets picked up automatically) and just say you're
-   ready to start. Its first job will be helping you fill in
-   `study/ai_instructions/scope.md` — everything downstream (gap-flagging
-   in particular) depends on that being real, not a placeholder.
+6. **Open Claude Code with `study/` as the working directory** (`cd
+   study` first, then start Claude Code there) so `study/CLAUDE.md` loads
+   automatically as its memory file — opening from the repo root instead
+   isn't guaranteed to pick it up until Claude happens to look inside
+   `study/` on its own, so `cd study` first is the reliable way. Then
+   just say you're ready to start. Its first job will be helping you fill
+   in `study/ai_instructions/scope.md` — everything downstream
+   (gap-flagging in particular) depends on that being real, not a
+   placeholder.
 7. Then work through `study/README.md`'s "Adding PDFs" section.

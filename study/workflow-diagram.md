@@ -6,19 +6,28 @@ which script reads/writes which file, and how the pipeline itself grows.
 These render natively on GitHub and in most markdown viewers (no
 extension needed). Read alongside `ai_instructions/workflow.md`, which
 these diagrams summarize graphically — that file is the authoritative
-text version if the two ever disagree.
+text version if the two ever disagree. Not depicted here, to keep these
+diagrams readable: `ai_instructions/batch-orchestration.md`,
+`long-running-sessions.md`, and `project_documents/source-access.md` —
+situational extensions to diagram 2's pipeline, read directly rather than
+via a diagram.
 
 ## 1. Starting a new study
 
-From "just cloned the template" to "ready to process real PDFs."
+From "just cloned the template" to "ready to process real PDFs." Note on
+step E: `study/CLAUDE.md` only loads automatically as Claude Code's
+memory file when `study/` is the actual working directory it was started
+in — starting from the repo root instead isn't guaranteed to pick it up
+until Claude happens to explore into `study/` on its own, so `cd study`
+first is the reliable path.
 
 ```mermaid
 flowchart TD
     A["'Use this template' on GitHub<br/>(or clone + re-init git)"] --> B["Rename repo for the new topic"]
     B --> C["Run scripts/setup.ps1 or setup.sh<br/>creates .venv, installs dependencies"]
     C --> D["User drops project_documents/<br/>project brief, purpose, existing drafts"]
-    D --> E["Open Claude Code anywhere in the repo"]
-    E --> F["study/CLAUDE.md auto-loads,<br/>points straight at ai_instructions/README.md"]
+    D --> E["cd study, then open Claude Code there<br/>(working dir matters - see note above)"]
+    E --> F["study/CLAUDE.md auto-loads as the memory file,<br/>points straight at ai_instructions/README.md"]
     F --> G{"Is ai_instructions/scope.md<br/>still the placeholder?"}
     G -- yes --> H["Claude reads project_documents/<br/>and interviews the user about the topic"]
     H --> I["Claude writes a real scope.md:<br/>in scope / out of scope / what counts as a gap"]

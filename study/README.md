@@ -55,12 +55,15 @@ Creates `.venv/` and installs dependencies. Activate it afterward with
 
 1. Drop your own project materials into `project_documents/` (a project
    brief, proposal, anything explaining why this study exists).
-2. Open Claude Code here (from `study/`, or anywhere above it —
-   `CLAUDE.md` in this folder is auto-loaded and points straight at
-   `ai_instructions/README.md`) and just say you're ready to start. Its
-   first job is helping you fill in `ai_instructions/scope.md` —
-   everything downstream (gap-flagging in particular) depends on that
-   being real.
+2. **Start Claude Code with this folder (`study/`) as its working
+   directory** — `cd` here first, then launch it, so `CLAUDE.md` in this
+   folder loads automatically as its memory file and points straight at
+   `ai_instructions/README.md`. Starting from the repo root instead isn't
+   guaranteed to pick it up until Claude happens to look inside `study/`
+   on its own, so `cd study` first is the reliable way. Then just say
+   you're ready to start. Its first job is helping you fill in
+   `ai_instructions/scope.md` — everything downstream (gap-flagging in
+   particular) depends on that being real.
 3. Drop PDFs into `PDFs/` and work through "Adding PDFs" below.
 
 ## Adding PDFs

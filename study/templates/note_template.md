@@ -11,7 +11,15 @@ tags: []
 source_pdf: PDFs/relative/path.pdf
 pdf_hash: sha256-hash-of-source-pdf
 converted_at: 2026-01-01T00:00:00Z
+doi: "10.xxxx/xxxxx"
 ---
+
+<!-- NOTE: title/authors/year above are best-effort from the PDF's own
+     metadata (or blank if metadata was empty/unusable) - PDF metadata is
+     frequently wrong or stale, verify against the actual text before
+     trusting, especially authors/year. This comment (and the doi: line
+     above, which is entirely omitted when no DOI is found on the first
+     two pages) only appear when convert.py actually found something. -->
 
 ## Key Findings
 

@@ -319,6 +319,11 @@ def build_quickref_lines(entries):
         if not f["compares"]:
             continue
         lines.append(f"- **{f['title']}** — {f['compares']}")
+    if not lines:
+        # Nothing to list yet (e.g. a fresh template with no processed
+        # comparison-study entries) - fall back to the placeholder rather
+        # than collapsing the section to blank lines.
+        lines.append("<!-- - **Title** — what's compared and on what basis -->")
     return lines
 
 
