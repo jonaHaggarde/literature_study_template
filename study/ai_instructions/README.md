@@ -1,4 +1,4 @@
-# AI instructions
+# Claude instructions
 
 Read this folder first, in this order, at the start of every session in
 this repo:
@@ -25,7 +25,7 @@ this repo:
 
 ## Why scope.md matters so much
 
-The single hardest judgment call this template asks an AI to make is:
+The single hardest judgment call this template asks Claude to make is:
 *is the fact that nobody's written about X a genuine gap in the
 literature worth flagging to the user, or is X just outside what this
 study is about?* There's no way to make that call without a clear,
@@ -40,7 +40,7 @@ scope, never flagged because scope.md never mentioned that area).
 `../project_documents/` holds the user's own primary materials — a
 project brief, a proposal, existing drafts, whatever explains why this
 study exists. Those documents are the source of truth but can be long.
-`scope.md` is a short, AI-maintained *distillation* of them, kept small
+`scope.md` is a short, Claude-maintained *distillation* of them, kept small
 enough to read in full every session without burning context — update it
 whenever `project_documents/` changes or a conversation reveals the
 existing distillation is wrong or incomplete, don't let it silently drift

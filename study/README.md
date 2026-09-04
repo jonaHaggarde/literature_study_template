@@ -1,16 +1,20 @@
 # study/
 
-A single-topic literature study: drop PDFs in, let an AI assistant build
+A single-topic literature study: drop PDFs in, let Claude build
 a searchable, citation-grounded catalog of them, and track its own
-coverage gaps against a scope you define. See the repo root `README.md`
-for the template-level pitch; this file covers setup and day-to-day
-mechanics.
+coverage gaps against a scope you define. This file covers setup and
+day-to-day mechanics; see `workflow-diagram.md` for a graphical
+walkthrough of the whole process. (If the repo root still has its own
+`README.md`, that's the template-level pitch rather than usage
+instructions — safe to delete once a real project is built out around
+`study/`, everything needed to actually run this lives in this folder.)
 
 ## Folder structure
 
 ```
 study/
   README.md              <- this file
+  CLAUDE.md                <- auto-loaded by Claude Code, points straight at ai_instructions/
   workflow-diagram.md      <- graphical overview of the whole process (Mermaid)
   catalog.md              <- master index. Read this FIRST, always.
   reference-index.md       <- every processed document's own references, deduplicated — grep for new leads
@@ -25,7 +29,7 @@ study/
     requirements.txt
   templates/
     note_template.md          <- reference only, shows the format convert.py generates
-  ai_instructions/            <- read this first in every AI session — see ai_instructions/README.md
+  ai_instructions/            <- read this first in every session — see ai_instructions/README.md
     README.md
     scope.md                   <- what this study is about — fill in before real work starts
     catalog-schema.md            <- catalog.md field definitions and allowed values
@@ -51,10 +55,12 @@ Creates `.venv/` and installs dependencies. Activate it afterward with
 
 1. Drop your own project materials into `project_documents/` (a project
    brief, proposal, anything explaining why this study exists).
-2. Open an AI coding assistant here and ask it to read
-   `ai_instructions/README.md`. Its first job is helping you fill in
-   `ai_instructions/scope.md` — everything downstream (gap-flagging in
-   particular) depends on that being real.
+2. Open Claude Code here (from `study/`, or anywhere above it —
+   `CLAUDE.md` in this folder is auto-loaded and points straight at
+   `ai_instructions/README.md`) and just say you're ready to start. Its
+   first job is helping you fill in `ai_instructions/scope.md` —
+   everything downstream (gap-flagging in particular) depends on that
+   being real.
 3. Drop PDFs into `PDFs/` and work through "Adding PDFs" below.
 
 ## Adding PDFs
@@ -68,7 +74,7 @@ Creates `.venv/` and installs dependencies. Activate it afterward with
    It hashes every PDF, skips anything already converted and unchanged,
    and for everything new/changed writes a `.md` file into `notes/`
    (mirroring the `PDFs/` path) and appends a stub entry to `catalog.md`.
-3. Ask your AI assistant to fill in the TODO fields (abstract, tags,
+3. Ask Claude to fill in the TODO fields (abstract, tags,
    type, contribution, key findings, implementation notes) for the new
    entries — see `ai_instructions/workflow.md` for exactly what's
    expected. This should be a full, non-lazy read of each document, not
@@ -108,7 +114,7 @@ Creates `.venv/` and installs dependencies. Activate it afterward with
    (`pip install ocrmypdf`, plus Tesseract + Ghostscript — see
    https://ocrmypdf.readthedocs.io/en/latest/installation.html)
 
-## How the AI should use this repo
+## How Claude should use this repo
 
 See `ai_instructions/README.md` — that folder is the actual operating
 manual (scope-checking, the catalog schema, the query playbook, and how

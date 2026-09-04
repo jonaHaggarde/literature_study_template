@@ -12,7 +12,7 @@ title/authors/year are best-effort pre-filled from each PDF's own
 metadata (often empty or wrong - treat as a starting point, not fact).
 Everything else (type/approach/contribution/tags/abstract, and the note's
 Key Findings/Implementation Notes) is left as TODO, meant to be filled in
-by asking the AI assistant to read the new notes and complete them - see
+by asking Claude to read the new notes and complete them - see
 ai_instructions/workflow.md.
 """
 
@@ -50,7 +50,7 @@ def best_effort_metadata(pdf_path: Path, first_pages_text: str) -> dict:
     """Pulls a best-effort title/author/year/doi from the PDF's own
     metadata and page text. PDF metadata is frequently empty, stale, or
     wrong (e.g. left over from a Word export) - this is a starting point
-    for the AI/user to verify, never treated as ground truth."""
+    for Claude/the user to verify, never treated as ground truth."""
     guess = {"title": "", "authors": "", "year": "", "doi": ""}
     try:
         doc = pymupdf.open(str(pdf_path))
@@ -143,7 +143,7 @@ def build_note_markdown(relpath: str, pdf_hash: str, pages: list, meta_guess: di
     lines.append("")
     lines.append(
         "<!-- TODO: 3-6 sentence summary of method, key claims, and results. "
-        "Fill in via the AI assistant after conversion. -->"
+        "Fill in via Claude after conversion. -->"
     )
     lines.append("")
     lines.append("## Content")
@@ -168,7 +168,7 @@ compares:
 tags:
 note: {note_path}
 source: {source_path}
-abstract: TODO - ask the AI assistant to summarize {note_path} and fill this in.
+abstract: TODO - ask Claude to summarize {note_path} and fill this in.
 <!-- /entry -->
 """
 
@@ -281,9 +281,9 @@ def main():
             print(f"  - {w}")
     if converted:
         print(
-            "\nNext step: open your AI assistant in this folder and ask it to read "
-            "ai_instructions/README.md and fill in the TODO fields (abstract, tags, "
-            "authors, key findings) for the newly added catalog entries and notes."
+            "\nNext step: open Claude Code in this folder and ask it to fill in the "
+            "TODO fields (abstract, tags, authors, key findings) for the newly added "
+            "catalog entries and notes - see ai_instructions/README.md."
         )
 
 

@@ -2,7 +2,7 @@
 """
 Rebuilds the auto-aggregated section of topics/gaps.md from every
 topics/*.md dossier's own "## Open questions" section. Purely mechanical
-mirroring - the AI/user's job is writing a good Open-questions section in
+mirroring - Claude/the user's job is writing a good Open-questions section in
 the dossier itself, not remembering to copy it here by hand afterward.
 
 Only replaces the content between the BEGIN/END markers in gaps.md; the

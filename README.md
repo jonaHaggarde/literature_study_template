@@ -5,7 +5,7 @@ single topic. Fork or download this repo per new topic/project — it is
 deliberately scoped to **one study at a time**, not a shared multi-project
 knowledge base.
 
-The idea: drop PDFs in, drop your own project documents in, tell the AI
+The idea: drop PDFs in, drop your own project documents in, tell Claude
 what the study is actually about, and let it build a searchable,
 citation-grounded catalog of the literature — one that tracks its own
 knowledge gaps against your stated scope instead of silently pretending
@@ -13,10 +13,14 @@ to be complete.
 
 Everything that matters lives under `study/` — see `study/README.md` for
 setup and day-to-day usage, and `study/ai_instructions/README.md` for how
-an AI assistant should operate in this repo. A GitHub Actions check
+Claude should operate in this repo (it's auto-loaded via
+`study/CLAUDE.md`, so you don't need to point it there yourself). For a
+graphical walkthrough of the whole process (onboarding, the PDF batch
+pipeline, how a question gets answered, which script touches which
+file), see `study/workflow-diagram.md`. A GitHub Actions check
 (`.github/workflows/validate.yml`) runs `study/scripts/validate_repo.py`
 on every push, so structural mistakes (a broken catalog entry, a stale
-quick-reference list) surface automatically, without needing an AI
+quick-reference list) surface automatically, without needing a Claude
 session to catch them.
 
 ## Starting a new study from this template
@@ -37,9 +41,9 @@ session to catch them.
 5. Drop any of your own project materials (a project description, a
    brief, existing drafts — anything that defines *why* this study exists)
    into `study/project_documents/`.
-6. Open Claude Code (or another AI coding assistant) in this repo and ask
-   it to read `study/ai_instructions/README.md` and get started. Its first
-   job will be helping you fill in `study/ai_instructions/scope.md` —
-   everything downstream (gap-flagging in particular) depends on that
-   being real, not a placeholder.
+6. Open Claude Code in this repo (from `study/`, or anywhere above it —
+   `study/CLAUDE.md` gets picked up automatically) and just say you're
+   ready to start. Its first job will be helping you fill in
+   `study/ai_instructions/scope.md` — everything downstream (gap-flagging
+   in particular) depends on that being real, not a placeholder.
 7. Then work through `study/README.md`'s "Adding PDFs" section.

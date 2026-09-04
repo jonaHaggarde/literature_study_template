@@ -1,7 +1,7 @@
 # Workflow diagrams
 
 Five diagrams covering this repo's process end to end: starting a new
-study, the PDF batch pipeline, how the AI answers a literature question,
+study, the PDF batch pipeline, how Claude answers a literature question,
 which script reads/writes which file, and how the pipeline itself grows.
 These render natively on GitHub and in most markdown viewers (no
 extension needed). Read alongside `ai_instructions/workflow.md`, which
@@ -17,11 +17,11 @@ flowchart TD
     A["'Use this template' on GitHub<br/>(or clone + re-init git)"] --> B["Rename repo for the new topic"]
     B --> C["Run scripts/setup.ps1 or setup.sh<br/>creates .venv, installs dependencies"]
     C --> D["User drops project_documents/<br/>project brief, purpose, existing drafts"]
-    D --> E["Open AI assistant in the repo"]
-    E --> F["AI reads ai_instructions/README.md<br/>the entry point for every session"]
+    D --> E["Open Claude Code anywhere in the repo"]
+    E --> F["study/CLAUDE.md auto-loads,<br/>points straight at ai_instructions/README.md"]
     F --> G{"Is ai_instructions/scope.md<br/>still the placeholder?"}
-    G -- yes --> H["AI reads project_documents/<br/>and interviews the user about the topic"]
-    H --> I["AI writes a real scope.md:<br/>in scope / out of scope / what counts as a gap"]
+    G -- yes --> H["Claude reads project_documents/<br/>and interviews the user about the topic"]
+    H --> I["Claude writes a real scope.md:<br/>in scope / out of scope / what counts as a gap"]
     G -- no --> J["Scope already defined"]
     I --> K["Study is ready for real work"]
     J --> K
@@ -42,15 +42,15 @@ flowchart TD
     B2 --> C["Writes notes/&lt;name&gt;.md<br/>Key Findings left as TODO"]
     C --> D["Appends a stub entry to catalog.md"]
     D --> E["Updates manifest.json"]
-    E --> F["AI does a full, non-lazy read of each new note"]
+    E --> F["Claude does a full, non-lazy read of each new note"]
     F --> G{"In scope?<br/>checked against ai_instructions/scope.md"}
     G -- no --> G1["Left excluded, reason noted"]
-    G -- yes --> H["AI fills catalog.md fields<br/>+ note's Key Findings / Implementation Notes"]
+    G -- yes --> H["Claude fills catalog.md fields<br/>+ note's Key Findings / Implementation Notes"]
     H --> I{"Head-to-head comparison<br/>or ranked survey?"}
     I -- yes --> I1["contribution: comparison-study<br/>quick-reference list regenerated later, not by hand"]
     I -- no --> J{"Dense cluster of related<br/>papers now exists?"}
     I1 --> J
-    J -- yes --> J1["AI builds/updates a topics/*.md dossier<br/>comparison table + Open questions section"]
+    J -- yes --> J1["Claude builds/updates a topics/*.md dossier<br/>comparison table + Open questions section"]
     J -- no --> K
     J1 --> K["Run: python scripts/build_reference_index.py<br/>rebuilds reference-index.md"]
     H --> GAP{"Reveals an in-scope sub-topic<br/>that's thin/absent in the catalog?"}
@@ -63,13 +63,13 @@ flowchart TD
     M -- no --> O{"Any topics/*.md dossier<br/>changed this batch?"}
     O -- yes --> O1["Run: python scripts/build_gaps_index.py"]
     O -- no --> P
-    O1 --> P["AI runs 2-3 real discovery queries by hand<br/>the actual usability check, scripts can't verify this"]
+    O1 --> P["Claude runs 2-3 real discovery queries by hand<br/>the actual usability check, scripts can't verify this"]
     P --> Q["Batch done"]
 ```
 
 ## 3. Answering a literature question
 
-How the AI routes a question and how much it reads to answer it — cost
+How Claude routes a question and how much it reads to answer it — cost
 discipline matters here since `notes/` and `reference-index.md` get
 expensive at scale.
 
@@ -98,7 +98,7 @@ flowchart TD
 
 ## 4. System map: which script touches which file
 
-Deterministic scripts move data mechanically; the AI is the only actor
+Deterministic scripts move data mechanically; Claude is the only actor
 that makes judgment calls, and it's also what triggers the scripts.
 
 ```mermaid
@@ -108,9 +108,9 @@ flowchart LR
         ProjDocs["project_documents/"]
     end
 
-    AI(["AI assistant<br/>judgment calls"])
+    CLAUDE(["Claude<br/>judgment calls"])
 
-    subgraph SCRIPTS["scripts/, deterministic, no AI needed"]
+    subgraph SCRIPTS["scripts/, deterministic, no Claude needed"]
         Convert["convert.py"]
         RefIdx["build_reference_index.py"]
         GapsIdx["build_gaps_index.py"]
@@ -142,17 +142,17 @@ flowchart LR
     Topics --> Validate
     Validate -. "fix mode rewrites" .-> Catalog
 
-    ProjDocs --> AI
-    AI -- "reads / writes" --> Scope
-    AI -- "reads notes, fills fields" --> Catalog
-    AI -- "writes Key Findings +<br/>Implementation Notes" --> Notes
-    AI -- "builds dossiers" --> Topics
-    AI -- "logs gaps, checks against scope" --> Gaps
-    AI -- "logs conclusions" --> Decisions
-    AI -- runs --> Convert
-    AI -- runs --> RefIdx
-    AI -- runs --> GapsIdx
-    AI -- runs --> Validate
+    ProjDocs --> CLAUDE
+    CLAUDE -- "reads / writes" --> Scope
+    CLAUDE -- "reads notes, fills fields" --> Catalog
+    CLAUDE -- "writes Key Findings +<br/>Implementation Notes" --> Notes
+    CLAUDE -- "builds dossiers" --> Topics
+    CLAUDE -- "logs gaps, checks against scope" --> Gaps
+    CLAUDE -- "logs conclusions" --> Decisions
+    CLAUDE -- runs --> Convert
+    CLAUDE -- runs --> RefIdx
+    CLAUDE -- runs --> GapsIdx
+    CLAUDE -- runs --> Validate
 ```
 
 ## 5. Extending the pipeline (adding a new script)
@@ -166,5 +166,5 @@ flowchart TD
     D -- yes --> S["Write scripts/new_script.py<br/>reading/writing existing files, same pattern as the others"]
     S --> W["Document it in ai_instructions/workflow.md:<br/>what it does, when to run it"]
     W --> V["Optionally wire it into<br/>validate_repo.py's checks or --fix path"]
-    D -- no --> J["Stays an AI-driven step,<br/>documented in ai_instructions/workflow.md instead"]
+    D -- no --> J["Stays a Claude-driven step,<br/>documented in ai_instructions/workflow.md instead"]
 ```
