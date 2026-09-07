@@ -140,10 +140,3 @@ a broken catalog entry, a stale derived index, a non-canonical tag used
 across several entries, an unbalanced mermaid fence — surface
 automatically without needing a Claude session to catch them. It is
 cheap, and it is what stops the derived files from quietly rotting.
-
-## Template version
-
-`TEMPLATE-VERSION` records which version of this template a fork started
-from, and `CHANGELOG.md` records what has changed since. A fork that has
-diverged can at least see what it is missing. See `CHANGELOG.md` for the
-pull-in options and their tradeoffs.
