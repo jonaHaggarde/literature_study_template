@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(cat:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(python scripts/validate_repo.py:*)",
+      "Bash(python scripts/build_reference_index.py:*)",
+      "Bash(python scripts/build_catalog_index.py:*)",
+      "Bash(python scripts/build_gaps_index.py:*)",
+      "Bash(python scripts/convert.py:*)",
+      "Bash(python study/scripts/validate_repo.py:*)",
+      "Bash(python study/scripts/build_reference_index.py:*)",
+      "Bash(python study/scripts/build_catalog_index.py:*)",
+      "Bash(python study/scripts/build_gaps_index.py:*)",
+      "Bash(python study/scripts/convert.py:*)"
+    ]
+  }
+}

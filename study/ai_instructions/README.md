@@ -24,14 +24,23 @@ this repo:
    full text version.
 
 Situational, read only when they apply — not part of the standard read
-order above, since most sessions don't need either:
+order above, since most sessions don't need them:
 
+- **`delegation.md`** — before launching any subagent, and before
+  changing a model assignment in `../../.claude/agents/`. Which work to
+  hand off (the rule is input/output asymmetry, not model cost), which
+  tier each kind of task belongs to, why the tiers sit where they do, and
+  which two fields a worker may only ever *propose*.
 - **`batch-orchestration.md`** — launching parallel subagents on a real
   backlog.
 - **`long-running-sessions.md`** — the user asks for an overnight,
   multi-hour, or multi-session autonomous run. Read this *before*
   starting one, not after — it's a checklist of what to nail down first,
   since these requests are almost always under-specified.
+- **`mcp.md`** — an MCP server is attached, or a workflow step dead-ends
+  on "there is no way to fetch that from here." Covers what a
+  source-acquisition server unlocks and what its output may never be
+  trusted with.
 
 ## Why scope.md matters so much
 
@@ -47,11 +56,26 @@ scope, never flagged because scope.md never mentioned that area).
 
 ## Relationship to project_documents/
 
-`../project_documents/` holds the user's own primary materials — a
-project brief, a proposal, existing drafts, whatever explains why this
-study exists. Those documents are the source of truth but can be long.
+`../../project_documents/` — at the repo root, outside `study/` — holds
+material handed down from outside the project: a brief, a proposal, a
+specification, whatever explains why this study exists. Those documents
+are the source of truth but can be long.
 `scope.md` is a short, Claude-maintained *distillation* of them, kept small
 enough to read in full every session without burning context — update it
 whenever `project_documents/` changes or a conversation reveals the
 existing distillation is wrong or incomplete, don't let it silently drift
 out of sync.
+
+## Where things live
+
+`study/` is the literature-review engine and nothing else. Project
+content — decisions, brainstorming, background explainers, meeting
+notes, the schedule, and provided material — lives at the repo root, one
+level up. The root `CLAUDE.md` has the routing and the repo-wide
+conventions (citations outside `study/`, and the diagram convention),
+and the root `README.md` explains why the split exists.
+
+The practical consequence for a session working in here: when a
+conversation produces something that isn't literature — a decision, an
+idea, an explainer — it does not go in `study/`. Put it in the right
+root-level folder, whose own `README.md` states what belongs there.

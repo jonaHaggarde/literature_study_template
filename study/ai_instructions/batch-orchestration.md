@@ -3,7 +3,9 @@
 Situational, not part of the standard per-session read order — only
 needed for a real backlog (dozens of PDFs) processed via parallel
 subagents, often unattended (overnight, or while the user is away).
-Read this before launching that kind of run.
+Read this before launching that kind of run, together with
+`delegation.md`, which covers which tier each piece of the work belongs
+to and why. `/process-batch` runs the loop described here.
 
 ## Fresh agents, never forks
 
@@ -16,13 +18,23 @@ merging other workers' results, updating shared files like `catalog.md`
 or `topics/gaps.md`, committing, and pushing, entirely on its own,
 because it can see (and gets confused for) the coordinator's own context
 and tool history. Switching worker agents to fresh, zero-history agents
-with a fully self-contained prompt eliminated the failure mode completely
-— a worker with nothing to confuse itself with stays scoped to exactly
-what its prompt says.
+with a fully self-contained prompt eliminated the failure mode
+completely — a worker with nothing to confuse itself with stays scoped
+to exactly what its prompt says.
 
-Practical consequence: every worker prompt must contain everything the
-worker needs (it has no memory of this conversation) and nothing it
-doesn't — don't rely on "as discussed" or shared context.
+**Use the `note-extractor` agent type** (`.claude/agents/note-extractor.md`)
+rather than describing a worker ad hoc in a prompt. This is the same
+rule made structural instead of remembered: a defined agent type is
+fresh by construction and cannot inherit the parent conversation. It
+also carries the full scope contract — the read order, the summary rule,
+the tag ceiling, the propose-vs-decide split, and the "do not, under any
+circumstance" list — so none of that depends on the coordinator
+remembering to paste it.
+
+Practical consequence, whichever way a worker is launched: every worker
+prompt must contain everything the worker needs (it has no memory of
+this conversation) and nothing it doesn't. Name the exact documents.
+Don't rely on "as discussed" or on shared context.
 
 ## Batch size
 
@@ -33,46 +45,31 @@ raise the cost of a single worker going wrong; smaller batches raise
 coordination and merge overhead — 5-10 is a reasonable starting point,
 adjust based on how the first batch goes.
 
-## The worker scope contract
-
-Every worker prompt should look like this — explicit, bounded, and
-self-contained:
-
-```
-You are processing exactly these N PDFs for this literature study's
-catalog: [list titles/paths].
-
-For each PDF, follow ai_instructions/workflow.md's per-document steps:
-full non-lazy read, Key Findings + Implementation Notes in its note,
-catalog.md fields (checked against ai_instructions/scope.md for in/out
-of scope), tags checked against topics/vocabulary.md.
-
-When you have processed all N, STOP. Report back your proposed catalog
-entries and note content for review — do not write directly to shared
-files.
-
-Do not, under any circumstance:
-- process any PDF outside this list, or decide the batch should be
-  bigger/smaller than assigned
-- edit topics/*.md dossiers, topics/gaps.md, or catalog.md's
-  Comparison & survey papers quick-reference section (shared, cross-worker
-  state — the coordinator handles this centrally after every worker
-  reports back)
-- run scripts/build_reference_index.py, scripts/validate_repo.py, or
-  scripts/build_gaps_index.py
-- commit or push
-- spawn further subagents, or continue doing anything after reporting back
-```
-
 ## Coordinator responsibilities (never delegated to a worker)
 
-After every parallel batch, the coordinating session (not a worker):
-merges each worker's proposed entries/note content, resolves any
-tag/vocabulary conflicts between workers, runs
-`build_reference_index.py`, `validate_repo.py --fix`, and
-`build_gaps_index.py` **once, centrally** (not per-worker — running
-these concurrently across workers risks concurrent-edit conflicts on the
-same shared files), then commits and pushes.
+After every parallel batch, the coordinating session — not a worker:
+
+1. **Merges** each worker's proposed entries and note content into the
+   shared files. Workers never write shared state.
+2. **Ratifies the collection-derived fields.** This is a required step,
+   not a review-if-you-have-time. `tags`, the in/out-of-scope verdict,
+   and any gap flag depend on the state of the collection — which tags
+   already exist and what they are used for, what `topics/gaps.md` says
+   is missing, why a document was acquired — and a worker with a
+   self-contained prompt structurally cannot know any of that. This is a
+   property of the worker contract rather than of the model: a
+   more capable worker with the same prompt makes the same mistakes.
+   `delegation.md` has the measurement, including the case where a
+   worker wrote an excellent summary of a document and an actively wrong
+   catalog entry for it.
+3. **Resolves tag and vocabulary conflicts** between workers, and adds
+   any genuinely new canonical tag to `topics/vocabulary.md`.
+4. **Runs the scripts once, centrally** — `build_reference_index.py`,
+   `build_catalog_index.py`, `validate_repo.py --fix`, and
+   `build_gaps_index.py` if a dossier changed. Never per-worker: running
+   these concurrently across workers risks concurrent-edit conflicts on
+   the same shared files.
+5. **Commits and pushes.**
 
 ## Resilience: commit after every batch, never accumulate
 

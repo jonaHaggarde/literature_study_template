@@ -3,15 +3,15 @@
 Repo health check — rerun after every batch of new PDFs.
 
 Deterministic, structural checks only (this is NOT a test of whether the
-notes/abstracts are factually correct — that still needs a human/AI
+notes/summaries are factually correct — that still needs a human/AI
 spot-check of a few real discovery queries, which this script cannot do).
 What it *does* catch: catalog/notes/manifest going out of sync, missing
 Implementation Notes, stale placeholder entries, tag-casing drift from
 topics/vocabulary.md, type/contribution values drifting from
 ai_instructions/catalog-schema.md, a stale "Comparison & survey papers"
 quick-reference list, dossiers missing their required Open-questions
-section, and whether reference-index.md is up to date with the current
-notes/.
+section, unbalanced mermaid fences, and whether reference-index.md and
+catalog-index.md are up to date with the current notes/ and catalog.md.
 
 Allowed `type`/`contribution` values and field-exempt types are read from
 ai_instructions/catalog-schema.md, not hardcoded here — edit that file to
@@ -25,7 +25,9 @@ Usage:
     python scripts/validate_repo.py --fix             # also auto-fix tag
                                                         # casing and regenerate
                                                         # the quick-reference list
-    python scripts/validate_repo.py --no-rebuild-index
+    python scripts/validate_repo.py --no-rebuild-index   # skip rebuilding
+                                                         # reference-index.md /
+                                                         # catalog-index.md
 
 Exit code: 1 if any FAIL, 0 otherwise (WARN/INFO never fail the run).
 """
@@ -46,6 +48,28 @@ SCHEMA_PATH = REPO_ROOT / "ai_instructions" / "catalog-schema.md"
 MANIFEST_PATH = REPO_ROOT / "manifest.json"
 REF_INDEX_PATH = REPO_ROOT / "reference-index.md"
 BUILD_REF_INDEX_SCRIPT = REPO_ROOT / "scripts" / "build_reference_index.py"
+CATALOG_INDEX_PATH = REPO_ROOT / "catalog-index.md"
+BUILD_CATALOG_INDEX_SCRIPT = REPO_ROOT / "scripts" / "build_catalog_index.py"
+# theory/ lives at the repo root, one level above study/, when this
+# template is used with its full project layout. Checked opportunistically
+# so study/ still validates standalone.
+THEORY_DIR = REPO_ROOT.parent / "theory"
+
+# ai_instructions/catalog-schema.md's budget for the summary field. Past
+# this it's a WARN, never a FAIL - a genuinely dense entry is allowed to
+# run long, the budget is a nudge toward writing the complement of the
+# other fields rather than a neutral abstract.
+SUMMARY_BUDGET_CHARS = 400
+
+# Values people write instead of leaving a field empty. The schema says
+# to omit; a literal placeholder survives into the index and into every
+# grep that filters on the field.
+PLACEHOLDER_VALUES = {"n/a", "na", "none", "-", "--", "tbd", "null"}
+
+# ai_instructions/catalog-schema.md's tag ceiling. A WARN, not a FAIL -
+# an occasional genuinely cross-cutting document exists, but over-tagging
+# is the normal failure and it is invisible until the corpus is large.
+MAX_TAGS_PER_ENTRY = 5
 
 # Fallback defaults, used only if ai_instructions/catalog-schema.md is
 # missing or a section can't be parsed - the real source of truth is
@@ -59,7 +83,7 @@ DEFAULT_EXEMPT_TYPES = {"standard", "dataset"}
 
 ENTRY_FIELDS = {
     "title", "authors", "year", "type", "approach", "contribution",
-    "compares", "tags", "note", "source", "abstract",
+    "compares", "tags", "note", "source", "summary",
 }
 ENTRY_RE = re.compile(
     r"^<!--\s*entry:(?P<id>.+?)\s*-->(?P<body>.*?)^<!--\s*/entry\s*-->",
@@ -122,9 +146,9 @@ def check_catalog_entries(entries, allowed_types, allowed_contrib, exempt_types)
         if entry_id == "EXAMPLE":
             continue
         title = f["title"] or entry_id
-        is_stub = "TODO" in f["abstract"] or not f["abstract"]
+        is_stub = "TODO" in f["summary"] or not f["summary"]
         if is_stub:
-            log("INFO", "unprocessed", f"'{title}' is still a stub (TODO abstract) — not yet annotated")
+            log("INFO", "unprocessed", f"'{title}' is still a stub (TODO summary) — not yet annotated")
             continue  # don't apply the "fully processed" rules to stubs
 
         note_path = REPO_ROOT / f["note"] if f["note"] else None
@@ -159,8 +183,24 @@ def check_catalog_entries(entries, allowed_types, allowed_contrib, exempt_types)
             if claims_comparison and "comparison-study" in contribs and not has_compares_field:
                 log("WARN", "schema", f"'{title}': contribution includes comparison-study but 'compares' is empty")
 
-        if len(f["abstract"]) < 80:
-            log("WARN", "schema", f"'{title}': abstract looks unusually short ({len(f['abstract'])} chars)")
+        if len(f["summary"]) < 80:
+            log("WARN", "schema", f"'{title}': summary looks unusually short ({len(f['summary'])} chars)")
+        elif len(f["summary"]) > SUMMARY_BUDGET_CHARS:
+            log(
+                "WARN", "schema",
+                f"'{title}': summary is {len(f['summary'])} chars, over the "
+                f"{SUMMARY_BUDGET_CHARS}-char budget — check it isn't restating "
+                "approach/compares/tags (see ai_instructions/catalog-schema.md)",
+            )
+
+        for field in ("approach", "contribution", "compares", "tags", "summary"):
+            if f[field].strip().lower() in PLACEHOLDER_VALUES:
+                log(
+                    "FAIL", "schema",
+                    f"'{title}': field '{field}' is the placeholder '{f[field].strip()}' — "
+                    "leave it empty instead (see ai_instructions/catalog-schema.md, "
+                    "'Empty fields: omit, never write n/a')",
+                )
 
         key = title.lower()
         if key in seen_titles:
@@ -197,7 +237,7 @@ def check_notes_cross_consistency(entries):
 
 def check_note_content(entries):
     for entry_id, f in entries:
-        if entry_id == "EXAMPLE" or "TODO" in f["abstract"] or not f["abstract"]:
+        if entry_id == "EXAMPLE" or "TODO" in f["summary"] or not f["summary"]:
             continue
         note_path = REPO_ROOT / f["note"] if f["note"] else None
         if not note_path or not note_path.exists():
@@ -221,22 +261,50 @@ def check_tag_vocabulary(entries):
     canonical = set(re.findall(r"^- `([^`]+)`", vocab_text, re.MULTILINE))
     canonical_lower = {t.lower(): t for t in canonical}
 
-    used = set()
+    # Usage counts, not just presence: a non-canonical tag used once is a
+    # legitimate one-off (a named dataset, a single instrument) and
+    # vocabulary.md says so explicitly. A non-canonical tag used by two or
+    # more entries has become load-bearing - people will query on it - and
+    # is exactly how one concept quietly acquires two spellings and splits
+    # its own search results. So: FAIL on recurring, WARN on single-use.
+    usage = {}
+    n_tagged_entries = 0
     for entry_id, f in entries:
-        if entry_id == "EXAMPLE" or not f["tags"] or "TODO" in f["abstract"] or not f["abstract"]:
+        if entry_id == "EXAMPLE" or not f["tags"] or "TODO" in f["summary"] or not f["summary"]:
             continue
-        used.update(t.strip() for t in f["tags"].split(",") if t.strip())
+        n_tagged_entries += 1
+        tags = [t.strip() for t in f["tags"].split(",") if t.strip()]
+        for tag in set(tags):
+            usage[tag] = usage.get(tag, 0) + 1
+        if len(tags) > MAX_TAGS_PER_ENTRY:
+            log(
+                "WARN", "vocabulary",
+                f"'{f['title'] or entry_id}': {len(tags)} tags, over the "
+                f"{MAX_TAGS_PER_ENTRY}-tag ceiling — tags describe what a document "
+                "contributes, not what it mentions (see ai_instructions/catalog-schema.md)",
+            )
 
-    uncanonicalized = []
-    for tag in sorted(used):
+    one_offs = []
+    for tag in sorted(usage):
         if tag in canonical:
             continue
         if tag.lower() in canonical_lower:
             log("FAIL", "tag-casing", f"tag '{tag}' differs only in case from canonical '{canonical_lower[tag.lower()]}' — fix casing")
+        elif usage[tag] >= 2:
+            log(
+                "FAIL", "vocabulary",
+                f"tag '{tag}' is used by {usage[tag]} entries but isn't in "
+                "topics/vocabulary.md — a recurring tag is load-bearing, add it "
+                "as canonical (or fold it into an existing canonical tag)",
+            )
         else:
-            uncanonicalized.append(tag)
-    if uncanonicalized:
-        log("INFO", "vocabulary", f"{len(uncanonicalized)} tag(s) not in topics/vocabulary.md (may be legitimate one-offs): {', '.join(uncanonicalized)}")
+            one_offs.append(tag)
+    if one_offs:
+        log(
+            "WARN", "vocabulary",
+            f"{len(one_offs)} single-use tag(s) not in topics/vocabulary.md — fine as "
+            f"genuine one-offs, but check for near-duplicates of canonical terms: {', '.join(one_offs)}",
+        )
 
 
 def normalize_title(t):
@@ -252,7 +320,7 @@ def check_comparison_quickref(entries, catalog_text):
     quickref_titles = {normalize_title(t) for t in re.findall(r"\*\*(.+?)\*\*", quickref_text)}
 
     for entry_id, f in entries:
-        if entry_id == "EXAMPLE" or "TODO" in f["abstract"] or not f["abstract"]:
+        if entry_id == "EXAMPLE" or "TODO" in f["summary"] or not f["summary"]:
             continue
         if not f["compares"]:
             continue
@@ -273,7 +341,7 @@ def check_near_duplicate_titles(entries):
     the fuzzy, WARN-level sibling of that check."""
     titles = []
     for entry_id, f in entries:
-        if entry_id == "EXAMPLE" or "TODO" in f["abstract"] or not f["abstract"]:
+        if entry_id == "EXAMPLE" or "TODO" in f["summary"] or not f["summary"]:
             continue
         titles.append((entry_id, f["title"], normalize_title(f["title"])))
 
@@ -314,7 +382,7 @@ def check_near_duplicate_titles(entries):
 def build_quickref_lines(entries):
     lines = []
     for entry_id, f in entries:
-        if entry_id == "EXAMPLE" or "TODO" in f["abstract"] or not f["abstract"]:
+        if entry_id == "EXAMPLE" or "TODO" in f["summary"] or not f["summary"]:
             continue
         if not f["compares"]:
             continue
@@ -378,6 +446,83 @@ def check_dossiers():
             log("FAIL", "dossier", f"topics/{p.name}: missing a '## Open questions...' section")
 
 
+MERMAID_FENCE_RE = re.compile(r"^\s*```", re.MULTILINE)
+
+
+def check_mermaid(entries):
+    """Two different checks, deliberately at different severities.
+
+    Balanced fences are a hard error: an unclosed ```mermaid block renders
+    the rest of the document as garbage, and that is mechanical, not a
+    judgment call. A *missing* diagram is at most a warning - the diagram
+    convention (see the repo root CLAUDE.md) is advisory, a document with
+    no process or ordering to draw should not be forced to invent one, and
+    a hard check on a judgment call is the kind of check people start
+    routing around."""
+    files = sorted(REPO_ROOT.rglob("*.md"))
+    files = [f for f in files if "notes" not in f.relative_to(REPO_ROOT).parts]
+    if THEORY_DIR.exists():
+        files += sorted(THEORY_DIR.glob("*.md"))
+
+    for path in files:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        try:
+            rel = path.relative_to(REPO_ROOT).as_posix()
+        except ValueError:
+            rel = "../" + path.relative_to(REPO_ROOT.parent).as_posix()
+
+        if len(MERMAID_FENCE_RE.findall(text)) % 2 != 0:
+            log(
+                "FAIL", "mermaid",
+                f"{rel}: odd number of ``` fences — an unclosed block renders "
+                "the rest of the file as garbage",
+            )
+
+    # Advisory: dossiers and theory/ explainers are the two places where a
+    # diagram carries most of the teaching, per the root CLAUDE.md.
+    dossiers = [p for p in TOPICS_DIR.glob("*.md")
+                if p.name not in {"README.md", "gaps.md", "vocabulary.md"}] if TOPICS_DIR.exists() else []
+    theory = [p for p in THEORY_DIR.glob("*.md") if p.name != "README.md"] if THEORY_DIR.exists() else []
+    for path in dossiers + theory:
+        text = path.read_text(encoding="utf-8")
+        if "```mermaid" not in text:
+            where = "topics" if path in dossiers else "../theory"
+            log(
+                "WARN", "mermaid",
+                f"{where}/{path.name}: no mermaid diagram — advisory only, but this "
+                "is the file type where one usually does the most work (see the "
+                "repo root CLAUDE.md, 'Diagrams')",
+            )
+
+
+def check_catalog_index(rebuild=True):
+    """catalog-index.md is a derived view of catalog.md, read in full at
+    the start of most sessions. A stale index is worse than no index: it
+    silently answers questions from an out-of-date corpus."""
+    if not BUILD_CATALOG_INDEX_SCRIPT.exists():
+        log("WARN", "catalog-index", "scripts/build_catalog_index.py not found")
+        return
+    before = CATALOG_INDEX_PATH.read_text(encoding="utf-8") if CATALOG_INDEX_PATH.exists() else ""
+    if rebuild:
+        proc = subprocess.run(
+            [sys.executable, str(BUILD_CATALOG_INDEX_SCRIPT)],
+            capture_output=True, text=True, cwd=REPO_ROOT,
+        )
+        if proc.returncode != 0:
+            log("FAIL", "catalog-index", f"build_catalog_index.py failed: {proc.stderr.strip()[:300]}")
+            return
+    after = CATALOG_INDEX_PATH.read_text(encoding="utf-8") if CATALOG_INDEX_PATH.exists() else ""
+    if rebuild and before != after:
+        log(
+            "WARN", "catalog-index",
+            "catalog-index.md changed after rebuild — was stale before this run "
+            "(now fixed, remember to commit it)",
+        )
+
+
 def check_reference_index(rebuild=True):
     if not BUILD_REF_INDEX_SCRIPT.exists():
         log("WARN", "reference-index", "scripts/build_reference_index.py not found")
@@ -399,7 +544,7 @@ def check_reference_index(rebuild=True):
 
 
 def summary_stats(entries, catalog_text):
-    processed = [f for eid, f in entries if eid != "EXAMPLE" and f["abstract"] and "TODO" not in f["abstract"]]
+    processed = [f for eid, f in entries if eid != "EXAMPLE" and f["summary"] and "TODO" not in f["summary"]]
     by_type = {}
     by_contrib = {}
     n_compares = 0
@@ -478,7 +623,9 @@ def main():
     check_comparison_quickref(entries, catalog_text)
     check_near_duplicate_titles(entries)
     check_dossiers()
+    check_mermaid(entries)
     check_reference_index(rebuild=rebuild)
+    check_catalog_index(rebuild=rebuild)
     summary_stats(entries, catalog_text)
 
     n_fail = sum(1 for lvl, _, _ in results if lvl == "FAIL")

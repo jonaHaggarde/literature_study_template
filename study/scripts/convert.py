@@ -10,7 +10,7 @@ Usage (from study/, with dependencies installed):
 
 title/authors/year are best-effort pre-filled from each PDF's own
 metadata (often empty or wrong - treat as a starting point, not fact).
-Everything else (type/approach/contribution/tags/abstract, and the note's
+Everything else (type/approach/contribution/tags/summary, and the note's
 Key Findings/Implementation Notes) is left as TODO, meant to be filled in
 by asking Claude to read the new notes and complete them - see
 ai_instructions/workflow.md.
@@ -34,6 +34,14 @@ except ImportError:
         file=sys.stderr,
     )
     sys.exit(1)
+
+COPYRIGHT_NOTICE = """
+--------------------------------------------------------------------
+COPYRIGHT: notes/ now contains substantial extracted text from your
+source documents. PDFs/ is gitignored; notes/ is NOT. That is fine for
+a private study and not fine to publish - check this repository's
+visibility before pushing. See README.md, "Copyright note".
+--------------------------------------------------------------------"""
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 LOW_YIELD_CHARS_PER_PAGE = 40  # below this average, flag as likely-scanned
@@ -168,7 +176,7 @@ compares:
 tags:
 note: {note_path}
 source: {source_path}
-abstract: TODO - ask Claude to summarize {note_path} and fill this in.
+summary: TODO - ask Claude to read {note_path} and fill this in (see ai_instructions/catalog-schema.md for the summary rule).
 <!-- /entry -->
 """
 
@@ -282,9 +290,14 @@ def main():
     if converted:
         print(
             "\nNext step: open Claude Code in this folder and ask it to fill in the "
-            "TODO fields (abstract, tags, authors, key findings) for the newly added "
+            "TODO fields (summary, tags, authors, key findings) for the newly added "
             "catalog entries and notes - see ai_instructions/README.md."
         )
+        print(
+            "Then rebuild the derived files: build_reference_index.py, "
+            "build_catalog_index.py, validate_repo.py --fix."
+        )
+        print(COPYRIGHT_NOTICE)
 
 
 if __name__ == "__main__":

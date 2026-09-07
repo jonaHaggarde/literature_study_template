@@ -40,6 +40,20 @@ not relevant" — e.g. specific sub-questions the study needs answered,
 or a rule like "if it doesn't touch [X], it's out of scope even if it
 mentions [topic keyword] in passing".>
 
+## Working language
+
+<What language are the source documents in, and what language does this
+study write in? State both, even when they're the same — this is settled
+implicitly and early or not at all, and a study where two people started
+on different days ends up with a half-and-half catalog that nobody wants
+to fix later.
+
+Cover: the language(s) source documents arrive in; the language the
+catalog, notes, and all analysis are written in; and what to do with a
+quoted passage from a source in another language (translate it, keep the
+original, or keep both). Any subject can have non-English sources, so
+this is worth a line even if it looks obvious today.>
+
 ## Intended use / audience
 
 <Who is this study for, and what will its findings actually be used for?
