@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Literature Study — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Literature Study</div>
+  <nav>
+    <a class="active">Dashboard</a>
+    <a href="index.html">Exploration Map</a>
+    <a href="gaps.html">Gaps</a>
+    <a href="milestones.html">Milestones</a>
+    <a href="console.html">Console</a>
+  </nav>
+  <div class="badge-proto">Prototype — informational page, nothing here is interactive yet</div>
+</div>
+
+<div class="info-wrap">
+  <h1>Welcome</h1>
+  <p class="info-lead">
+    This is a local dashboard over your literature study: an exploration
+    map of the problem space, a browser for the gaps still worth
+    researching, a milestone checklist, and a console to talk to Claude
+    directly. This page is the orientation stop — what each piece is
+    for and how a study grows through them.
+  </p>
+
+  <h2>Getting started</h2>
+  <p>
+    Every study starts one of two ways: describe what you want to study
+    directly (once the Console page is connected to Claude), or drop
+    material — a brief, a proposal, anything handed down from
+    outside — into <code>project_documents/</code> so scope can be
+    set from it first. Either way, scope comes first: it's what later
+    tells the map and the gaps browser what counts as in-scope versus
+    a distraction.
+  </p>
+  <p>
+    From there, exploration begins: identify the big stages of the
+    problem, then branch each one out — <strong>broad</strong>
+    (comparing alternative approaches to the same problem) or
+    <strong>deep</strong> (digging further into one specific method).
+    Branches you commit to get marked chosen; everything else stays
+    visible rather than disappearing, so the map always shows both the
+    path taken and what it was chosen from.
+  </p>
+
+  <div class="diagram-intro">What question does this answer? How a study goes from nothing to an exploration map with tracked progress.</div>
+  <div class="mermaid">
+flowchart TD
+    A["Describe your project via Console"] --> C["Scope is set"]
+    B["Drop material into project_documents/"] --> C
+    C --> D["Exploration Map: identify pipeline stages"]
+    D --> E{"Explore broad or deep?"}
+    E -- "Broad" --> F["Compare alternative approaches to the same stage"]
+    E -- "Deep" --> G["Dig into one specific method"]
+    F --> H["Mark a branch as chosen"]
+    G --> H
+    H --> I["Gaps: triage what's still unexplored"]
+    I --> J["Milestones: track progress toward done"]
+    J --> D
+  </div>
+
+  <h2>The four views</h2>
+  <p>
+    <strong>Exploration Map</strong> is the source of truth: a tree of
+    stages and branches, each carrying a status (explored, identified,
+    evaluated-and-not-favored, or chosen) and, for any branch with its
+    own sub-branches, a color-intensity readout of how much of it is
+    still unexplored. <strong>Gaps</strong> is a filtered, listable view
+    over that same tree — just the still-open leaves — built
+    for triage and picking a batch to research together, not for
+    editing structure. <strong>Milestones</strong> is a separate,
+    independent checklist tree for tracking progress toward "done,"
+    with its own evaluate-and-cache mechanism. <strong>Console</strong>
+    is a direct line to Claude, terminal-style, for anything that isn't
+    a click-through action on one of the other three.
+  </p>
+
+  <div class="diagram-intro">What question does this answer? How the four pages relate to each other and to Claude.</div>
+  <div class="mermaid">
+flowchart LR
+    MAP["Exploration Map\nthe tree of stages, branches, decisions"]
+    GAPS["Gaps\nfiltered view: unexplored leaves"]
+    MS["Milestones\nindependent checklist tree"]
+    CONSOLE["Console\ntalk to Claude"]
+
+    MAP -- "same tree, read-only here" --> GAPS
+    GAPS -- "View in map" --> MAP
+    CONSOLE -. "will launch studies into Map / Gaps once the backend exists" .-> MAP
+    CONSOLE -. "will answer Evaluate requests" .-> MS
+  </div>
+
+  <h2>Where this stands right now</h2>
+  <p>
+    This whole dashboard is still a frontend-only prototype: every page
+    persists its own state in this browser's <code>localStorage</code>,
+    and nothing here has called Claude or a backend yet. See
+    <code>../../gui-dev-notes.md</code> at the repo root for the running
+    log of what's built, what's decided, and what's still open.
+  </p>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    themeVariables: {
+      background: "#faf3e9",
+      primaryColor: "#f7e7c4",
+      primaryBorderColor: "#c08a2e",
+      primaryTextColor: "#3a2e22",
+      lineColor: "#b8a98f",
+      secondaryColor: "#eadfc8",
+      tertiaryColor: "#fffcf6",
+      fontFamily: "Segoe UI, system-ui, sans-serif"
+    }
+  });
+</script>
+</body>
+</html>

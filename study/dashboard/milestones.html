@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Literature Study — Milestones</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Literature Study</div>
+  <nav>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="index.html">Exploration Map</a>
+    <a href="gaps.html">Gaps</a>
+    <a class="active">Milestones</a>
+    <a href="console.html">Console</a>
+  </nav>
+  <div class="badge-proto">Prototype — "Evaluate" uses a simulated response, not a real Claude call yet</div>
+</div>
+
+<div class="layout">
+  <div class="ms-wrap">
+    <div class="ms-toolbar">
+      <button class="action" id="addRootBtn">+ Add milestone</button>
+      <span class="hint">Up to 3 levels deep. Click a milestone to see details and evaluate it.</span>
+    </div>
+    <div class="ms-tree" id="msTree"></div>
+  </div>
+  <div class="sidepanel" id="panel"></div>
+</div>
+
+<script src="milestones.js?v=2"></script>
+</body>
+</html>

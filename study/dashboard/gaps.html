@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Literature Study — Gaps</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Literature Study</div>
+  <nav>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="index.html">Exploration Map</a>
+    <a class="active">Gaps</a>
+    <a href="milestones.html">Milestones</a>
+    <a href="console.html">Console</a>
+  </nav>
+  <div class="badge-proto">Prototype — reads the same tree as the Exploration Map, no backend yet</div>
+</div>
+
+<div class="layout">
+  <div class="ms-wrap">
+    <div class="ms-toolbar">
+      <input type="text" id="gapSearch" placeholder="Search gaps..." style="padding:6px 10px; border-radius:8px; border:1px solid var(--panel-border); font-family:inherit; min-width:200px;">
+      <label class="ms-check-label"><input type="checkbox" id="showRejected"> Also show evaluated-not-favored</label>
+      <button class="action" id="selectAllBtn">Select all shown</button>
+      <button class="action" id="clearSelectionBtn">Clear selection</button>
+      <button class="action" id="exploreMoreBtn" disabled>Explore more on selected (0)</button>
+    </div>
+    <div id="gapList"></div>
+  </div>
+  <div class="sidepanel" id="panel"></div>
+</div>
+
+<script src="tree.js"></script>
+<script src="data.sample.js"></script>
+<script src="gaps.js"></script>
+</body>
+</html>

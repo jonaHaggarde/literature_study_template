@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Literature Study — Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Literature Study</div>
+  <nav>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="index.html">Exploration Map</a>
+    <a href="gaps.html">Gaps</a>
+    <a href="milestones.html">Milestones</a>
+    <a class="active">Console</a>
+  </nav>
+  <div class="badge-proto">Prototype — not connected to Claude or a backend</div>
+</div>
+
+<div class="console-wrap">
+  <div class="console-scrollback" id="scrollback"></div>
+  <div class="console-input-row">
+    <span class="console-prompt">&rsaquo;</span>
+    <input type="text" id="cmdInput" class="console-input" placeholder="Ask Claude... (not connected yet)" autocomplete="off">
+  </div>
+</div>
+
+<script src="console.js"></script>
+</body>
+</html>
