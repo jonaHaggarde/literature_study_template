@@ -10,7 +10,8 @@ Implementation Notes, stale placeholder entries, tag-casing drift from
 topics/vocabulary.md, type/contribution values drifting from
 ai_instructions/catalog-schema.md, a stale "Comparison & survey papers"
 quick-reference list, dossiers missing their required Open-questions
-section, unbalanced mermaid fences, and whether reference-index.md and
+section, unbalanced mermaid fences, article/ citations without a
+bibliography entry, and whether reference-index.md and
 catalog-index.md are up to date with the current notes/ and catalog.md.
 
 Allowed `type`/`contribution` values and field-exempt types are read from
@@ -54,6 +55,8 @@ BUILD_CATALOG_INDEX_SCRIPT = REPO_ROOT / "scripts" / "build_catalog_index.py"
 # template is used with its full project layout. Checked opportunistically
 # so study/ still validates standalone.
 THEORY_DIR = REPO_ROOT.parent / "theory"
+# article/ is the LaTeX review-article template, also at the repo root.
+ARTICLE_DIR = REPO_ROOT.parent / "article"
 
 # ai_instructions/catalog-schema.md's budget for the summary field. Past
 # this it's a WARN, never a FAIL - a genuinely dense entry is allowed to
@@ -498,6 +501,38 @@ def check_mermaid(entries):
             )
 
 
+def check_article():
+    r"""article/ is a LaTeX paper with a plain thebibliography list, so a
+    \cite with no matching \bibitem renders as [?] and nothing in the
+    build fails. That is mechanical, so it is a hard error; an uncited
+    \bibitem is only a warning, and the remaining \todo count is
+    information, never a failure - a draft is allowed to be unfinished."""
+    if not ARTICLE_DIR.exists():
+        return
+    comment_re = re.compile(r"(?<!\\)%.*")
+    cite_re = re.compile(r"\\cite[a-z]*\*?(?:\[[^\]]*\])*\{([^}]*)\}")
+    bib_re = re.compile(r"\\bibitem(?:\[[^\]]*\])?\{([^}]*)\}")
+    todo_re = re.compile(r"\\todo\{")
+
+    cited, bibitems, todos = {}, set(), 0
+    for path in sorted(ARTICLE_DIR.rglob("*.tex")):
+        rel = path.relative_to(ARTICLE_DIR.parent).as_posix()
+        text = comment_re.sub("", path.read_text(encoding="utf-8", errors="replace"))
+        for m in cite_re.finditer(text):
+            for key in (k.strip() for k in m.group(1).split(",")):
+                if key:
+                    cited.setdefault(key, rel)
+        bibitems.update(k.strip() for k in bib_re.findall(text))
+        todos += len(todo_re.findall(text))
+
+    for key, rel in sorted(cited.items()):
+        if key not in bibitems:
+            log("FAIL", "article", f"{rel}: \\cite{{{key}}} has no matching \\bibitem in sections/references.tex")
+    for key in sorted(bibitems - set(cited)):
+        log("WARN", "article", f"\\bibitem{{{key}}} is never cited")
+    log("INFO", "article", f"{todos} \\todo marker(s) remaining in article/")
+
+
 def check_catalog_index(rebuild=True):
     """catalog-index.md is a derived view of catalog.md, read in full at
     the start of most sessions. A stale index is worse than no index: it
@@ -624,6 +659,7 @@ def main():
     check_near_duplicate_titles(entries)
     check_dossiers()
     check_mermaid(entries)
+    check_article()
     check_reference_index(rebuild=rebuild)
     check_catalog_index(rebuild=rebuild)
     summary_stats(entries, catalog_text)

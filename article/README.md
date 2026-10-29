@@ -1,10 +1,32 @@
-# Article
+# article/
 
-A literature review article in LaTeX: a **comparison of methods** plus a
-real introduction and related-work text. No new results. The value is the
-side-by-side table and the pointers to where each method is described.
+The write-up of the study as a **literature review article** in LaTeX: an
+introduction, related work, and above all a **side-by-side comparison of
+methods** with pointers to where each one is described. No new results.
 
-The working title and folder name are provisional.
+**What ships is a template, not content.** The title, abstract, every
+section and the table are placeholders (`\todo{...}`) with guidance on what
+to write. Nothing in here assumes a subject, so it forks cleanly for any
+topic. Whoever runs a study fills it in.
+
+## What belongs here, and what doesn't
+
+**Belongs here:** the article itself — prose, the comparison table, figures
+(TikZ sources), and its reference list.
+
+**Does not belong here:**
+
+- **Literature notes and dossiers.** They stay in `../study/`
+  (`notes/`, `catalog.md`, `topics/`). The article draws on them; it does
+  not replace them. A claim in the article should be traceable to a note.
+- **Decisions and brainstorming.** Those are `../decisions.md` and
+  `../ideation/`. A review reports what the literature says, not what the
+  project chose.
+- **Built PDFs and LaTeX build output.** Gitignored; rebuild locally.
+
+The split matters because the article is a *view* of the study. If it
+becomes the only place a finding is recorded, the finding has no source
+trail and the next edit can silently change it.
 
 ## Layout
 
@@ -12,37 +34,58 @@ The working title and folder name are provisional.
 |---|---|
 | `main.tex` | Preamble, title, abstract, and the `\input` order of the sections |
 | `sections/` | One `.tex` file per section, plus `references.tex` |
+| `sections/comparison_table.tex` | The comparison table, on its own so it can be rewritten or regenerated without touching the prose |
 | `figs/` | TikZ sources, one file per figure, `\input` from the sections |
 
-## Shape of the paper
+## Filling it in
 
-The sections run in this order, and the comparison is the core.
+The article is written from the study, in this order. The question the
+diagram answers: where does each part of the paper come from?
 
 ```mermaid
 flowchart LR
-  I[Introduction] --> R[Related work]
-  R --> M[Scope and method]
-  M --> C[Comparison]
-  C --> D[Discussion]
-  D --> K[Conclusion]
+  C[Catalog and notes] --> D[Dossiers]
+  D --> T[Comparison table]
+  D --> R[Related work]
+  T --> P[Comparison text]
+  R --> I[Introduction]
+  P --> K[Discussion]
+  K --> A[Abstract]
 ```
 
-The comparison section is a taxonomy figure of the method families, then
-one wide table with the columns *measurements used*, *estimated quantity*,
-*model used*, *methodology*, *reference*. That is the format of Table 1 in
-Singh et al., "Literature review and fundamental approaches for vehicle and
-tire state estimation". Every row needs a reference; do not add an entry
-without one.
+1. **Fix the scope** in `../study/ai_instructions/scope.md` first. The
+   article's "Scope and method" section is that scope in prose.
+2. **Table and taxonomy first.** Decide the columns and the method families
+   from the dossiers, fill `comparison_table.tex`, and draw
+   `figs/taxonomy.tex`. The table is the core; the rest explains it.
+3. **Related work and comparison text** next, one paragraph per family or
+   earlier review.
+4. **Introduction, discussion and abstract last**, once you know what the
+   comparison shows. They are the easiest to write and the easiest to get
+   wrong early.
+5. **Remove the status banner** in the abstract only after every table entry
+   and claim has been checked against its source.
+
+Never add a table row without a reference. A row you cannot cite is a claim
+nobody can check.
 
 ## Conventions
 
-- `\todo{...}` marks unwritten text. Grep for it before sharing a draft.
-- References are a plain `thebibliography` list in `sections/references.tex`
-  (no bibtex run), numbered in order of first citation, and each source should
-  be in `study/catalog.md` with a note in `study/notes/`.
-- The abstract carries a status banner saying the draft is AI-assisted and
-  unverified. Remove it only after every entry has been checked against its
-  source.
+- **`\todo{...}`** marks unwritten text, in red. The validator reports how
+  many remain; none should be left before sharing the draft.
+- **`\openissue{...}`** sets off a question the sources do not settle.
+- **Citations.** The root `CLAUDE.md` requires numbered markers in order of
+  first appearance with a reference list at the end, local to each file. In
+  LaTeX that is `\cite{key}` plus a plain `thebibliography` list in
+  `sections/references.tex` (no bibtex run). The `cite` package numbers
+  entries in order of first citation, and the numbering is local to this
+  article. Each source should be in `../study/catalog.md` with a note in
+  `../study/notes/`.
+- **Check.** `study/scripts/validate_repo.py` fails if a `\cite` key has no
+  matching `\bibitem` (it would render as `[?]`) and warns about a
+  `\bibitem` that is never cited.
+- **Status banner.** The abstract says the draft is AI-assisted and
+  unverified. That is the honest state of any draft until checked.
 
 ## Build
 

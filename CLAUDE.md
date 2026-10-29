@@ -28,13 +28,18 @@ Routing, for a session starting at the repo root:
 - Project work (a decision, a brainstorm, an explainer, meeting notes,
   the timeline) → the relevant root folder's own `README.md` states what
   belongs in it and what doesn't. Read that before adding a file.
+- Writing the study up as a literature review article (the comparison
+  table, introduction, related work) → `article/README.md`. The article
+  is a view of `study/`, written from the dossiers; findings are recorded
+  in `study/` first and never only in the article.
 
 See `README.md` for the full layout and the reasoning behind the split.
 
 ## Citations outside `study/`
 
 Files in the root-level folders (`ideation/`, `meetings/`, `theory/`,
-`decisions.md`, and similar) that reference a specific external source —
+`decisions.md`, and similar; the LaTeX files in `article/` follow the same
+rule with `\cite` and a `thebibliography` list) that reference a specific external source —
 a catalogued paper, a document provided by the client or institution, or
 similar — use numbered inline markers (`[1]`, `[2]`, … `[n]`) **in order
 of first appearance**, with a `## References` section at the bottom of
