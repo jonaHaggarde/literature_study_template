@@ -4,7 +4,10 @@
 % One row per method (or per group of methods that agree in every descriptive column).
 % Every row needs a reference: never add an entry whose source you cannot cite. Rename,
 % add or drop columns to fit the topic, and keep the tabularx column spec in step.
-\begin{table*}[t]
+% [!t]: a two-column-wide float can only sit at the top of a page. Keeping the \input at the start
+% of the section, before the figure and the family subsections, makes it land on the first page of
+% the section instead of drifting to the end of the paper.
+\begin{table*}[!t]
 \caption{Summary of the methods. \todo{Describe what a row is and what the columns mean.}}
 \label{tab:comparison}
 \small
