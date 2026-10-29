@@ -31,6 +31,8 @@ study/
     build_reference_index.py      <- rebuilds reference-index.md from notes/
     build_catalog_index.py         <- rebuilds catalog-index.md from catalog.md
     build_gaps_index.py             <- rebuilds topics/gaps.md's auto-aggregated section from dossiers
+    build_article_table.py           <- rebuilds ../article/sections/comparison_rows.tex from the notes' method cards
+    method_cards.py                   <- shared helpers for method cards (imported, not run)
     validate_repo.py                 <- structural health check + --fix, rerun after every batch
     requirements.txt
   templates/

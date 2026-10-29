@@ -36,21 +36,36 @@ flowchart TD
    article's *Scope and method* section is that scope in prose. If writing
    the article shows the scope is wrong, change `scope.md` first, then the
    article.
-2. **Columns and method families.** Decided by the user, from the dossiers
-   in `../study/topics/`. Claude proposes; the user chooses. The families
-   become `figs/taxonomy.tex` and the subsections of the comparison.
-3. **Table.** One row per method, each with a reference, in
-   `sections/comparison_table.tex`. *Pending:* how rows are produced
-   (hand-written, generated from a data file, or from per-note method
-   cards) is an open decision. Until it is made, rows are written by hand
-   from the dossiers.
+2. **Columns and method families.** Decided by the user, from the first
+   dozen or so documents and the dossiers in `../study/topics/`. Claude
+   proposes; the user chooses. The columns are the field list in
+   `../study/ai_instructions/method-card.md`. **Settle them before
+   extracting many cards**: changing a column later means revisiting every
+   card. The families become `figs/taxonomy.tex` and the subsections of
+   the comparison.
+3. **Table, from method cards.** Each note of a document that has a method
+   of its own carries a `## Method Cards` section, written by the
+   `note-extractor` while it reads the document. Then:
+
+   ```bash
+   python study/scripts/build_article_table.py            # rewrite comparison_rows.tex
+   python study/scripts/build_article_table.py --bibitems # ibitem entries still missing
+   ```
+
+   `sections/comparison_rows.tex` is generated and never hand-edited;
+   `sections/comparison_table.tex` holds the float and caption. Paste the
+   printed `ibitem` entries into `sections/references.tex` (the cite key
+   is the first author's surname plus year, derived from the catalog, so
+   fix a wrong surname in `../study/catalog.md`, not in the article). A
+   row you want that has no card means the note is missing one: fix the
+   note.
 4. **Prose.** Related work (earlier reviews only), the comparison text per
    family, then discussion, introduction and abstract last, once the
    comparison shows what it shows. Drafted from the dossiers, with
    citations.
 5. **Check.** `python study/scripts/validate_repo.py`: every `\cite` has a
-   `\bibitem`, no unbalanced fences, `\todo` count. Build with
-   `pdflatex main.tex` twice.
+   `\bibitem`, method cards are well formed, the table is current, no
+   unbalanced fences, `\todo` count. Build with `pdflatex main.tex` twice.
 6. **Verify rows.** A fresh agent, given only a row and the cited
    document, checks the row against the source and reports mismatches. It
    does not see the article's conclusions. *Pending:* a worker definition

@@ -11,7 +11,7 @@ topics/vocabulary.md, type/contribution values drifting from
 ai_instructions/catalog-schema.md, a stale "Comparison & survey papers"
 quick-reference list, dossiers missing their required Open-questions
 section, unbalanced mermaid fences, article/ citations without a
-bibliography entry, and whether reference-index.md and
+bibliography entry, malformed method cards, a stale article table, and whether reference-index.md and
 catalog-index.md are up to date with the current notes/ and catalog.md.
 
 Allowed `type`/`contribution` values and field-exempt types are read from
@@ -40,6 +40,9 @@ import sys
 from difflib import SequenceMatcher
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import method_cards  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CATALOG_PATH = REPO_ROOT / "catalog.md"
 NOTES_DIR = REPO_ROOT / "notes"
@@ -57,6 +60,8 @@ BUILD_CATALOG_INDEX_SCRIPT = REPO_ROOT / "scripts" / "build_catalog_index.py"
 THEORY_DIR = REPO_ROOT.parent / "theory"
 # article/ is the LaTeX review-article template, also at the repo root.
 ARTICLE_DIR = REPO_ROOT.parent / "article"
+BUILD_ARTICLE_TABLE_SCRIPT = REPO_ROOT / "scripts" / "build_article_table.py"
+ARTICLE_ROWS_PATH = ARTICLE_DIR / "sections" / "comparison_rows.tex"
 
 # ai_instructions/catalog-schema.md's budget for the summary field. Past
 # this it's a WARN, never a FAIL - a genuinely dense entry is allowed to
@@ -533,6 +538,84 @@ def check_article():
     log("INFO", "article", f"{todos} \\todo marker(s) remaining in article/")
 
 
+def check_method_cards(entries, exempt_types):
+    """Method cards (ai_instructions/method-card.md) are free text in a
+    note, and the article table is built from them, so a malformed card
+    ends up in print. Structural problems are warnings except a literal
+    placeholder value, which is a FAIL for the same reason it is in the
+    catalog. A note with no cards is normal (a survey, a standard), so
+    absence is only counted."""
+    fields = set(method_cards.load_fields())
+    processed = n_with = n_cards = 0
+    for entry_id, f in entries:
+        if entry_id == "EXAMPLE" or not f["summary"] or "TODO" in f["summary"]:
+            continue
+        processed += 1
+        note = REPO_ROOT / f["note"] if f["note"] else None
+        if not note or not note.exists():
+            continue
+        cards = method_cards.parse_cards(note.read_text(encoding="utf-8"))
+        if not cards:
+            continue
+        n_with += 1
+        title = f["title"] or entry_id
+        if f["type"] in exempt_types:
+            log("WARN", "method-cards", f"'{title}': type '{f['type']}' is field-exempt but the note has method cards")
+        seen = set()
+        for name, values in cards:
+            n_cards += 1
+            if name.lower() in seen:
+                log("WARN", "method-cards", f"'{title}': duplicate card name '{name}'")
+            seen.add(name.lower())
+            for key in values:
+                if key not in fields:
+                    log("WARN", "method-cards", f"'{title}' / '{name}': field '{key}' is not in ai_instructions/method-card.md")
+            if not any(values.get(k, "") for k in fields):
+                log("WARN", "method-cards", f"'{title}' / '{name}': card has no filled fields; delete it rather than leave it empty")
+            for key, value in values.items():
+                if value.strip().lower() in PLACEHOLDER_VALUES:
+                    log(
+                        "FAIL", "method-cards",
+                        f"'{title}' / '{name}': field '{key}' is the placeholder '{value}' — "
+                        "leave it empty instead (see ai_instructions/method-card.md)",
+                    )
+    log("INFO", "method-cards", f"{n_with} of {processed} processed entries have method cards ({n_cards} card(s) in total)")
+
+
+def check_article_table(rebuild=True):
+    """article/sections/comparison_rows.tex is a derived view of the method
+    cards. A stale table silently describes an out-of-date corpus in print,
+    so it is rebuilt here, with a warning when it had to change."""
+    if not ARTICLE_DIR.exists():
+        return
+    if not BUILD_ARTICLE_TABLE_SCRIPT.exists():
+        log("WARN", "article-table", "scripts/build_article_table.py not found")
+        return
+    if rebuild:
+        before = ARTICLE_ROWS_PATH.read_text(encoding="utf-8") if ARTICLE_ROWS_PATH.exists() else ""
+        proc = subprocess.run(
+            [sys.executable, str(BUILD_ARTICLE_TABLE_SCRIPT)],
+            capture_output=True, text=True, cwd=REPO_ROOT,
+        )
+        if proc.returncode != 0:
+            log("FAIL", "article-table", f"build_article_table.py failed: {proc.stderr.strip()[:300]}")
+            return
+        after = ARTICLE_ROWS_PATH.read_text(encoding="utf-8") if ARTICLE_ROWS_PATH.exists() else ""
+        if before != after:
+            log(
+                "WARN", "article-table",
+                "article/sections/comparison_rows.tex changed after rebuild — was stale "
+                "before this run (now fixed, remember to commit it)",
+            )
+    else:
+        proc = subprocess.run(
+            [sys.executable, str(BUILD_ARTICLE_TABLE_SCRIPT), "--check"],
+            capture_output=True, text=True, cwd=REPO_ROOT,
+        )
+        if proc.returncode != 0:
+            log("WARN", "article-table", "article/sections/comparison_rows.tex is stale; run scripts/build_article_table.py")
+
+
 def check_catalog_index(rebuild=True):
     """catalog-index.md is a derived view of catalog.md, read in full at
     the start of most sessions. A stale index is worse than no index: it
@@ -660,6 +743,8 @@ def main():
     check_dossiers()
     check_mermaid(entries)
     check_article()
+    check_method_cards(entries, exempt_types)
+    check_article_table(rebuild=rebuild)
     check_reference_index(rebuild=rebuild)
     check_catalog_index(rebuild=rebuild)
     summary_stats(entries, catalog_text)

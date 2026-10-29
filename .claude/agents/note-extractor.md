@@ -29,6 +29,8 @@ Before processing anything, read, in this order:
 3. `study/ai_instructions/workflow.md` — "Processing new PDFs", the
    per-document steps.
 4. `study/topics/vocabulary.md` — the canonical tag vocabulary.
+5. `study/ai_instructions/method-card.md` — the method-card fields and
+   rules, if any document in your list has a method of its own.
 
 ## Per document
 
@@ -41,6 +43,13 @@ summary — and then produce:
   modes and limitations the authors themselves flag, released code or
   data). Omit sub-bullets that genuinely don't apply rather than forcing
   empty headers.
+- A `## Method Cards` section, placed after Implementation Notes, **only
+  if the document has a method of its own**: one `### Method name` block
+  per method it proposes, tests, or compares as its subject, with the
+  fields and rules in `study/ai_instructions/method-card.md`. A survey of
+  other people's work, a standard or a dataset gets no section. Use the
+  document's own terms, plain text, short phrases, blank rather than
+  `n/a`. Describe what the document reports, never a judgment.
 - The catalog fields: `authors`, `year`, `type`, `approach`,
   `contribution`, `compares` where applicable, `tags`, `summary`.
   Title/authors/year in the stub were pre-filled from the source file's
@@ -87,7 +96,8 @@ acquired in the first place. None of that is visible from inside the
 document, and no amount of careful reading will recover it.
 
 - **Document-derived** — title, authors, year, type, approach, compares,
-  summary, Key Findings, Implementation Notes. Yours; write them.
+  summary, Key Findings, Implementation Notes, Method Cards. Yours; write
+  them.
 - **Collection-derived** — `tags`, the in/out-of-scope verdict, and any
   coverage gap you think the document exposes. **Propose these
   explicitly and separately in your report**, with your reasoning, and

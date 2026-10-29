@@ -34,7 +34,8 @@ trail and the next edit can silently change it.
 |---|---|
 | `main.tex` | Preamble, title, abstract, and the `\input` order of the sections |
 | `sections/` | One `.tex` file per section, plus `references.tex` |
-| `sections/comparison_table.tex` | The comparison table, on its own so it can be rewritten or regenerated without touching the prose |
+| `sections/comparison_table.tex` | The table's float, caption and label. Hand-written |
+| `sections/comparison_rows.tex` | The table body. **Generated** from the notes' method cards by `study/scripts/build_article_table.py`; never hand-edit |
 | `figs/` | TikZ sources, one file per figure, `\input` from the sections |
 
 ## Filling it in
@@ -59,9 +60,11 @@ flowchart LR
 
 1. **Fix the scope** in `../study/ai_instructions/scope.md` first. The
    article's "Scope and method" section is that scope in prose.
-2. **Table and taxonomy first.** Decide the columns and the method families
-   from the dossiers, fill `comparison_table.tex`, and draw
-   `figs/taxonomy.tex`. The table is the core; the rest explains it.
+2. **Table and taxonomy first.** Decide the columns (the fields in
+   `../study/ai_instructions/method-card.md`) and the method families, have
+   the notes carry method cards, generate the table with
+   `study/scripts/build_article_table.py`, and draw `figs/taxonomy.tex`.
+   The table is the core; the rest explains it.
 3. **Related work and comparison text** next, one paragraph per family or
    earlier review.
 4. **Introduction, discussion and abstract last**, once you know what the
@@ -70,8 +73,10 @@ flowchart LR
 5. **Remove the status banner** in the abstract only after every table entry
    and claim has been checked against its source.
 
-Never add a table row without a reference. A row you cannot cite is a claim
-nobody can check.
+A table row exists because a note has a method card, and its reference is
+derived from the catalog entry, so a row cannot lack a source. To change a
+cell, change the card in the note and rerun the script; never edit
+`comparison_rows.tex`.
 
 ## Conventions
 

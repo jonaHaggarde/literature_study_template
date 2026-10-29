@@ -84,7 +84,7 @@ synthesis. It is:
 
 | | Fields | Handling |
 | --- | --- | --- |
-| **Document-derived** | title, authors, year, type, approach, compares, summary, Key Findings, Implementation Notes | Worker writes them, accepted as-is |
+| **Document-derived** | title, authors, year, type, approach, compares, summary, Key Findings, Implementation Notes, Method Cards | Worker writes them, accepted as-is |
 | **Collection-derived** | `tags`, the scope verdict, any gap flag | Worker **proposes**, coordinator **ratifies** |
 
 Collection-derived fields depend on the state of the collection: which

@@ -1,9 +1,11 @@
-% The comparison table, kept in its own file so it can be regenerated or rewritten without
-% touching the prose around it. Included by comparison.tex.
+% The comparison table's float, caption and label. Hand-written. The rows are generated:
+% sections/comparison_rows.tex is rebuilt from the method cards in ../study/notes/ by
+% `python study/scripts/build_article_table.py`, so do not edit that file. To change the
+% columns, edit the field list in ../study/ai_instructions/method-card.md and rerun the script.
 %
-% One row per method (or per group of methods that agree in every descriptive column).
-% Every row needs a reference: never add an entry whose source you cannot cite. Rename,
-% add or drop columns to fit the topic, and keep the tabularx column spec in step.
+% Never add a row by hand. A row exists because a note has a method card, and a card cites its
+% source by construction.
+%
 % [!t]: a two-column-wide float can only sit at the top of a page. Keeping the \input at the start
 % of the section, before the figure and the family subsections, makes it land on the first page of
 % the section instead of drifting to the end of the paper.
@@ -11,14 +13,5 @@
 \caption{Summary of the methods. \todo{Describe what a row is and what the columns mean.}}
 \label{tab:comparison}
 \small
-\begin{tabularx}{\textwidth}{@{}L L L L l@{}}
-\toprule
-\textbf{Input / data used} & \textbf{Output / quantity} & \textbf{Model or assumption} &
-\textbf{Technique} & \textbf{Ref.}\\
-\midrule
-\todo{input} & \todo{output} & \todo{model} & \todo{technique} & \cite{key1}\\
-\addlinespace
-\todo{input} & \todo{output} & \todo{model} & \todo{technique} & \todo{ref}\\
-\bottomrule
-\end{tabularx}
+\input{sections/comparison_rows}
 \end{table*}
