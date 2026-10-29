@@ -52,6 +52,48 @@ The first phase is one of the first big milestones of a repo.
   debrief). Kept separate for now, but the two features should be designed
   so they can meet.
 
+## Project definition document (comes before the review article)
+
+Added 2026-10-29. Before the review article, a repo gets **one standalone
+`.tex` (built to PDF)** that defines the project: **scope, introduction and
+problem description**. Purpose: a clearly defined project that everything
+after it, the review article included, can be measured against. The
+scope in `study/ai_instructions/scope.md` is derived from it, not the other
+way round.
+
+How it is produced is open. Likely a combination of:
+
+- **A questionnaire from Claude**, asking the questions a project
+  definition needs answered.
+- **The user prompting**: free description, corrections, priorities.
+- **The user adding documents** (briefs, rules, specifications) to
+  `project_documents/`, which Claude reads and cites.
+
+Needs a defined structure: what the questionnaire asks, how answers and
+documents become sections, and what "defined enough to proceed" means.
+Not designed. Not to be discussed in depth yet.
+
+## Gates: where the bigger picture fits
+
+The phase boundaries and the project definition are **gates**, so they
+belong with the `dev-gate-events` design (forced stop, printable PDF,
+debrief) rather than with the article. Candidate gates, none decided:
+
+1. Project definition accepted (scope, introduction, problem description).
+2. Survey finished (review article read and understood).
+3. Concept decisions taken.
+4. Split into the implementation repo.
+
+The article work stays separate for now. The two should be designed so
+they can meet.
+
+## Onboarding slide (PowerPoint)
+
+A **slide deck a new user opens and reads before using the repo**,
+explaining the whole flow and every gate: what each phase is for, what is
+frozen at each gate, what the user is expected to read and do. Depends on
+the gate design, so it is built after it. Not started.
+
 ## Where each piece lives for now
 
 - Phase 1 workflow and the review article: `article/` on `dev-article`
