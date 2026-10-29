@@ -29,9 +29,14 @@ Routing, for a session starting at the repo root:
   the timeline) → the relevant root folder's own `README.md` states what
   belongs in it and what doesn't. Read that before adding a file.
 - Writing the study up as a literature review article (the comparison
-  table, introduction, related work) → `article/README.md`. The article
-  is a view of `study/`, written from the dossiers; findings are recorded
-  in `study/` first and never only in the article.
+  table, introduction, related work) → `article/README.md`, then follow
+  `article/workflow.md`. The article is a view of `study/`, written from
+  the dossiers; findings are recorded in `study/` first and never only in
+  the article. **The review article contains no decisions**: it reports
+  what the literature says, never what the project chose or recommends.
+  Deciding the product is a later phase (`decisions.md`, `ideation/`),
+  kept out of the article so the review stays a neutral record of the
+  field.
 
 See `README.md` for the full layout and the reasoning behind the split.
 

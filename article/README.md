@@ -39,6 +39,10 @@ trail and the next edit can silently change it.
 
 ## Filling it in
 
+The step-by-step process, the rules that hold throughout (above all: **no
+decisions in the review**), and the definition of done are in
+[`workflow.md`](workflow.md). In short:
+
 The article is written from the study, in this order. The question the
 diagram answers: where does each part of the paper come from?
 
