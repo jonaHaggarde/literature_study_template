@@ -122,4 +122,6 @@ its own `dev-ocr` branch, because it is real work:
   `development` 2026-10-30).
 - Gate events: `dev-gate-events`.
 - OCR and scanned PDFs: this file only, until a `dev-ocr` branch exists.
+- What real usage says about the template (bug table, engine features,
+  structure and larger ideas, suggested order): `feedback-notes.md`.
 - Everything above beyond phase 1: this file only.
