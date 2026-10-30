@@ -32,7 +32,7 @@ study/
     build_reference_index.py      <- rebuilds reference-index.md from notes/
     build_catalog_index.py         <- rebuilds catalog-index.md from catalog.md
     build_gaps_index.py             <- rebuilds topics/gaps.md's auto-aggregated sections from dossiers and decision trees
-    build_review_table.py           <- rebuilds ../article-review/sections/comparison_rows.tex from the notes' method cards
+    build_review_table.py           <- rebuilds ../articles/review/sections/comparison_rows.tex from the notes' method cards
     build_decision_trees.py           <- regenerates the mermaid diagram under each decision-tree table in ../ideation/
     method_cards.py                   <- shared helpers for method cards (imported, not run)
     ocr_support.py                     <- OCR tool discovery and OCR of scans (run it alone to see what is missing)

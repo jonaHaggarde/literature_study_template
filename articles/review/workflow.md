@@ -1,6 +1,6 @@
 # Workflow: producing the review article
 
-This file says how Claude and the user produce the article in `article-review/`.
+This file says how Claude and the user produce the article in `articles/review/`.
 `README.md` in this folder says what the article is and what belongs in
 it. The whole sequence is available as the `/article` command
 (`.claude/commands/article.md`).
@@ -13,7 +13,7 @@ it. The whole sequence is available as the `/article` command
   concept phase (`../decisions.md`, `../ideation/`). Refining the *scope*
   of the study and of the article is allowed; deciding the product is not.
   `validate_repo.py` warns on decision language ("we chose", "our design",
-  "should be used", and similar) anywhere in `article-review/*.tex`. It is
+  "should be used", and similar) anywhere in `articles/review/*.tex`. It is
   advisory, since a quoted source can say "we chose", but a hit means the
   article is drifting out of phase 1 and deserves a look.
 - **The article is a view of `study/`.** A finding is recorded in
@@ -63,18 +63,18 @@ flowchart TD
 
    ```bash
    python study/scripts/build_review_table.py
+   python study/scripts/build_bibliography.py
    ```
 
-   rewrites two derived files, neither of which is ever hand-edited:
-   `sections/comparison_rows.tex` (the table body, one row per card) and
-   `sections/references.tex` (the whole bibliography, in order of first
-   citation in the source, so numbers follow the repo's convention). The
-   cite key is the first author's surname plus year, derived from the
-   catalog; fix a wrong surname in `../study/catalog.md`, not in the
+   rewrite the derived files, none of which is ever hand-edited:
+   `sections/comparison_rows.tex` (the table body, one row per card) and the
+   article's own `references.bib` and `sections/references.tex` (only the
+   sources this article cites; BibTeX numbers them in order of first citation).
+   The cite key is the first author's surname plus year, derived from the
+   catalog; fix a wrong surname in `../../study/catalog.md`, not in the
    article. A source that is not in the catalog (a provided document, a
-   rulebook) is a hand-written `\bibitem` in `sections/references_extra.tex`.
-   `validate_repo.py` rebuilds both files on every run and warns if they
-   were stale.
+   rulebook) is a hand-written BibTeX entry in `../common/references_extra.bib`.
+   `validate_repo.py` rebuilds these on every run and warns if they were stale.
 5. **Prose.** Related work (earlier reviews only), the comparison text per
    family, then discussion, introduction and abstract last, once the
    comparison shows what it shows. Drafted from the dossiers, with
@@ -102,8 +102,9 @@ flowchart TD
    quote, and the card or the note is fixed with their say-so.
 7. **Check.** `python study/scripts/validate_repo.py`: citations resolve,
    cards are well formed, derived files are current, verified count,
-   decision-language warnings, `\todo` count. Build with `pdflatex main.tex`
-   twice.
+   decision-language warnings, `\todo` count. Build the PDF with
+   `python study/scripts/build_articles.py --only review` (it lands in
+   `articles/review.pdf`).
 
 **Done** means: no `\todo`, all citations resolve, every card verified,
 scope final, status banner removed, no decision-language warnings left

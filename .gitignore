@@ -19,3 +19,7 @@ Thumbs.db
 
 # Local switch: usage logging off in the template's own working copy
 /.claude/no-usage-log
+
+# Built articles: PDFs directly in articles/, LaTeX auxiliary files in articles/.build/
+/articles/*.pdf
+/articles/.build/

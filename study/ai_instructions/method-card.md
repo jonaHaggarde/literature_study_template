@@ -2,7 +2,7 @@
 
 A **method card** is a short, structured record of one method, kept in the
 note of the document that describes it. The cards feed the comparison table
-in the review article (`../../article-review/`): `scripts/build_review_table.py`
+in the review article (`../../articles/review/`): `scripts/build_review_table.py`
 turns every card into one table row. This file defines what a card holds.
 
 It is read by `scripts/method_cards.py`, `scripts/validate_repo.py` and
@@ -62,7 +62,7 @@ In the document's note, after `## Implementation Notes`, as one
 
 The heading is the method's name and becomes the first column of the table.
 The table's reference column is derived from the catalog entry (see
-`../../article-review/README.md`); a card does not repeat it.
+`../../articles/review/README.md`); a card does not repeat it.
 
 ## Rules
 

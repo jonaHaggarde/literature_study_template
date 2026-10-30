@@ -13,11 +13,14 @@ design), and `main` has to stay topic-neutral and cloneable.
 
 ## Decisions taken (2026-10-30)
 
-- **Articles are sibling `article-*/` folders** (`article-review/`,
-  `article-spec/`, `article-manual/`, ...). A shared `article-common/`
-  (preamble only; each article keeps its own reference list, per the
-  per-file numbering rule) is created when the second article exists, not
-  before. Settles L1.
+- **Articles live in `articles/`, one subfolder per article** (`review`,
+  `rationale`, `specification-<name>`, ...), with the generated PDFs directly
+  in `articles/`, a shared `articles/common/` (preamble, extra sources), and
+  each article with its own bibliography, only if it cites sources. Built on
+  2026-10-30 (branch `dev-articles-layout`); it supersedes the earlier
+  decision for sibling `article-*/` folders. Several specification documents
+  are separate articles, never one. There is no manual article here: the
+  manual is written in the implementation repo. Settles L1.
 - **Positioning: engineering-leaning, neutral core.** Most use is
   engineering projects, so the template should carry many tools for them,
   but nothing may be so built in that a non-engineering study cannot use it.
@@ -25,7 +28,7 @@ design), and `main` has to stay topic-neutral and cloneable.
   article) must still pass the "eighteenth-century agriculture" test in the
   root README; **engineering tools are optional modules** at the root, each
   with its own README, absent from the validator's hard checks when the
-  folder is missing or empty (the pattern `article-review/` already uses),
+  folder is missing or empty (the pattern the `articles/` folder already uses),
   and deletable without breaking anything. Settles the placement of L2.
 - **Requirements (L2): built as a description-first optional module
   (2026-10-30, branch `dev-requirements-module`).** After discussion the heavy
@@ -309,12 +312,9 @@ equations and holds the analysis, stand-alone from page one), and **how to set
 it** (parameter and tuning manual). The specification stayed in the study
 repo, the manual went to the implementation repo. This is the spec article of
 `roadmap-notes.md` phase 3, and it says the spec article is really two or
-three. The current `article-review/` is the first of these. Structure
-question for the user: keep sibling folders (`article-review/`,
-`article-spec/`, `article-manual/`) with a shared preamble in
-`article-common/` once a second article exists, or nest under `articles/`?
-Recommendation: siblings now (matches the rename already done), add
-`article-common/` when the second one is created, not before. Note that a
+three. The current `articles/review/` is the first of these. **Decided:** one
+`articles/` folder with a subfolder per article and a shared `articles/common/`
+(see the decisions at the top). Note that a
 shared *bibliography* conflicts with the per-file numbering rule in root
 `CLAUDE.md`; share the preamble, keep the reference list per article.
 

@@ -42,7 +42,11 @@
       "Bash(python scripts/vision_pages.py plan:*)",
       "Bash(python scripts/vision_pages.py record:*)",
       "Bash(python study/scripts/ocr_support.py:*)",
-      "Bash(python scripts/ocr_support.py:*)"
+      "Bash(python scripts/ocr_support.py:*)",
+      "Bash(python study/scripts/build_bibliography.py:*)",
+      "Bash(python scripts/build_bibliography.py:*)",
+      "Bash(python study/scripts/build_articles.py:*)",
+      "Bash(python scripts/build_articles.py:*)"
     ],
     "ask": [
       "Agent(page-reader)",
