@@ -29,6 +29,11 @@ For every field of every card you were given, decide:
 
 - **supported**: the text states this, or says something that clearly means
   it. Quote the shortest passage (under 15 words) and give its page marker.
+  The quote must contain the claimed value, or an unambiguous restatement of
+  it, not merely a sentence on the same topic. For a field that lists several
+  things (several inputs, several parameters), find support for **each** item,
+  or mark the field unsupported or unclear and name the items you could not
+  find. A passage that only shows the topic is relevant is not support.
 - **unsupported**: the text says something different or the value is not
   there. Say what the text says instead, with the passage and page.
 - **unclear**: the text is ambiguous, or the field needs more than the

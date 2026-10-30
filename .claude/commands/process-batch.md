@@ -86,7 +86,9 @@ Structural checks passing does not mean the batch is factually sound.
 Run 2-3 real discovery queries against the freshly-updated catalog (see
 `study/ai_instructions/workflow.md`) and sanity-check the results by eye.
 
-Then commit and push. **Commit after every batch** — never let more than
+Then commit, and push only if the user has said pushing is allowed for this
+run (the notes hold copyrighted extracted text; ask once at the start, and
+mention the unpushed-commit count every few batches). **Commit after every batch** — never let more than
 one batch's work sit uncommitted, so an interruption (a rate limit, a
 crash, a closed laptop) costs at most one batch.
 

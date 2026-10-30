@@ -40,6 +40,8 @@ import sys
 from difflib import SequenceMatcher
 from pathlib import Path
 
+import _console  # noqa: F401  (UTF-8 console output on Windows)
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import method_cards  # noqa: E402
 import verification  # noqa: E402
@@ -101,7 +103,7 @@ ENTRY_RE = re.compile(
     re.DOTALL | re.MULTILINE,
 )
 FIELD_START_RE = re.compile(
-    r"^(" + "|".join(ENTRY_FIELDS) + r"):\s?(.*)$"
+    r"^(" + "|".join(ENTRY_FIELDS) + r"):[ \t]?(.*)$"
 )
 
 results = []  # list of (level, category, message)
@@ -435,11 +437,12 @@ def fix_tag_casing(catalog_text, canonical_lower):
         def fix_tags_line(lm):
             raw_tags = [t.strip() for t in lm.group(2).split(",") if t.strip()]
             fixed_tags = [canonical_lower.get(t.lower(), t) for t in raw_tags]
-            if fixed_tags != raw_tags:
-                changed[0] = True
+            if fixed_tags == raw_tags:
+                return lm.group(0)
+            changed[0] = True
             return f"{lm.group(1)}: {', '.join(fixed_tags)}"
 
-        return re.sub(r"^(tags):\s?(.*)$", fix_tags_line, block, count=1, flags=re.MULTILINE)
+        return re.sub(r"^(tags):[ \t]?(.*)$", fix_tags_line, block, count=1, flags=re.MULTILINE)
 
     new_text = ENTRY_RE.sub(fix_entry, catalog_text)
     return new_text, changed[0]
@@ -699,6 +702,22 @@ def check_article_decisions():
                 )
 
 
+def check_path_lengths():
+    """Windows rejects paths past about 260 characters, and the failure shows
+    up at `git add`, long after the file was created. Warn well before."""
+    limit = 230
+    for base in (NOTES_DIR, REPO_ROOT / "PDFs"):
+        if not base.exists():
+            continue
+        for path in base.rglob("*"):
+            if path.is_file() and len(str(path)) > limit:
+                log(
+                    "WARN", "path-length",
+                    f"{path.relative_to(REPO_ROOT).as_posix()}: full path is {len(str(path))} "
+                    f"characters (Windows limit is about 260) - shorten the filename",
+                )
+
+
 def check_catalog_index(rebuild=True):
     """catalog-index.md is a derived view of catalog.md, read in full at
     the start of most sessions. A stale index is worse than no index: it
@@ -825,6 +844,7 @@ def main():
     check_near_duplicate_titles(entries)
     check_dossiers()
     check_mermaid(entries)
+    check_path_lengths()
     check_article()
     check_method_cards(entries, exempt_types)
     check_article_table(rebuild=rebuild)

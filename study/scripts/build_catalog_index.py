@@ -20,6 +20,8 @@ import re
 import sys
 from pathlib import Path
 
+import _console  # noqa: F401  (UTF-8 console output on Windows)
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CATALOG_PATH = REPO_ROOT / "catalog.md"
 INDEX_PATH = REPO_ROOT / "catalog-index.md"
@@ -32,7 +34,7 @@ ENTRY_RE = re.compile(
     r"^<!--\s*entry:(?P<id>.+?)\s*-->(?P<body>.*?)^<!--\s*/entry\s*-->",
     re.DOTALL | re.MULTILINE,
 )
-FIELD_START_RE = re.compile(r"^(" + "|".join(ENTRY_FIELDS) + r"):\s?(.*)$")
+FIELD_START_RE = re.compile(r"^(" + "|".join(ENTRY_FIELDS) + r"):[ \t]?(.*)$")
 
 HEADER = """# Catalog index
 
