@@ -31,6 +31,15 @@ front so nobody has to guess:
   undocumented gets silently reverted by the next person who finds it
   inconvenient.
 
+**Optional modules.** Most use of this template is engineering projects, so some
+tooling leans that way. It does so without leaking into the core: the core
+(catalog, notes, dossiers, scope, the review article) has to pass the test below,
+while an **optional module** may lean engineering, says so in a banner at the top
+of its own `README.md`, is checked by the validator only when its folder exists,
+and can be deleted without breaking anything. `requirements/` is the first one. A
+study with no use for it deletes the folder; the reason a module is optional and
+not core is that it only makes sense for projects that build something.
+
 The test for anything added here: **would this still be right for a
 literature study about eighteenth-century agriculture?** If yes, it
 belongs in the template. If it only makes sense for one field, it belongs
@@ -52,6 +61,7 @@ ideation/               unverified brainstorming, never citable as literature
 theory/                 explainers of background concepts, for teammates
 meetings/               one file per counterparty, plus internal.md
 article-review/                LaTeX literature-review article template: comparison table, intro, related work
+requirements/           OPTIONAL module (engineering-leaning): where requirements sit in the pipeline; delete if unused
 study/                  the literature-review engine — self-contained
 .claude/                agent definitions, slash commands, permissions
 .github/workflows/      CI: runs the structural validator on every push

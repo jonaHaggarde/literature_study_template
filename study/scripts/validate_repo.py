@@ -708,7 +708,7 @@ def check_article_decisions():
 NOTE_REF_RE = re.compile(r"(?<![A-Za-z0-9_])study/notes/([^\s)\]`'\"<>*]+?\.md)")
 # Root-level folders and files that cite catalogued sources.
 ROOT_CITING_DOCS = ["decisions.md", "timeline.md"]
-ROOT_CITING_DIRS = ["ideation", "theory", "meetings", "article-review"]
+ROOT_CITING_DIRS = ["ideation", "theory", "meetings", "article-review", "requirements"]
 
 
 def find_note_refs(text):
@@ -845,6 +845,59 @@ def check_usage_log():
     log("INFO", "usage-log", f"{n} entr{'y' if n == 1 else 'ies'} in .claude/usage-log.md")
 
 
+REQUIREMENTS_DIR = REPO_ROOT.parent / "requirements"
+REQUIREMENTS_DESCRIPTIVE = {"README.md", "background.md"}
+TBD_RE = re.compile(r"\bTB[DR]\b")
+
+
+def requirements_too_early_reasons(scope_placeholder, n_processed, article_unfinished):
+    """Why requirements written now would be premature, as readable strings
+    (empty when nothing says so). Pure, so it can be tested."""
+    reasons = []
+    if scope_placeholder:
+        reasons.append("scope.md is still a placeholder, so there is nothing defined to build requirements on")
+    elif n_processed == 0:
+        reasons.append("no document has been processed into the catalog yet, so there is no survey to ground values in")
+    if article_unfinished:
+        reasons.append("the review article is not finished (its 'not verified' status banner is still in place)")
+    return reasons
+
+
+def check_requirements(entries):
+    """requirements/ is an optional module, described in its own README. Low-level
+    requirements set before the survey is done tend to be guesses that the design
+    then bends to meet, so writing them early gets a warning (never a failure: a
+    project can legitimately start from a fixed customer specification). The count
+    of TBD/TBR markers is information only; an honest TBD is not a defect."""
+    if not REQUIREMENTS_DIR.exists():
+        return
+    files = [p for p in sorted(REQUIREMENTS_DIR.rglob("*"))
+             if p.is_file() and p.name not in REQUIREMENTS_DESCRIPTIVE and not p.name.startswith(".")]
+    if not files:
+        return
+    scope = REPO_ROOT / "ai_instructions" / "scope.md"
+    scope_placeholder = (not scope.exists()) or "<!-- placeholder -->" in scope.read_text(encoding="utf-8")
+    n_processed = sum(1 for i, f in entries
+                      if i != "EXAMPLE" and f["summary"] and "TODO" not in f["summary"])
+    main_tex = REPO_ROOT.parent / "article-review" / "main.tex"
+    article_unfinished = main_tex.exists() and "not verified" in main_tex.read_text(encoding="utf-8")
+    reasons = requirements_too_early_reasons(scope_placeholder, n_processed, article_unfinished)
+    if reasons:
+        log(
+            "WARN", "requirements",
+            f"requirements/ holds {len(files)} file(s) beyond its README, written early: "
+            + "; ".join(reasons)
+            + ". Low-level requirements set this early tend to drive the design (see "
+            "requirements/README.md): keep top-level facts in the project definition and "
+            "write unknown values as TBD.",
+        )
+    tbd = 0
+    for path in files:
+        if path.suffix.lower() in {".md", ".txt", ".csv", ".tex"}:
+            tbd += len(TBD_RE.findall(path.read_text(encoding="utf-8", errors="replace")))
+    log("INFO", "requirements", f"{len(files)} requirements file(s), {tbd} TBD/TBR marker(s) remaining")
+
+
 def check_catalog_index(rebuild=True):
     """catalog-index.md is a derived view of catalog.md, read in full at
     the start of most sessions. A stale index is worse than no index: it
@@ -976,6 +1029,7 @@ def main():
     check_decision_trees(rebuild=rebuild)
     check_gaps_index(rebuild=rebuild)
     check_usage_log()
+    check_requirements(entries)
     check_article()
     check_method_cards(entries, exempt_types)
     check_article_table(rebuild=rebuild)

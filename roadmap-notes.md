@@ -52,6 +52,17 @@ The first phase is one of the first big milestones of a repo.
   debrief). Kept separate for now, but the two features should be designed
   so they can meet.
 
+## Requirements in the phase model
+
+Requirements are staged, and the stages line up with the phases above. Top-level
+facts and goals belong to the **project definition** (before any search). A first
+requirements list (version 1, with honest `TBD`s) is written **after the survey**,
+using the review article as evidence of what is typical and achievable. Lower-level
+requirements are written **after the concept decision** they depend on, so a number
+cannot pre-decide the design. The optional `requirements/` module describes this;
+its detailed per-type templates wait for real use. "Requirements v1 accepted" is a
+candidate gate for the gate-events design.
+
 ## Project definition document (comes before the review article)
 
 Added 2026-10-29. Before the review article, a repo gets **one standalone

@@ -27,8 +27,18 @@ design), and `main` has to stay topic-neutral and cloneable.
   with its own README, absent from the validator's hard checks when the
   folder is missing or empty (the pattern `article-review/` already uses),
   and deletable without breaking anything. Settles the placement of L2.
-- **Requirements engine (L2): to be investigated and developed, optional.**
-  Not built yet; first a design discussion, then its own branch.
+- **Requirements (L2): built as a description-first optional module
+  (2026-10-30, branch `dev-requirements-module`).** After discussion the heavy
+  version (bounds table, acceptance, strength and confidence columns, tiers,
+  generated audit) was shelved: many projects start too early to set
+  requirements, and low-level ones set early drive an unreasonable design. What
+  ships is `requirements/README.md` (intent, where requirements sit in the
+  pipeline, what they consume and feed, `TBD` as a normal state, the early-writing
+  warning) and `requirements/background.md` (pre-work on standards and procedures,
+  unverified, from search summaries). Detailed templates per project type are
+  deferred until there is real use, with the usage log as the source. The
+  validator warns, never fails, when requirement files exist before the survey is
+  done, and counts TBD/TBR markers.
 - **Usage log is automatic in every fork (L6, upgraded).** Every fork starts
   building a usage log without the user doing anything and without opening
   it. Location: `.claude/usage-log.md` (inside the harness folder, not the

@@ -28,6 +28,16 @@ Routing, for a session starting at the repo root:
 - Project work (a decision, a brainstorm, an explainer, meeting notes,
   the timeline) → the relevant root folder's own `README.md` states what
   belongs in it and what doesn't. Read that before adding a file.
+- Requirements (optional module, for projects that build something) →
+  `requirements/README.md`. Requirements are staged: top-level facts and goals
+  belong in the project definition and `scope.md`, version 1 comes **after** the
+  review article, and lower-level requirements come after the concept decision
+  they depend on. If asked for requirements before the survey is finished, say
+  why that tends to drive an unreasonable design (the README has the reasoning),
+  offer top-level facts and `TBD` entries instead, and let the user decide; do not
+  refuse. A value nobody knows yet is written `TBD`, with an owner, a resolve-by
+  milestone and what it waits on. Never present a draft from outside, or an
+  assumption, as a source of truth.
 - Writing the study up as a literature review article (the comparison
   table, introduction, related work) → `article-review/README.md`, then follow
   `article-review/workflow.md` (the `/article` command runs that sequence and
