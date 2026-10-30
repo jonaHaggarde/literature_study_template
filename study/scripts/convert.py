@@ -9,6 +9,16 @@ Usage (from study/, with dependencies installed):
     python scripts/convert.py --dry-run            # list what would happen, convert nothing
     python scripts/convert.py --only Smith2020     # only PDFs whose path contains this
     python scripts/convert.py --timeout 120        # per-file extraction limit, seconds
+    python scripts/convert.py --ocr off            # never OCR (default: auto)
+    python scripts/convert.py --reocr [TEXT]       # OCR already-converted scans (keeps your notes)
+
+Scanned PDFs (no extractable text) are OCR'd automatically when ocrmypdf and
+Tesseract are installed (`python scripts/ocr_support.py` shows what is missing and
+the commands to install it; nothing is installed for you). OCR runs on a copy and
+never changes the PDF in PDFs/. OCR text is marked `(ocr)` per page in the note,
+and equation-heavy pages are listed in a notice, because OCR garbles equations,
+symbols and tables. Reading such pages from their images is a separate, budgeted
+step: see ai_instructions/vision-budget.md.
 
 Triage, before converting a pile of new documents: move a PDF you do not
 want processed (a whole edited book of which one chapter matters, a thesis
@@ -41,6 +51,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import _console  # noqa: F401  (UTF-8 console output on Windows)
+import ocr_support
 
 try:
     import pymupdf4llm
@@ -153,7 +164,7 @@ def entry_id_for(relpath_no_ext: str) -> str:
 
 
 def build_note_markdown(relpath: str, pdf_hash: str, pages: list, meta_guess: dict,
-                        extraction: str = "layout") -> tuple[str, bool]:
+                        extraction: str = "layout", ocr_suspect=None) -> tuple[str, bool]:
     total_chars = sum(len(p.get("text", "")) for p in pages)
     avg_chars = total_chars / len(pages) if pages else 0
     low_yield = avg_chars < LOW_YIELD_CHARS_PER_PAGE
@@ -182,17 +193,18 @@ def build_note_markdown(relpath: str, pdf_hash: str, pages: list, meta_guess: di
             "text before trusting, especially authors/year. -->"
         )
         lines.append("")
-    if extraction != "layout":
+    if extraction == "plain-text-fallback":
         lines.append(
             "<!-- WARNING: layout extraction timed out on this PDF, so the text below is a "
             "plain-text fallback: tables, equations and structure are lost or scrambled. "
             "Treat anything that depends on a table or a formula as unread. -->"
         )
         lines.append("")
-    if low_yield:
+    if low_yield and extraction != "ocr":
         lines.append(
             "<!-- WARNING: low text yield, this PDF may be scanned/image-based. "
-            "Consider OCR (see study/README.md) and re-running convert.py. -->"
+            "Run `python scripts/ocr_support.py` to see whether OCR is available, then "
+            "`python scripts/convert.py --reocr` (see study/README.md). -->"
         )
         lines.append("")
     lines.append("## Key Findings")
@@ -204,8 +216,14 @@ def build_note_markdown(relpath: str, pdf_hash: str, pages: list, meta_guess: di
     lines.append("")
     lines.append("## Content")
     lines.append("")
+    if extraction == "ocr":
+        # Inside Content on purpose: anyone reading only the text (the row-verifier does)
+        # sees it, not just whoever reads the note's header.
+        lines.append(ocr_support.notice(ocr_suspect or []))
+        lines.append("")
     for i, page in enumerate(pages, start=1):
-        lines.append(f"<!-- page: {i} -->")
+        tag = " (ocr)" if page.get("ocr") else ""
+        lines.append(f"<!-- page: {i}{tag} -->")
         lines.append("")
         lines.append(page.get("text", "").strip())
         lines.append("")
@@ -316,6 +334,97 @@ def page_count(pdf_path: Path) -> str:
         return "?"
 
 
+def is_low_yield(pages) -> bool:
+    total = sum(len(p.get("text", "")) for p in pages)
+    return (total / len(pages) if pages else 0) < LOW_YIELD_CHARS_PER_PAGE
+
+
+_OCR_HINT_SHOWN = [False]
+
+
+def apply_ocr(pdf_path, pages, mode, lang, timeout, warnings, relpath):
+    """If the PDF is a scan and OCR is allowed and available, fill the empty pages
+    with OCR text. Returns (pages, extraction, info): extraction is "ocr" or None,
+    info is None or {"ocr_pages", "suspect", "lang"}. With mode "require" a missing
+    tool or a failed run raises instead of leaving an unread scan."""
+    if mode == "off" or not is_low_yield(pages):
+        return pages, None, None
+    st = ocr_support.status()
+    if not ocr_support.ready(st):
+        hints = ocr_support.install_hints(st)
+        msg = f"{relpath}: scanned PDF, OCR is not available"
+        if mode == "require":
+            raise RuntimeError(msg + ". To enable it, run yourself: " + "; ".join(hints))
+        if hints and not _OCR_HINT_SHOWN[0]:
+            msg += ". To enable it, run yourself: " + "; ".join(hints)
+            _OCR_HINT_SHOWN[0] = True
+        warnings.append(msg)
+        return pages, None, None
+    print(f"  scanned PDF: running OCR ({lang}); a long document can take minutes")
+    ocr_pages, err = ocr_support.run_ocr(pdf_path, lang, timeout, st)
+    if err:
+        if mode == "require":
+            raise RuntimeError(f"{relpath}: {err}")
+        warnings.append(f"{relpath}: {err}; left as an unread scan")
+        return pages, None, None
+    texts, used = ocr_support.merge_pages([p.get("text", "") for p in pages], ocr_pages)
+    if not used:
+        warnings.append(f"{relpath}: OCR produced no text for the empty pages; left as an unread scan")
+        return pages, None, None
+    merged = [dict(text=t, **({"ocr": True} if (i + 1) in used else {})) for i, t in enumerate(texts)]
+    suspect = ocr_support.suspect_pages([t if (i + 1) in used else None for i, t in enumerate(texts)])
+    return merged, "ocr", {"ocr_pages": used, "suspect": suspect, "lang": lang}
+
+
+def splice_content(old_note: str, new_note: str) -> str:
+    """Keep everything the old note has before its Content section (the
+    frontmatter and any Key Findings, Implementation Notes and Method Cards a
+    worker wrote) and take the new note's Content. Used to add OCR text to a note
+    that already exists without touching what has been written in it."""
+    i_old = old_note.index("\n## Content")
+    i_new = new_note.index("\n## Content")
+    head = re.sub(r"<!-- WARNING: low text yield.*?-->\n\n?", "", old_note[:i_old], flags=re.S)
+    return head + new_note[i_new:]
+
+
+def reocr_existing(args, manifest, manifest_path, pdfs_dir, notes_dir):
+    """OCR scans that were converted earlier without OCR, in place in their notes."""
+    done = failed = 0
+    for relpath, entry in sorted(manifest.items()):
+        if entry.get("extraction") == "ocr" or not entry.get("low_text_yield"):
+            continue
+        if args.reocr and args.reocr.lower() not in relpath.lower():
+            continue
+        pdf_path = pdfs_dir / relpath
+        note_path = notes_dir / Path(entry["notes_path"]).relative_to("notes")
+        if not pdf_path.exists() or not note_path.exists():
+            print(f"Skipping {relpath}: the PDF or its note is missing", file=sys.stderr)
+            failed += 1
+            continue
+        print(f"Re-OCR: {relpath}")
+        try:
+            pages, _ = extract_pages(pdf_path, args.timeout)
+            warnings = []
+            pages, extraction, info = apply_ocr(pdf_path, pages, "require", args.ocr_lang,
+                                                args.ocr_timeout, warnings, relpath)
+        except Exception as e:  # noqa: BLE001
+            print(f"  FAILED: {e}", file=sys.stderr)
+            failed += 1
+            continue
+        meta_guess = best_effort_metadata(pdf_path, "\n".join(p.get("text", "") for p in pages[:2]))
+        new_note, _ = build_note_markdown(relpath, entry["hash"], pages, meta_guess, extraction, info["suspect"])
+        note_path.write_text(splice_content(note_path.read_text(encoding="utf-8"), new_note), encoding="utf-8")
+        entry.update({"extraction": "ocr", "low_text_yield": False, "ocr_pages": info["ocr_pages"],
+                      "ocr_suspect_pages": info["suspect"], "ocr_lang": info["lang"],
+                      "ocr_at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+        save_json(manifest_path, manifest)
+        print(f"  OCR'd {len(info['ocr_pages'])} page(s); equation-heavy: "
+              f"{', '.join(map(str, info['suspect'])) or 'none detected'}")
+        done += 1
+    print(f"\nRe-OCR done: {done} note(s) updated, {failed} failed. Notes' own sections were kept.")
+    return 1 if failed else 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--pdfs-dir", default=str(REPO_ROOT / "PDFs"))
@@ -328,6 +437,16 @@ def main():
                         help="list what would be converted, deferred or skipped; convert nothing")
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT,
                         help=f"seconds allowed for layout extraction of one file (default {DEFAULT_TIMEOUT})")
+    parser.add_argument("--ocr", choices=["auto", "off", "require"], default="auto",
+                        help="OCR scanned PDFs: auto (when the tools exist), off, or require "
+                             "(fail loudly if they do not)")
+    parser.add_argument("--ocr-lang", default=ocr_support.DEFAULT_LANG,
+                        help="Tesseract language code(s), e.g. eng or eng+deu (default eng)")
+    parser.add_argument("--ocr-timeout", type=float, default=ocr_support.OCR_TIMEOUT,
+                        help="seconds allowed for OCR of one document")
+    parser.add_argument("--reocr", nargs="?", const="", default=None, metavar="TEXT",
+                        help="OCR scans converted earlier without OCR (optionally only paths containing "
+                             "TEXT), keeping everything written in their notes")
     parser.add_argument("--extract-one", help=argparse.SUPPRESS)
     parser.add_argument("--mode", default="layout", help=argparse.SUPPRESS)
     parser.add_argument("--out", help=argparse.SUPPRESS)
@@ -346,6 +465,8 @@ def main():
         sys.exit(1)
 
     manifest = load_json(manifest_path)
+    if args.reocr is not None:
+        return reocr_existing(args, manifest, manifest_path, pdfs_dir, notes_dir)
     all_pdfs = sorted(pdfs_dir.rglob("*.pdf"))
     deferred = [p for p in all_pdfs if DEFERRED_DIR in p.relative_to(pdfs_dir).parts]
     pdf_files = [p for p in all_pdfs if p not in deferred]
@@ -393,10 +514,21 @@ def main():
             warnings.append(f"{relpath}: layout extraction timed out, used plain-text fallback "
                             f"(tables and structure lost)")
 
+        try:
+            pages, ocr_extraction, ocr_info = apply_ocr(pdf_path, pages, args.ocr, args.ocr_lang,
+                                                        args.ocr_timeout, warnings, relpath)
+        except RuntimeError as e:
+            print(f"  FAILED: {e}", file=sys.stderr)
+            warnings.append(f"{relpath}: {e}")
+            continue
+        if ocr_extraction:
+            extraction = ocr_extraction
+
         first_pages_text = "\n".join(p.get("text", "") for p in pages[:2])
         meta_guess = best_effort_metadata(pdf_path, first_pages_text)
 
-        note_content, low_yield = build_note_markdown(relpath, pdf_hash, pages, meta_guess, extraction)
+        note_content, low_yield = build_note_markdown(relpath, pdf_hash, pages, meta_guess, extraction,
+                                                      ocr_info["suspect"] if ocr_info else None)
 
         note_relpath = short_note_relpath(relpath)
         note_path = notes_dir / note_relpath
@@ -410,6 +542,10 @@ def main():
             "low_text_yield": low_yield,
             "extraction": extraction,
         }
+        if ocr_info:
+            manifest[relpath].update({"ocr_pages": ocr_info["ocr_pages"],
+                                      "ocr_suspect_pages": ocr_info["suspect"],
+                                      "ocr_lang": ocr_info["lang"]})
         known_hashes[pdf_hash] = relpath
         converted += 1
         if low_yield:
