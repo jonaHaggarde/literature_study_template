@@ -2,8 +2,8 @@
 
 **Status: ideas, not designed, not built.** Written 2026-10-29 from a
 discussion. Nothing here is a convention yet. It is parked so the larger
-direction is not lost while `dev-article` stays focused on the review
-article. When a part is built, it moves to a `dev-<feature>` branch and
+direction is not lost while the review article was built (`article-review/`,
+now merged). When a part is built, it moves to a `dev-<feature>` branch and
 into the real docs.
 
 ## The idea: a study has phases, and the repo should know which one it is in
@@ -94,9 +94,32 @@ explaining the whole flow and every gate: what each phase is for, what is
 frozen at each gate, what the user is expected to read and do. Depends on
 the gate design, so it is built after it. Not started.
 
-## Where each piece lives for now
+## Scanned PDFs and OCR (own feature)
 
-- Phase 1 workflow and the review article: `article/` on `dev-article`
-  (in progress).
+Added 2026-10-30. Found when three sample papers went through the pipeline:
+a scanned 1960 paper converted to empty text. Today `convert.py` warns
+`LOW TEXT YIELD` and `study/README.md` tells the user to run `ocrmypdf` by
+hand; a scan fails safely (the extractor writes nothing from memory, the
+validator lists it as an unprocessed stub). Not designed: a proper fix is
+its own `dev-ocr` branch, because it is real work:
+
+- **Tooling.** Tesseract, Ghostscript and ocrmypdf are separate installs and
+  differ per OS, so `setup.ps1` / `setup.sh` need changes and a fallback for
+  when they are missing.
+- **Pipeline.** Detect, OCR and re-convert automatically. The manifest tracks
+  PDFs by hash, so OCR'ing in place changes the hash.
+- **Trust.** OCR garbles equations and symbols, especially in old scans. The
+  extractor and the `row-verifier` need a rule that OCR'd text is lower-trust,
+  and cards from it should be flagged.
+- **Validation.** Report scanned papers that are still unprocessed, instead
+  of a quiet info line.
+- **Alternative to decide on:** reading page images with a vision-capable
+  model instead of OCR, which may handle equations better.
+
+## Where each piece lives
+
+- Phase 1 workflow and the review article: `article-review/` (merged into
+  `development` 2026-10-30).
 - Gate events: `dev-gate-events`.
+- OCR and scanned PDFs: this file only, until a `dev-ocr` branch exists.
 - Everything above beyond phase 1: this file only.
