@@ -1,0 +1,19 @@
+% Method families and what each needs as input. Included by ../sections/comparison.tex
+% with \input{figs/taxonomy}. Keep labels to a few words; explain in the surrounding prose.
+%
+% TEMPLATE: this is a stub with two placeholder families. To fill it in, use the families
+% in ../../study/topics/families.md, one node per family, in the same order as the table
+% groups. Under each node put what that family needs as input (the table's first columns say
+% it). If the families relate (one refines another, one feeds another), draw that as arrows;
+% if they are simply parallel alternatives, leave them as a row. One subsection of
+% sections/comparison.tex per node.
+\begin{tikzpicture}[
+    fam/.style  = {draw, rounded corners=2pt, align=center, text width=24mm,
+                   minimum height=9mm, font=\small, fill=blue!8},
+    need/.style = {font=\footnotesize, align=center, text=black!70},
+]
+  \node[fam]                  (a) {Family A};
+  \node[fam, right=6mm of a]  (b) {Family B};
+  \node[need, below=3mm of a] {needs: \todo{input}};
+  \node[need, below=3mm of b] {needs: \todo{input}};
+\end{tikzpicture}

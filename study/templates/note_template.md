@@ -37,6 +37,22 @@ doi: "10.xxxx/xxxxx"
      sub-bullets that genuinely don't apply (e.g. a pure literature review
      has no tuning parameters) rather than forcing empty headers. -->
 
+## Method Cards
+
+<!-- Optional. One "### Method name" block per method the document itself
+     proposes, tests or compares, with the fields defined in
+     ai_instructions/method-card.md (defaults: input, output, model,
+     technique), one "- key: value" line each. Plain text; leave a value
+     empty rather than write n/a. Omit the whole section for a document
+     with no method of its own. These cards become the rows of the
+     review article's comparison table (scripts/build_review_table.py). -->
+
+### Example method
+- input:
+- output:
+- model:
+- technique:
+
 ## Content
 
 <!-- page: 1 -->

@@ -32,6 +32,11 @@ per-document and apply whether run serially or inside a worker.
      limitations the authors themselves flag, released
      code/data/materials — omit sub-bullets that don't apply rather than
      forcing empty headers).
+   - A `## Method Cards` section, one card per method the document itself
+     proposes, tests or compares, in the fields of `method-card.md`. These
+     cards become the rows of the review article's table. A document with
+     no method of its own (a survey of other people's work, a standard, a
+     dataset) gets no section.
    - **Check the new document against `ai_instructions/scope.md` while
      reading it.** If it's a head-to-head comparison or a survey with an
      explicit ranking, set `contribution: comparison-study` (or add

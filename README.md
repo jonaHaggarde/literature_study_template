@@ -51,6 +51,7 @@ project_documents/      material handed down from outside — nothing self-autho
 ideation/               unverified brainstorming, never citable as literature
 theory/                 explainers of background concepts, for teammates
 meetings/               one file per counterparty, plus internal.md
+article-review/                LaTeX literature-review article template: comparison table, intro, related work
 study/                  the literature-review engine — self-contained
 .claude/                agent definitions, slash commands, permissions
 .github/workflows/      CI: runs the structural validator on every push
@@ -69,7 +70,7 @@ an existing project later.
 
 ## What ships in `.claude/`
 
-Three agent definitions and three slash commands, all in Claude Code's
+Four agent definitions and four slash commands, all in Claude Code's
 own format:
 
 | | What it is |
@@ -80,6 +81,8 @@ own format:
 | `/lit` | Answer a literature question — scout locates, the session concludes. |
 | `/process-batch` | The full batch loop: parallel workers, central merge, ratify, validate, commit. |
 | `/gap-check` | Audit coverage against scope and report what is genuinely thin. |
+| `row-verifier` | Cheap (Haiku) check of one note's method cards against its extracted text, for the article's verification pass. |
+| `/article-review` | Build the review article: preflight, cards, table, verification pass, checks. |
 
 `study/ai_instructions/delegation.md` explains what each is for, why the
 model tiers sit where they do, and the rule that matters most — that the

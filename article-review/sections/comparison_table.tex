@@ -1,0 +1,17 @@
+% The comparison table's float, caption and label. Hand-written. The rows are generated:
+% sections/comparison_rows.tex is rebuilt from the method cards in ../study/notes/ by
+% `python study/scripts/build_review_table.py`, so do not edit that file. To change the
+% columns, edit the field list in ../study/ai_instructions/method-card.md and rerun the script.
+%
+% Never add a row by hand. A row exists because a note has a method card, and a card cites its
+% source by construction.
+%
+% [!t]: a two-column-wide float can only sit at the top of a page. Keeping the \input at the start
+% of the section, before the figure and the family subsections, makes it land on the first page of
+% the section instead of drifting to the end of the paper.
+\begin{table*}[!t]
+\caption{Summary of the methods. \todo{Describe what a row is and what the columns mean.}}
+\label{tab:comparison}
+\small
+\input{sections/comparison_rows}
+\end{table*}

@@ -42,7 +42,8 @@ entry, it has stopped being a one-off: add it here.
 **Three to five tags per entry**, and prefer too few. See
 `../ai_instructions/catalog-schema.md`.
 
-Format: one canonical tag per line, backtick-wrapped, under a heading
+Format: one canonical tag per bulleted line, backtick-wrapped (a leading
+`- ` is required: `- `tag``), under a heading
 grouping related concepts — `scripts/validate_repo.py` parses this
 format, so keep it. A one-line gloss after the tag is welcome where the
 term is ambiguous; the parser only reads the backticked part.

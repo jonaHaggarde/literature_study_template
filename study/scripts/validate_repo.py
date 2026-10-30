@@ -10,7 +10,8 @@ Implementation Notes, stale placeholder entries, tag-casing drift from
 topics/vocabulary.md, type/contribution values drifting from
 ai_instructions/catalog-schema.md, a stale "Comparison & survey papers"
 quick-reference list, dossiers missing their required Open-questions
-section, unbalanced mermaid fences, and whether reference-index.md and
+section, unbalanced mermaid fences, article-review/ citations without a
+bibliography entry, malformed method cards, a stale article table, and whether reference-index.md and
 catalog-index.md are up to date with the current notes/ and catalog.md.
 
 Allowed `type`/`contribution` values and field-exempt types are read from
@@ -39,6 +40,10 @@ import sys
 from difflib import SequenceMatcher
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import method_cards  # noqa: E402
+import verification  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CATALOG_PATH = REPO_ROOT / "catalog.md"
 NOTES_DIR = REPO_ROOT / "notes"
@@ -54,6 +59,12 @@ BUILD_CATALOG_INDEX_SCRIPT = REPO_ROOT / "scripts" / "build_catalog_index.py"
 # template is used with its full project layout. Checked opportunistically
 # so study/ still validates standalone.
 THEORY_DIR = REPO_ROOT.parent / "theory"
+# article-review/ is the LaTeX review-article template, also at the repo root.
+ARTICLE_DIR = REPO_ROOT.parent / "article-review"
+BUILD_ARTICLE_TABLE_SCRIPT = REPO_ROOT / "scripts" / "build_review_table.py"
+ARTICLE_ROWS_PATH = ARTICLE_DIR / "sections" / "comparison_rows.tex"
+ARTICLE_REFS_PATH = ARTICLE_DIR / "sections" / "references.tex"
+ARTICLE_MAIN_PATH = ARTICLE_DIR / "main.tex"
 
 # ai_instructions/catalog-schema.md's budget for the summary field. Past
 # this it's a WARN, never a FAIL - a genuinely dense entry is allowed to
@@ -437,7 +448,7 @@ def fix_tag_casing(catalog_text, canonical_lower):
 def check_dossiers():
     if not TOPICS_DIR.exists():
         return
-    skip = {"README.md", "gaps.md", "vocabulary.md"}
+    skip = {"README.md", "gaps.md", "vocabulary.md", "families.md"}
     for p in sorted(TOPICS_DIR.glob("*.md")):
         if p.name in skip:
             continue
@@ -484,7 +495,7 @@ def check_mermaid(entries):
     # Advisory: dossiers and theory/ explainers are the two places where a
     # diagram carries most of the teaching, per the root CLAUDE.md.
     dossiers = [p for p in TOPICS_DIR.glob("*.md")
-                if p.name not in {"README.md", "gaps.md", "vocabulary.md"}] if TOPICS_DIR.exists() else []
+                if p.name not in {"README.md", "gaps.md", "vocabulary.md", "families.md"}] if TOPICS_DIR.exists() else []
     theory = [p for p in THEORY_DIR.glob("*.md") if p.name != "README.md"] if THEORY_DIR.exists() else []
     for path in dossiers + theory:
         text = path.read_text(encoding="utf-8")
@@ -496,6 +507,196 @@ def check_mermaid(entries):
                 "is the file type where one usually does the most work (see the "
                 "repo root CLAUDE.md, 'Diagrams')",
             )
+
+
+def check_article():
+    r"""article-review/ is a LaTeX paper with a plain thebibliography list, so a
+    \cite with no matching \bibitem renders as [?] and nothing in the
+    build fails. That is mechanical, so it is a hard error; an uncited
+    \bibitem is only a warning, and the remaining \todo count is
+    information, never a failure - a draft is allowed to be unfinished."""
+    if not ARTICLE_DIR.exists():
+        return
+    comment_re = re.compile(r"(?<!\\)%.*")
+    cite_re = re.compile(r"\\cite[a-z]*\*?(?:\[[^\]]*\])*\{([^}]*)\}")
+    bib_re = re.compile(r"\\bibitem(?:\[[^\]]*\])?\{([^}]*)\}")
+    todo_re = re.compile(r"\\todo\{")
+
+    cited, bibitems, todos = {}, set(), 0
+    for path in sorted(ARTICLE_DIR.rglob("*.tex")):
+        rel = path.relative_to(ARTICLE_DIR.parent).as_posix()
+        text = comment_re.sub("", path.read_text(encoding="utf-8", errors="replace"))
+        for m in cite_re.finditer(text):
+            for key in (k.strip() for k in m.group(1).split(",")):
+                if key:
+                    cited.setdefault(key, rel)
+        bibitems.update(k.strip() for k in bib_re.findall(text))
+        todos += len(todo_re.findall(text))
+
+    for key, rel in sorted(cited.items()):
+        if key not in bibitems:
+            log("FAIL", "article", f"{rel}: \\cite{{{key}}} has no matching \\bibitem in sections/references.tex")
+    for key in sorted(bibitems - set(cited)):
+        log("WARN", "article", f"\\bibitem{{{key}}} is never cited")
+    log("INFO", "article", f"{todos} \\todo marker(s) remaining in article-review/")
+
+
+def value_is_unlisted(value, families):
+    return bool(value.strip()) and value.strip() not in families
+
+
+def check_method_cards(entries, exempt_types):
+    """Method cards (ai_instructions/method-card.md) are free text in a
+    note, and the article table is built from them, so a malformed card
+    ends up in print. Structural problems are warnings except a literal
+    placeholder value, which is a FAIL for the same reason it is in the
+    catalog. A note with no cards is normal (a survey, a standard), so
+    absence is only counted."""
+    fields = set(method_cards.load_fields())
+    families = method_cards.load_families()
+    processed = n_with = n_cards = 0
+    for entry_id, f in entries:
+        if entry_id == "EXAMPLE" or not f["summary"] or "TODO" in f["summary"]:
+            continue
+        processed += 1
+        note = REPO_ROOT / f["note"] if f["note"] else None
+        if not note or not note.exists():
+            continue
+        cards = method_cards.parse_cards(note.read_text(encoding="utf-8"))
+        if not cards:
+            continue
+        n_with += 1
+        title = f["title"] or entry_id
+        if f["type"] in exempt_types:
+            log("WARN", "method-cards", f"'{title}': type '{f['type']}' is field-exempt but the note has method cards")
+        seen = set()
+        for name, values in cards:
+            n_cards += 1
+            if name.lower() in seen:
+                log("WARN", "method-cards", f"'{title}': duplicate card name '{name}'")
+            seen.add(name.lower())
+            for key in values:
+                if key == method_cards.FAMILY_KEY:
+                    if value_is_unlisted(values[key], families):
+                        log("WARN", "method-cards", f"'{title}' / '{name}': family '{values[key]}' is not in topics/families.md (propose it there, or fold it into an existing family)")
+                elif key not in fields:
+                    log("WARN", "method-cards", f"'{title}' / '{name}': field '{key}' is not in ai_instructions/method-card.md")
+            if not any(values.get(k, "") for k in fields):
+                log("WARN", "method-cards", f"'{title}' / '{name}': card has no filled fields; delete it rather than leave it empty")
+            for key, value in values.items():
+                if value.strip().lower() in PLACEHOLDER_VALUES:
+                    log(
+                        "FAIL", "method-cards",
+                        f"'{title}' / '{name}': field '{key}' is the placeholder '{value}' — "
+                        "leave it empty instead (see ai_instructions/method-card.md)",
+                    )
+    log("INFO", "method-cards", f"{n_with} of {processed} processed entries have method cards ({n_cards} card(s) in total)")
+
+
+def check_article_table(rebuild=True):
+    """article-review/sections/comparison_rows.tex and references.tex are derived
+    from the method cards and the catalog. A stale table or reference list
+    silently describes an out-of-date corpus in print, so both are rebuilt
+    here, with a warning when they had to change."""
+    if not ARTICLE_DIR.exists():
+        return
+    if not BUILD_ARTICLE_TABLE_SCRIPT.exists():
+        log("WARN", "article-table", "scripts/build_review_table.py not found")
+        return
+
+    def snapshot():
+        return tuple(p.read_text(encoding="utf-8") if p.exists() else ""
+                     for p in (ARTICLE_ROWS_PATH, ARTICLE_REFS_PATH))
+
+    if rebuild:
+        before = snapshot()
+        proc = subprocess.run(
+            [sys.executable, str(BUILD_ARTICLE_TABLE_SCRIPT)],
+            capture_output=True, text=True, cwd=REPO_ROOT,
+        )
+        if proc.returncode != 0:
+            log("FAIL", "article-table", f"build_review_table.py failed: {proc.stderr.strip()[:300]}")
+            return
+        if before != snapshot():
+            log(
+                "WARN", "article-table",
+                "article-review/sections/comparison_rows.tex or references.tex changed after "
+                "rebuild — was stale before this run (now fixed, remember to commit it)",
+            )
+    else:
+        proc = subprocess.run(
+            [sys.executable, str(BUILD_ARTICLE_TABLE_SCRIPT), "--check"],
+            capture_output=True, text=True, cwd=REPO_ROOT,
+        )
+        if proc.returncode != 0:
+            log("WARN", "article-table", "article-review/ derived files are stale; run scripts/build_review_table.py")
+
+
+def check_verification(entries):
+    """Method cards are checked against their source by the row-verifier
+    agent (article-review/workflow.md, step 6). Verdicts are stored against a hash
+    of the card, so an edited card is stale. The article's status banner
+    says 'not verified'; removing it while cards are unchecked is the one
+    thing here that is warned about, because that banner is the only thing
+    telling a reader how far to trust the table."""
+    statuses = verification.card_statuses(entries)
+    counts = {}
+    for _key, status in statuses:
+        counts[status] = counts.get(status, 0) + 1
+    log(
+        "INFO", "verification",
+        f"{counts.get('verified', 0)} of {len(statuses)} method card(s) verified "
+        f"({counts.get('unverified', 0)} unverified, {counts.get('stale', 0)} stale, "
+        f"{counts.get('failed', 0)} failed/unclear)",
+    )
+    for key, status in statuses:
+        if status == "stale":
+            log("WARN", "verification", f"{key}: card changed since it was verified — verify again")
+        elif status == "failed":
+            log("WARN", "verification", f"{key}: last verification did not pass — fix the card or the note")
+    for key in verification.orphan_records(entries):
+        log("WARN", "verification", f"verification.json has a record for a card that no longer exists: {key}")
+    if ARTICLE_MAIN_PATH.exists() and statuses:
+        banner = "not verified" in ARTICLE_MAIN_PATH.read_text(encoding="utf-8")
+        unchecked = len(statuses) - counts.get("verified", 0)
+        if not banner and unchecked:
+            log(
+                "WARN", "verification",
+                f"article-review/main.tex no longer carries the 'not verified' banner, but "
+                f"{unchecked} method card(s) are not verified",
+            )
+
+
+# Phrases that signal a decision about the project rather than a report of
+# the literature. The review article must contain none (root CLAUDE.md).
+# Advisory: a quoted source can legitimately say "we chose", and a check on
+# a judgment call that fails builds is one people learn to route around.
+DECISION_PHRASES = [
+    r"\bwe (?:chose|choose|decided|decide|selected|select|adopted|adopt|recommend|will use|opted)\b",
+    r"\bour (?:design|choice|choices|decision|algorithm|controller|system|solution|implementation)\b",
+    r"\b(?:is|are) the (?:best|preferred|recommended) (?:choice|option|method|approach|solution)\b",
+    r"\bshould be (?:used|chosen|adopted|selected)\b",
+    r"\bfor (?:this|our) project\b",
+]
+DECISION_RE = re.compile("|".join(DECISION_PHRASES), re.IGNORECASE)
+
+
+def check_article_decisions():
+    """Warn on decision language in article-review/. The review reports what the
+    literature says; deciding the product is a later phase."""
+    if not ARTICLE_DIR.exists():
+        return
+    comment_re = re.compile(r"(?<!\\)%.*")
+    for path in sorted(ARTICLE_DIR.rglob("*.tex")):
+        rel = path.relative_to(ARTICLE_DIR.parent).as_posix()
+        for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+            m = DECISION_RE.search(comment_re.sub("", line))
+            if m:
+                log(
+                    "WARN", "article-decision",
+                    f"{rel}:{lineno}: '{m.group(0)}' reads like a decision, not a report of the "
+                    "literature — the review article contains no decisions (root CLAUDE.md)",
+                )
 
 
 def check_catalog_index(rebuild=True):
@@ -624,6 +825,11 @@ def main():
     check_near_duplicate_titles(entries)
     check_dossiers()
     check_mermaid(entries)
+    check_article()
+    check_method_cards(entries, exempt_types)
+    check_article_table(rebuild=rebuild)
+    check_verification(entries)
+    check_article_decisions()
     check_reference_index(rebuild=rebuild)
     check_catalog_index(rebuild=rebuild)
     summary_stats(entries, catalog_text)

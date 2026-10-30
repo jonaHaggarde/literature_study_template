@@ -26,6 +26,11 @@ this repo:
 Situational, read only when they apply — not part of the standard read
 order above, since most sessions don't need them:
 
+- **`method-card.md`** — before writing or editing a `## Method Cards`
+  section in a note. Defines the card fields (the columns of the review
+  article's comparison table) and the rules for when a document gets a
+  card.
+
 - **`delegation.md`** — before launching any subagent, and before
   changing a model assignment in `../../.claude/agents/`. Which work to
   hand off (the rule is input/output asymmetry, not model cost), which

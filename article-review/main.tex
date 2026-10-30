@@ -1,0 +1,74 @@
+% Literature review article -- skeleton.
+% Topic-neutral template. Goal: a comparison of methods (the table is sections/comparison_table.tex)
+% plus an introduction and related-work text, all to be written per topic. No new results; the
+% value is the organised overview and pointers to where each method is described.
+% Sections live in sections/, figures (TikZ sources) in figs/, references in sections/references.tex
+% (a plain thebibliography list, so no bibtex run is needed).
+% Build: pdflatex main.tex, twice (the second run resolves the cross-references), or latexmk -pdf main.tex
+
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper, top=20mm, bottom=22mm, left=17mm, right=17mm, columnsep=7mm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs, tabularx, array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage{cite}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+
+\setlist{itemsep=1pt, topsep=3pt, leftmargin=*}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\renewcommand{\arraystretch}{1.2}
+
+% ---- markers ------------------------------------------------------------------------------
+% \todo{...} marks text that is still to be written; grep for it before sharing the draft.
+\newcommand{\todo}[1]{{\color{red!60!black}\textbf{[TODO: #1]}}}
+
+% \openissue{...} sets off a question the sources do not settle.
+\newcommand{\openissue}[1]{%
+  \par\smallskip\noindent
+  \fcolorbox{red!60!black}{red!5}{\parbox{\dimexpr\columnwidth-2\fboxsep-2\fboxrule\relax}{%
+    \small\textbf{Open.} #1}}\par\smallskip}
+
+\title{\Large Title of the Review\\[3pt]
+       \large A comparison of methods (draft)}
+\author{Authors}
+\date{Draft, \today}
+
+\begin{document}
+
+\twocolumn[
+\begin{@twocolumnfalse}
+\maketitle
+\begin{abstract}
+\noindent
+\todo{Four to six sentences: the problem, why the methods need comparing, how the sources were
+chosen, what the comparison covers, and the main take-away. No results of our own.}
+
+\smallskip\noindent
+\fcolorbox{red!60!black}{red!5}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\small
+\textbf{Status: first draft, not verified, AI-assisted.} Written with an AI assistant (Claude) from
+the project's literature notes. Every table entry and claim must be checked against the cited
+source before the text is relied on.}}
+\end{abstract}
+\bigskip
+\end{@twocolumnfalse}
+]
+
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/method}
+\input{sections/comparison}
+\input{sections/discussion}
+\input{sections/conclusion}
+
+\input{sections/references}
+
+\end{document}
