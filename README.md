@@ -68,6 +68,19 @@ instructions Claude follows. Keeping it self-contained is deliberate:
 it is what makes it possible to drop a newer version of the engine into
 an existing project later.
 
+## Usage log
+
+Every repo made from this template quietly keeps `.claude/usage-log.md`: a short
+list of dated one-line notes about how the repo is used (a new kind of request,
+a structural rework, a convention that fit badly, a script that misbehaved). It
+records the *shape* of a session, never its subject, and a script refuses text
+that looks like content (addresses, URLs, paths, secrets). Claude writes it under
+a rule in `CLAUDE.md`; you never need to open it. It is committed with the repo.
+If the remote is shared or public and you would rather it stayed local, add the
+file to `.gitignore`. To turn it off, delete the "Usage log" section from
+`CLAUDE.md`. It exists so the template can be improved from real use: to give
+feedback, copy the file to wherever the template is maintained.
+
 ## What ships in `.claude/`
 
 Four agent definitions and four slash commands, all in Claude Code's
