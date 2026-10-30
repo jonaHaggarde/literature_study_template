@@ -83,13 +83,33 @@ but not yet a `/process-batch` argument), F5, F7, S1 to S7, L1 to L6, and the
   Project-specific. The project-agnostic part is kept: a clearly defined scope
   before searching for papers, refined during the project, with every refinement
   logged (`scope.md` "Scope changes", `leads.md` rules).
-- **`dev-docs-templates` status:** built so far: F3 (`study/leads.md`, the
+- **`dev-docs-templates` status:** built: F3 (`study/leads.md`, the
   open-access rule), F4 (batch size), F5 (root-citation check), F7 (scope check
   in `/gap-check`), S3 (`rests on` and `alternatives rejected` in
-  `decisions.md`), S1 (map and deep-dive templates, subfolder guidance, the
-  decided-file rule). **Waiting** on the GUI discussion: the recommendation
-  template and S2 (decision-tree style), since the tree's data shape should be
-  agreed with the GUI's exploration map first.
+  `decisions.md`), S1 (map, deep-dive and recommendation templates, subfolder
+  guidance, the decided-file rule), and S2 (the decision tree: a table is the
+  source, `study/scripts/build_decision_trees.py` generates the mermaid, the
+  validator checks the table and reports how many rejected alternatives were
+  examined; the style and its reason are in the root `CLAUDE.md`).
+
+### The decision tree and the GUI (agreed 2026-10-30)
+
+The GUI's exploration map and the decision tree are two views of one set of
+facts (a question, its answers, which was chosen, why, and which were actually
+examined). The table in a tree file is the canonical source; the mermaid is
+derived from it now, and the GUI's JSON should later be derived from the same
+table, not kept as a second copy. The column names deliberately match the GUI
+node shape (status, source). Taken from the GUI branch: the status vocabulary
+(`identified`, `explored`, `chosen`), the "N of M explored" measure, and the
+source link per node. **Not yet taken, for later:**
+
+- Feed every `identified` leaf into `study/topics/gaps.md` automatically (the
+  GUI's gaps page does this from its tree).
+- Validate that a `source` cell points at a real note or deep-dive section.
+- The GUI itself (a local server, a shared access layer, the milestones page).
+  Its branch is based on the old `main`, keeps state in the browser's
+  `localStorage`, and has an unresolved double-click bug in its notes, so it is
+  not merged; its ideas are extracted instead.
 
 ## 1. Bugs that are real in this template today
 

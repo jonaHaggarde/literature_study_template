@@ -76,7 +76,11 @@ comment, fill it in; each already begins with the required banner.
   *evidence-by-context* table. It does not pick a winner.
 - **Recommendation** (`_templates/recommendation.md`): weighs candidates against
   stated criteria and reaches a conclusion. The only kind that argues for
-  something, and still unverified until the user decides.
+  something, and still unverified until the user decides. It carries a
+  **decision tree** (root `CLAUDE.md`, "Decision trees"): a table of questions
+  and answers is the source, and `study/scripts/build_decision_trees.py`
+  generates the diagram from it. Any file in this folder can hold a tree, not
+  only a recommendation.
 
 ## When a topic needs its own folder
 

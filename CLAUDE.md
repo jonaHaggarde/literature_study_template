@@ -119,6 +119,32 @@ Style rules, learned the hard way:
 - Prefer several small diagrams over one large one. A diagram nobody can
   read at a glance has failed at the only thing it was for.
 
+**Decision trees: one more named style, for any document that weighs
+alternatives and reaches a conclusion** (a recommendation, the reasoning behind
+a `decisions.md` entry). Every internal node is a **question**, never a
+statement. Every outgoing edge is **one possible answer**, and *all* the real
+answers are drawn as sibling edges from the same node, not only the one that
+wins. Only the chosen answer continues downward to the next question; every
+other answer stops at once in a leaf naming the method it would have given
+(solid if it was examined, dashed if it was only listed). The recommended path
+is styled differently from the rejected leaves, and the bottom of it is a
+single leaf stating the assembled recommendation.
+
+**Why this and not a linear chain or a pros-and-cons list:** it shows every
+choice *before* one is taken, so a reader can see what was on the table and what
+was never examined, and each edge is a placeholder for the reason the team
+gives when it decides. The tree doubles as that decision's checklist, not only
+an illustration of a conclusion already reached in the prose.
+
+**The table is the source, the diagram is derived.** The tree is written as a
+table (`ideation/_templates/recommendation.md` has the columns), and
+`study/scripts/build_decision_trees.py` generates the mermaid from it. Never
+edit the diagram by hand: it is overwritten, exactly like
+`study/catalog-index.md`. The validator checks the table (one chosen answer per
+question, every question reachable) and reports how many rejected alternatives
+were actually examined, so a decision resting on options nobody looked at is
+visible as such.
+
 **The convention is advisory.** `study/scripts/validate_repo.py` checks
 that fenced ` ```mermaid ` blocks are *balanced* — that is a hard error,
 since a broken fence renders as garbage — and warns when a dossier or a

@@ -45,6 +45,7 @@ import _console  # noqa: F401  (UTF-8 console output on Windows)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import method_cards  # noqa: E402
 import verification  # noqa: E402
+import build_decision_trees as decision_trees  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CATALOG_PATH = REPO_ROOT / "catalog.md"
@@ -763,6 +764,39 @@ def check_path_lengths():
                 )
 
 
+def check_decision_trees(rebuild=True):
+    """A decision tree is a table (the source) plus a generated mermaid diagram.
+    A malformed table is a FAIL, since the diagram built from it would be wrong;
+    a stale diagram is rebuilt (or warned about), like the other derived files.
+    The statistics are information only: they say how much of a decision rests on
+    options nobody examined, which no structural rule can judge."""
+    for path in decision_trees.tree_files():
+        text = path.read_text(encoding="utf-8")
+        if "<!-- decision-tree" not in text:
+            continue
+        rel = path.relative_to(REPO_ROOT.parent).as_posix()
+        new_text, results = decision_trees.process_text(text)
+        any_problem = False
+        for rows, problems in results:
+            for pr in problems:
+                log("FAIL", "decision-tree", f"{rel}: {pr}")
+                any_problem = True
+            if rows and "_templates" not in path.parts:
+                st = decision_trees.stats(rows)
+                log(
+                    "INFO", "decision-tree",
+                    f"{rel}: {st['decided']} of {st['questions']} questions decided; "
+                    f"{st['explored']} of {st['alternatives']} rejected alternatives examined; "
+                    f"{st['motivations_missing']} motivation(s) still to write",
+                )
+        if new_text != text and not any_problem:
+            if rebuild:
+                path.write_text(new_text, encoding="utf-8")
+                log("WARN", "decision-tree", f"{rel}: diagram was stale, rebuilt (remember to commit it)")
+            else:
+                log("WARN", "decision-tree", f"{rel}: diagram is stale; run scripts/build_decision_trees.py")
+
+
 def check_catalog_index(rebuild=True):
     """catalog-index.md is a derived view of catalog.md, read in full at
     the start of most sessions. A stale index is worse than no index: it
@@ -891,6 +925,7 @@ def main():
     check_mermaid(entries)
     check_path_lengths()
     check_root_citations(entries)
+    check_decision_trees(rebuild=rebuild)
     check_article()
     check_method_cards(entries, exempt_types)
     check_article_table(rebuild=rebuild)
