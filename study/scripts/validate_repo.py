@@ -797,6 +797,25 @@ def check_decision_trees(rebuild=True):
                 log("WARN", "decision-tree", f"{rel}: diagram is stale; run scripts/build_decision_trees.py")
 
 
+def check_gaps_index(rebuild=True):
+    """topics/gaps.md's auto-aggregated blocks are derived from the dossiers'
+    Open questions and from the unexamined alternatives of decision trees. A
+    stale block lists gaps that are closed or misses ones that were just
+    created, so it is rebuilt here, with a warning when it had to change."""
+    script = REPO_ROOT / "scripts" / "build_gaps_index.py"
+    gaps = TOPICS_DIR / "gaps.md"
+    if not rebuild or not script.exists() or not gaps.exists():
+        return
+    before = gaps.read_text(encoding="utf-8")
+    proc = subprocess.run([sys.executable, str(script)], capture_output=True, text=True, cwd=REPO_ROOT)
+    if proc.returncode != 0:
+        log("FAIL", "gaps-index", f"build_gaps_index.py failed: {proc.stderr.strip()[:300]}")
+        return
+    if gaps.read_text(encoding="utf-8") != before:
+        log("WARN", "gaps-index",
+            "topics/gaps.md changed after rebuild - was stale before this run (now fixed, remember to commit it)")
+
+
 def check_catalog_index(rebuild=True):
     """catalog-index.md is a derived view of catalog.md, read in full at
     the start of most sessions. A stale index is worse than no index: it
@@ -926,6 +945,7 @@ def main():
     check_path_lengths()
     check_root_citations(entries)
     check_decision_trees(rebuild=rebuild)
+    check_gaps_index(rebuild=rebuild)
     check_article()
     check_method_cards(entries, exempt_types)
     check_article_table(rebuild=rebuild)

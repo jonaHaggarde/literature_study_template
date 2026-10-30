@@ -101,10 +101,11 @@ derived from it now, and the GUI's JSON should later be derived from the same
 table, not kept as a second copy. The column names deliberately match the GUI
 node shape (status, source). Taken from the GUI branch: the status vocabulary
 (`identified`, `explored`, `chosen`), the "N of M explored" measure, and the
-source link per node. **Not yet taken, for later:**
+source link per node, and now the gaps feed: `build_gaps_index.py` lists every
+`identified` alternative of every tree in a second auto-aggregated block of
+`study/topics/gaps.md` (mechanical, no scope judgement; `/gap-check` does that),
+and the validator keeps it fresh. **Not yet taken, for later:**
 
-- Feed every `identified` leaf into `study/topics/gaps.md` automatically (the
-  GUI's gaps page does this from its tree).
 - Validate that a `source` cell points at a real note or deep-dive section.
 - The GUI itself (a local server, a shared access layer, the milestones page).
   Its branch is based on the old `main`, keeps state in the browser's

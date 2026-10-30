@@ -13,11 +13,13 @@ $ARGUMENTS
    stop: no coverage claim means anything without a real scope
    statement, and filling it in with the user is the actual task.
 
-2. **Read `study/topics/gaps.md`.** It has two halves with different
-   trust levels: the auto-aggregated block is mirrored from each
-   dossier's `## Open questions` section and is only as fresh as the last
+2. **Read `study/topics/gaps.md`.** It has three parts with different
+   trust levels: the first auto-aggregated block is mirrored from each
+   dossier's `## Open questions` section, and the second lists every
+   alternative that a decision tree under `ideation/` names but never
+   examined (a dashed box). Both are only as fresh as the last
    `python scripts/build_gaps_index.py` run — re-run it before trusting
-   the block. The "Flagged directly" section is hand-written and may
+   them. Neither judges scope, which is your job in step 3. The "Flagged directly" section is hand-written and may
    contain items a dossier has since covered.
 
 3. **Cross-check each gap against scope.** For every entry, decide:
