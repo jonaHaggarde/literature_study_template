@@ -45,6 +45,13 @@ Don't rely on "as discussed" or on shared context.
 
 ## Batch size
 
+The size governs **dispatch**: how many documents go to one worker, and how many
+are merged, ratified and committed per round. It does not limit conversion,
+which is one pass over everything outstanding (`convert.py` has no per-run file
+limit). When a user says "process N at a time" they mean this, and it is the
+only one of the two readings that can be controlled without extra tooling. The
+`/process-batch` command takes the size as its argument.
+
 Split the backlog into batches of roughly 5-10 PDFs per worker, launched
 in parallel (one message, multiple worker launches) so independent
 full-non-lazy-reads run concurrently instead of serially. Bigger batches

@@ -37,7 +37,15 @@ $ARGUMENTS
    least likely to be already written down, because nothing ever
    prompted anyone to notice it.
 
-5. **Report, ranked by consequence.** For each genuine gap: what is
+5. **Check the scope against the project.** Read `decisions.md` and the
+   goals stated in `ideation/` and compare them with `scope.md`'s exclusions
+   and its "Scope changes" log. A project goal that the scope excludes (or an
+   exclusion a decision now depends on) means catalog verdicts and gap flags are
+   being judged against a stale boundary, and nothing else in the repo will
+   notice. Report each conflict and propose the change to `scope.md`; the user
+   decides, and the change goes in "Scope changes" with its date.
+
+6. **Report, ranked by consequence.** For each genuine gap: what is
    missing, what currently rests on it (a dossier recommendation, a
    `decisions.md` entry), and a concrete acquisition direction — a
    search term, a venue, a citation trail in
@@ -45,7 +53,7 @@ $ARGUMENTS
    `project_documents/source-access.md` so each suggestion points
    somewhere real rather than trailing off.
 
-6. **Ask the user directly** whether they can source material for the
+7. **Ask the user directly** whether they can source material for the
    top gaps, rather than silently working around the hole. Update
    `study/topics/gaps.md`'s "Flagged directly" section with anything new
    you found — do not hand-edit the auto-aggregated block.

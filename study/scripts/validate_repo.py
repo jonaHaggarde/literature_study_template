@@ -702,6 +702,51 @@ def check_article_decisions():
                 )
 
 
+# A relative path into study/notes/, as written in a root document's
+# References section (root CLAUDE.md): `../study/notes/x.md`, `study/notes/x.md`.
+NOTE_REF_RE = re.compile(r"(?<![A-Za-z0-9_])study/notes/([^\s)\]`'\"<>*]+?\.md)")
+# Root-level folders and files that cite catalogued sources.
+ROOT_CITING_DOCS = ["decisions.md", "timeline.md"]
+ROOT_CITING_DIRS = ["ideation", "theory", "meetings", "article-review"]
+
+
+def find_note_refs(text):
+    """Note paths (relative to study/notes/) cited in a root document."""
+    return list(dict.fromkeys(NOTE_REF_RE.findall(text)))
+
+
+def check_root_citations(entries):
+    """Root documents cite catalogued papers by path into study/notes/. A
+    citation of a note that does not exist is a broken link, so it fails, as a
+    \\cite with no \\bibitem does. A citation of a note whose catalog entry is
+    still an unfilled stub is only a warning: the file exists, but the document
+    is leaning on something nobody has read yet, and a structural check cannot
+    see that any other way (a crashed session once left a document resting on
+    exactly such a stub, and everything still validated). README.md files are
+    skipped: they document the convention with example paths and cite nothing."""
+    root = REPO_ROOT.parent
+    files = [root / name for name in ROOT_CITING_DOCS]
+    for d in ROOT_CITING_DIRS:
+        base = root / d
+        if base.exists():
+            files += [p for p in sorted(base.rglob("*.md"))
+                      if "_templates" not in p.parts and p.name != "README.md"]
+    stubs = {f["note"] for _id, f in entries
+             if f["note"] and (not f["summary"] or "TODO" in f["summary"])}
+    for path in files:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        rel = path.relative_to(root).as_posix()
+        for name in find_note_refs(text):
+            note = REPO_ROOT / "notes" / name
+            if not note.exists():
+                log("FAIL", "root-citation", f"{rel}: cites study/notes/{name}, which does not exist")
+            elif f"notes/{name}" in stubs:
+                log("WARN", "root-citation",
+                    f"{rel}: cites study/notes/{name}, whose catalog entry is still an unfilled stub")
+
+
 def check_path_lengths():
     """Windows rejects paths past about 260 characters, and the failure shows
     up at `git add`, long after the file was created. Warn well before."""
@@ -845,6 +890,7 @@ def main():
     check_dossiers()
     check_mermaid(entries)
     check_path_lengths()
+    check_root_citations(entries)
     check_article()
     check_method_cards(entries, exempt_types)
     check_article_table(rebuild=rebuild)

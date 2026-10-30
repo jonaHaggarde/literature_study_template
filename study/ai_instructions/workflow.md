@@ -3,6 +3,23 @@
 How to actually operate in this repo, once `scope.md` is real (see
 `README.md` in this folder if it isn't yet).
 
+## Acquiring documents
+
+Finding a document, getting the file, and processing it are separate steps and
+often happen in different sessions. Track every lead in `../leads.md` (one row
+per lead, with a state) so one that could not be fetched is not forgotten.
+
+- **Scope comes first.** Acquire against `scope.md`, never before it is real.
+  Each lead names the in-scope item or logged gap it serves. If searching shows
+  the scope is wrong, change `scope.md` and log it under "Scope changes", then
+  continue.
+- **Only some leads can be fetched automatically.** Hand the user the rest as a
+  list with DOIs; they fetch those by hand and drop them into `PDFs/`.
+- **Check open access, do not assume it.** A repository serving a full file
+  does not make it openly licensed; see the rule at the top of `leads.md`.
+- **Triage before converting.** `python scripts/convert.py --dry-run` lists
+  what would convert; a document not wanted yet goes in `PDFs/_deferred/`.
+
 ## Processing new PDFs
 
 For a large backlog processed in parallel via subagents (especially an

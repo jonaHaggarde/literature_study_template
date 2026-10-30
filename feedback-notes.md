@@ -70,6 +70,27 @@ but not yet a `/process-batch` argument), F5, F7, S1 to S7, L1 to L6, and the
   loudly (it first returned success and merged nothing), and the batch docs
   say to put the schema in the worker prompt.
 
+## Deferred and dropped (2026-10-30)
+
+- **S5, versioning: deferred.** How a spec is versioned feels project-specific
+  and depends on how the spec article is built. TODO for the future
+  `article-spec/` branch: one stable file with a revision-notes section; the
+  version number changes only for a bigger change; superseded drafts are
+  deleted, decided ones kept. Revisit then, not before.
+- **S6, confidential inputs: dropped from the template.** Project-specific;
+  built in the fork where it is needed.
+- **Constraints-first section in the recommendation template: dropped.**
+  Project-specific. The project-agnostic part is kept: a clearly defined scope
+  before searching for papers, refined during the project, with every refinement
+  logged (`scope.md` "Scope changes", `leads.md` rules).
+- **`dev-docs-templates` status:** built so far: F3 (`study/leads.md`, the
+  open-access rule), F4 (batch size), F5 (root-citation check), F7 (scope check
+  in `/gap-check`), S3 (`rests on` and `alternatives rejected` in
+  `decisions.md`), S1 (map and deep-dive templates, subfolder guidance, the
+  decided-file rule). **Waiting** on the GUI discussion: the recommendation
+  template and S2 (decision-tree style), since the tree's data shape should be
+  agreed with the GUI's exploration map first.
+
 ## 1. Bugs that are real in this template today
 
 These were found and fixed in the derived repo. Check whether the fix has
