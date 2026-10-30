@@ -2,7 +2,7 @@
 
 **Status: ideas, not designed, not built.** Written 2026-10-29 from a
 discussion. Nothing here is a convention yet. It is parked so the larger
-direction is not lost while the review article was built (`article-review/`,
+direction is not lost while the review article was built (`articles/review/`,
 now merged). When a part is built, it moves to a `dev-<feature>` branch and
 into the real docs.
 
@@ -125,8 +125,8 @@ tested, and a live `page-reader` launch was not exercised (see `feedback-notes.m
 
 ## Where each piece lives
 
-- Phase 1 workflow and the review article: `article-review/` (merged into
-  `development` 2026-10-30).
+- Phase 1 workflow and the review article: `articles/review/` (merged into
+  `development` 2026-10-30; moved into `articles/` on `dev-articles-layout`).
 - Gate events: `dev-gate-events`.
 - OCR and scanned PDFs: `dev-ocr` (built, not yet merged).
 - What real usage says about the template (bug table, engine features,

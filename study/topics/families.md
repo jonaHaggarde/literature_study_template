@@ -43,7 +43,7 @@ and cards without one last under "Ungrouped".
 
 ## Using the taxonomy in the article
 
-The families are the skeleton of `../../article-review/`: one subsection of
+The families are the skeleton of `../../articles/review/`: one subsection of
 `sections/comparison.tex` per family, and the nodes of
 `figs/taxonomy.tex`. Writing the families is the hand-off from reading
 the literature to writing about it, which is why the user settles them

@@ -10,7 +10,7 @@ Implementation Notes, stale placeholder entries, tag-casing drift from
 topics/vocabulary.md, type/contribution values drifting from
 ai_instructions/catalog-schema.md, a stale "Comparison & survey papers"
 quick-reference list, dossiers missing their required Open-questions
-section, unbalanced mermaid fences, article-review/ citations without a
+section, unbalanced mermaid fences, article citations without a
 bibliography entry, malformed method cards, a stale article table, and whether reference-index.md and
 catalog-index.md are up to date with the current notes/ and catalog.md.
 
@@ -46,6 +46,7 @@ import _console  # noqa: F401  (UTF-8 console output on Windows)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import method_cards  # noqa: E402
 import verification  # noqa: E402
+import build_bibliography as bibliography  # noqa: E402
 import build_decision_trees as decision_trees  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -63,9 +64,14 @@ BUILD_CATALOG_INDEX_SCRIPT = REPO_ROOT / "scripts" / "build_catalog_index.py"
 # template is used with its full project layout. Checked opportunistically
 # so study/ still validates standalone.
 THEORY_DIR = REPO_ROOT.parent / "theory"
-# article-review/ is the LaTeX review-article template, also at the repo root.
-ARTICLE_DIR = REPO_ROOT.parent / "article-review"
+# articles/ holds the LaTeX articles, one folder each (review, ...), also at the repo root.
+ARTICLES_DIR = REPO_ROOT.parent / "articles"
+ARTICLE_DIR = ARTICLES_DIR / "review"  # the review article: its derived table and status banner
 BUILD_ARTICLE_TABLE_SCRIPT = REPO_ROOT / "scripts" / "build_review_table.py"
+BUILD_BIBLIOGRAPHY_SCRIPT = REPO_ROOT / "scripts" / "build_bibliography.py"
+# Articles that report the literature and must contain no decisions; the rationale and the
+# specification are *about* decisions, so decision language is expected there.
+DECISION_FREE_ARTICLES = {"map", "review"}
 ARTICLE_ROWS_PATH = ARTICLE_DIR / "sections" / "comparison_rows.tex"
 ARTICLE_REFS_PATH = ARTICLE_DIR / "sections" / "references.tex"
 ARTICLE_MAIN_PATH = ARTICLE_DIR / "main.tex"
@@ -514,36 +520,27 @@ def check_mermaid(entries):
             )
 
 
-def check_article():
-    r"""article-review/ is a LaTeX paper with a plain thebibliography list, so a
-    \cite with no matching \bibitem renders as [?] and nothing in the
-    build fails. That is mechanical, so it is a hard error; an uncited
-    \bibitem is only a warning, and the remaining \todo count is
-    information, never a failure - a draft is allowed to be unfinished."""
-    if not ARTICLE_DIR.exists():
-        return
+def check_articles():
+    r"""Every article under articles/ has its own references.bib, generated from
+    what it cites. A \cite with no entry there renders as [?] and nothing in the
+    build fails, so it is a hard error. The remaining \todo count is information,
+    never a failure: a draft is allowed to be unfinished."""
     comment_re = re.compile(r"(?<!\\)%.*")
-    cite_re = re.compile(r"\\cite[a-z]*\*?(?:\[[^\]]*\])*\{([^}]*)\}")
-    bib_re = re.compile(r"\\bibitem(?:\[[^\]]*\])?\{([^}]*)\}")
     todo_re = re.compile(r"\\todo\{")
-
-    cited, bibitems, todos = {}, set(), 0
-    for path in sorted(ARTICLE_DIR.rglob("*.tex")):
-        rel = path.relative_to(ARTICLE_DIR.parent).as_posix()
-        text = comment_re.sub("", path.read_text(encoding="utf-8", errors="replace"))
-        for m in cite_re.finditer(text):
-            for key in (k.strip() for k in m.group(1).split(",")):
-                if key:
-                    cited.setdefault(key, rel)
-        bibitems.update(k.strip() for k in bib_re.findall(text))
-        todos += len(todo_re.findall(text))
-
-    for key, rel in sorted(cited.items()):
-        if key not in bibitems:
-            log("FAIL", "article", f"{rel}: \\cite{{{key}}} has no matching \\bibitem in sections/references.tex")
-    for key in sorted(bibitems - set(cited)):
-        log("WARN", "article", f"\\bibitem{{{key}}} is never cited")
-    log("INFO", "article", f"{todos} \\todo marker(s) remaining in article-review/")
+    dirs = bibliography.article_dirs()
+    todos = 0
+    for adir in dirs:
+        bib_path = adir / "references.bib"
+        have = bibliography.bib_keys(bib_path.read_text(encoding="utf-8")) if bib_path.exists() else set()
+        for key in bibliography.cited_keys_in_order(adir):
+            if key not in have:
+                log("FAIL", "article",
+                    f"articles/{adir.name}: \\cite{{{key}}} has no entry in its references.bib "
+                    "(it is in neither study/catalog.md nor articles/common/references_extra.bib)")
+        for path in adir.rglob("*.tex"):
+            todos += len(todo_re.findall(comment_re.sub("", path.read_text(encoding="utf-8", errors="replace"))))
+    if dirs:
+        log("INFO", "article", f"{todos} \\todo marker(s) remaining in articles/")
 
 
 def value_is_unlisted(value, families):
@@ -604,47 +601,42 @@ def check_method_cards(entries, exempt_types):
 
 
 def check_article_table(rebuild=True):
-    """article-review/sections/comparison_rows.tex and references.tex are derived
-    from the method cards and the catalog. A stale table or reference list
-    silently describes an out-of-date corpus in print, so both are rebuilt
-    here, with a warning when they had to change."""
-    if not ARTICLE_DIR.exists():
+    """The review's comparison_rows.tex and every article's references.bib and
+    sections/references.tex are derived (from the method cards and the catalog). A
+    stale table or bibliography silently describes an out-of-date corpus in print, so
+    they are rebuilt here, with a warning when they had to change."""
+    if not ARTICLES_DIR.exists():
         return
-    if not BUILD_ARTICLE_TABLE_SCRIPT.exists():
-        log("WARN", "article-table", "scripts/build_review_table.py not found")
+    scripts = ([BUILD_ARTICLE_TABLE_SCRIPT] if ARTICLE_DIR.exists() else []) + [BUILD_BIBLIOGRAPHY_SCRIPT]
+    missing = [sc.name for sc in scripts if not sc.exists()]
+    if missing:
+        log("WARN", "article-table", f"scripts/{', '.join(missing)} not found")
         return
 
     def snapshot():
-        return tuple(p.read_text(encoding="utf-8") if p.exists() else ""
-                     for p in (ARTICLE_ROWS_PATH, ARTICLE_REFS_PATH))
+        paths = [ARTICLE_ROWS_PATH]
+        for adir in bibliography.article_dirs():
+            paths += [adir / "references.bib", adir / "sections" / "references.tex"]
+        return tuple(p.read_text(encoding="utf-8") if p.exists() else "" for p in paths)
 
-    if rebuild:
-        before = snapshot()
-        proc = subprocess.run(
-            [sys.executable, str(BUILD_ARTICLE_TABLE_SCRIPT)],
-            capture_output=True, text=True, cwd=REPO_ROOT,
-        )
-        if proc.returncode != 0:
-            log("FAIL", "article-table", f"build_review_table.py failed: {proc.stderr.strip()[:300]}")
+    before = snapshot()
+    for sc in scripts:
+        args = [sys.executable, str(sc)] + ([] if rebuild else ["--check"])
+        proc = subprocess.run(args, capture_output=True, text=True, cwd=REPO_ROOT)
+        if rebuild and proc.returncode != 0:
+            log("FAIL", "article-table", f"{sc.name} failed: {proc.stderr.strip()[:300]}")
             return
-        if before != snapshot():
-            log(
-                "WARN", "article-table",
-                "article-review/sections/comparison_rows.tex or references.tex changed after "
-                "rebuild — was stale before this run (now fixed, remember to commit it)",
-            )
-    else:
-        proc = subprocess.run(
-            [sys.executable, str(BUILD_ARTICLE_TABLE_SCRIPT), "--check"],
-            capture_output=True, text=True, cwd=REPO_ROOT,
-        )
-        if proc.returncode != 0:
-            log("WARN", "article-table", "article-review/ derived files are stale; run scripts/build_review_table.py")
+        if not rebuild and proc.returncode != 0:
+            log("WARN", "article-table", f"articles/ derived files are stale; run scripts/{sc.name}")
+    if rebuild and before != snapshot():
+        log("WARN", "article-table",
+            "articles/ derived files (the review's comparison_rows.tex, bibliographies) changed after "
+            "rebuild: they were stale before this run (now fixed, remember to commit them)")
 
 
 def check_verification(entries):
     """Method cards are checked against their source by the row-verifier
-    agent (article-review/workflow.md, step 6). Verdicts are stored against a hash
+    agent (articles/review/workflow.md, step 6). Verdicts are stored against a hash
     of the card, so an edited card is stale. The article's status banner
     says 'not verified'; removing it while cards are unchecked is the one
     thing here that is warned about, because that banner is the only thing
@@ -672,7 +664,7 @@ def check_verification(entries):
         if not banner and unchecked:
             log(
                 "WARN", "verification",
-                f"article-review/main.tex no longer carries the 'not verified' banner, but "
+                f"articles/review/main.tex no longer carries the 'not verified' banner, but "
                 f"{unchecked} method card(s) are not verified",
             )
 
@@ -692,21 +684,23 @@ DECISION_RE = re.compile("|".join(DECISION_PHRASES), re.IGNORECASE)
 
 
 def check_article_decisions():
-    """Warn on decision language in article-review/. The review reports what the
-    literature says; deciding the product is a later phase."""
-    if not ARTICLE_DIR.exists():
-        return
+    """Warn on decision language in the survey-phase articles (DECISION_FREE_ARTICLES).
+    They report what the literature says; deciding the product is a later phase. The
+    rationale and specification articles are about decisions, so they are not checked."""
     comment_re = re.compile(r"(?<!\\)%.*")
-    for path in sorted(ARTICLE_DIR.rglob("*.tex")):
-        rel = path.relative_to(ARTICLE_DIR.parent).as_posix()
-        for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
-            m = DECISION_RE.search(comment_re.sub("", line))
-            if m:
-                log(
-                    "WARN", "article-decision",
-                    f"{rel}:{lineno}: '{m.group(0)}' reads like a decision, not a report of the "
-                    "literature — the review article contains no decisions (root CLAUDE.md)",
-                )
+    for adir in bibliography.article_dirs():
+        if adir.name not in DECISION_FREE_ARTICLES:
+            continue
+        for path in sorted(adir.rglob("*.tex")):
+            rel = path.relative_to(ARTICLES_DIR.parent).as_posix()
+            for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+                m = DECISION_RE.search(comment_re.sub("", line))
+                if m:
+                    log(
+                        "WARN", "article-decision",
+                        f"{rel}:{lineno}: '{m.group(0)}' reads like a decision, not a report of the "
+                        "literature: this article contains no decisions (root CLAUDE.md)",
+                    )
 
 
 # A relative path into study/notes/, as written in a root document's
@@ -714,7 +708,7 @@ def check_article_decisions():
 NOTE_REF_RE = re.compile(r"(?<![A-Za-z0-9_])study/notes/([^\s)\]`'\"<>*]+?\.md)")
 # Root-level folders and files that cite catalogued sources.
 ROOT_CITING_DOCS = ["decisions.md", "timeline.md"]
-ROOT_CITING_DIRS = ["ideation", "theory", "meetings", "article-review", "requirements"]
+ROOT_CITING_DIRS = ["ideation", "theory", "meetings", "articles", "requirements"]
 
 
 def find_note_refs(text):
@@ -887,7 +881,7 @@ def check_requirements(entries):
     scope_placeholder = (not scope.exists()) or "<!-- placeholder -->" in scope.read_text(encoding="utf-8")
     n_processed = sum(1 for i, f in entries
                       if i != "EXAMPLE" and f["summary"] and "TODO" not in f["summary"])
-    main_tex = REPO_ROOT.parent / "article-review" / "main.tex"
+    main_tex = REPO_ROOT.parent / "articles" / "review" / "main.tex"
     article_unfinished = main_tex.exists() and "not verified" in main_tex.read_text(encoding="utf-8")
     reasons = requirements_too_early_reasons(scope_placeholder, n_processed, article_unfinished)
     if reasons:
@@ -1080,9 +1074,9 @@ def main():
     check_usage_log()
     check_ocr()
     check_requirements(entries)
-    check_article()
     check_method_cards(entries, exempt_types)
     check_article_table(rebuild=rebuild)
+    check_articles()
     check_verification(entries)
     check_article_decisions()
     check_reference_index(rebuild=rebuild)

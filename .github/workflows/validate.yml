@@ -5,14 +5,14 @@ on:
     paths:
       - "study/**"
       - "theory/**"
-      - "article-review/**"
+      - "articles/review/**"
       - ".claude/**"
       - ".github/workflows/validate.yml"
   pull_request:
     paths:
       - "study/**"
       - "theory/**"
-      - "article-review/**"
+      - "articles/review/**"
       - ".claude/**"
       - ".github/workflows/validate.yml"
 
