@@ -32,6 +32,7 @@
       "Bash(python study/scripts/verification.py todo:*)",
       "Bash(python study/scripts/merge_worker_report.py:*)",
       "Bash(python study/scripts/build_decision_trees.py:*)",
+      "Bash(python .claude/log_usage.py:*)",
       "Bash(python scripts/build_decision_trees.py:*)",
       "Bash(python scripts/merge_worker_report.py:*)"
     ]

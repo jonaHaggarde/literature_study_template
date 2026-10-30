@@ -816,6 +816,35 @@ def check_gaps_index(rebuild=True):
             "topics/gaps.md changed after rebuild - was stale before this run (now fixed, remember to commit it)")
 
 
+def check_usage_log():
+    """.claude/usage-log.md records how the repo is used. It is written by a
+    script that enforces its own format, so a problem here means someone edited
+    it by hand. Entries that look like content are worth a warning because the
+    log must never carry the project's subject; the count is information only."""
+    script = REPO_ROOT.parent / ".claude" / "log_usage.py"
+    log_path = REPO_ROOT.parent / ".claude" / "usage-log.md"
+    if not script.exists() or not log_path.exists():
+        return
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("log_usage", script)
+    lu = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(lu)
+    entry_re = re.compile(r"^- \*\*\d{4}-\d{2}-\d{2}\*\*( \[(" + "|".join(lu.KINDS) + r")\])? \u2014 (.+)$")
+    n = 0
+    for lineno, line in enumerate(log_path.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.startswith("- **"):
+            continue
+        n += 1
+        m = entry_re.match(line)
+        if not m:
+            log("WARN", "usage-log", f".claude/usage-log.md:{lineno}: not in the entry format "
+                "(`- **date** [kind] \u2014 text`); entries are written by .claude/log_usage.py")
+            continue
+        for problem in lu.check_text(m.group(3)):
+            log("WARN", "usage-log", f".claude/usage-log.md:{lineno}: {problem}")
+    log("INFO", "usage-log", f"{n} entr{'y' if n == 1 else 'ies'} in .claude/usage-log.md")
+
+
 def check_catalog_index(rebuild=True):
     """catalog-index.md is a derived view of catalog.md, read in full at
     the start of most sessions. A stale index is worse than no index: it
@@ -946,6 +975,7 @@ def main():
     check_root_citations(entries)
     check_decision_trees(rebuild=rebuild)
     check_gaps_index(rebuild=rebuild)
+    check_usage_log()
     check_article()
     check_method_cards(entries, exempt_types)
     check_article_table(rebuild=rebuild)

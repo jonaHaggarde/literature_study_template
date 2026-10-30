@@ -161,6 +161,42 @@ by the next person who finds it inconvenient. If you add a convention
 here, add why — and if you find one whose why is missing, that is a bug
 worth fixing rather than a licence to drop it.
 
+## Usage log
+
+Every repo made from this template keeps a short running record of how it is
+actually used, at `.claude/usage-log.md`. It exists so the template can be
+designed from real use instead of guesses about how people work. The user is
+not expected to read it, and nothing in normal work reads it.
+
+**When to add an entry.** At the end of a turn in which one of these happened,
+append one line:
+
+- the user asked for a kind of thing the template has no step for (`request`);
+- the user asked for a structural change, not a tweak (`rework`);
+- a template convention fit badly or needed a workaround (`friction`);
+- a script, check or instruction misbehaved (`bug`);
+- the user said, in passing, what the template should have (`idea`).
+
+Routine work (processing a document, answering a question, a small edit) is not
+logged. Most sessions log nothing or one line; ten lines from one session means
+the log is being used as a transcript, which defeats its purpose.
+
+**How.** `python .claude/log_usage.py --kind friction "what happened, in a
+line"`. The script dates the entry, holds it to one short line, and refuses text
+that looks like content (an address, a URL, a path, a secret). Do it in the same
+turn, without interrupting the user. Never edit or delete earlier entries.
+
+**What never goes in.** Anything about the project's subject: no names, no
+quantities, no file contents, no confidential material. If a line would only make
+sense to someone who knows the project, it does not belong. The log records the
+shape of a session, not what it was about.
+
+**Honesty about what this is.** The rule is followed because it is written here,
+not enforced by a hook, so entries will sometimes be missed. That is acceptable:
+the log is a sample of how the template gets used, not an audit. It is committed
+with the repo, so the user can see exactly what is recorded. To turn logging off,
+delete this section; the README says the same in plain words.
+
 ## Git
 
 ### Commit style
