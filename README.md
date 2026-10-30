@@ -87,8 +87,8 @@ records the *shape* of a session, never its subject, and a script refuses text
 that looks like content (addresses, URLs, paths, secrets). Claude writes it under
 a rule in `CLAUDE.md`; you never need to open it. It is committed with the repo.
 If the remote is shared or public and you would rather it stayed local, add the
-file to `.gitignore`. To turn it off, delete the "Usage log" section from
-`CLAUDE.md`. It exists so the template can be improved from real use: to give
+file to `.gitignore`. To turn it off, create an empty file `.claude/no-usage-log` (it is not committed), or
+delete the "Usage log" section from `CLAUDE.md`. It exists so the template can be improved from real use: to give
 feedback, copy the file to wherever the template is maintained.
 
 ## What ships in `.claude/`

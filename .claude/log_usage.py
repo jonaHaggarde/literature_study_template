@@ -10,6 +10,11 @@ else: it dates the entry, keeps it to one short line, and refuses text that
 looks like content (an address, a URL, a file path, a secret) because the log
 records the *shape* of a session, never what it was about.
 
+It does nothing in a working copy where the file .claude/no-usage-log exists. That
+file is not committed (it is in .gitignore): the template's own maintainers create
+it in their working copy, so repos made from the template log and the template's
+own development does not. Anyone can switch logging off the same way.
+
 Usage:
     python .claude/log_usage.py "what happened, in a line"
     python .claude/log_usage.py --kind friction "the template's step X did not fit because Y"
@@ -38,6 +43,7 @@ for _stream in (sys.stdout, sys.stderr):
 LOG_PATH = Path(__file__).resolve().parent / "usage-log.md"
 KINDS = ("request", "rework", "friction", "bug", "idea")
 MAX_CHARS = 400
+OFF_MARKER = "no-usage-log"
 
 HEADER = """# Usage log
 
@@ -60,8 +66,9 @@ who knows the project, it does not belong here.
 **What to do with it.** Nothing, until you want to give feedback to the template:
 copy the file to wherever that is tracked. It is committed with the repo; if the
 remote is shared or public and you would rather it stayed local, add
-`.claude/usage-log.md` to `.gitignore`. To turn logging off, delete the
-"Usage log" section from the root `CLAUDE.md`.
+`.claude/usage-log.md` to `.gitignore`. To turn logging off, create an empty
+file `.claude/no-usage-log` (it is not committed), or delete the "Usage log" section
+from the root `CLAUDE.md`.
 
 ## Entries
 
@@ -75,6 +82,14 @@ GUARDS = [
     (re.compile(r"\b[A-Za-z0-9_\-]{32,}\b"), "a long token-like string"),
     (re.compile(r"(?i)\b(password|passwd|secret|api[_ -]?key|token)\s*[:=]"), "a credential"),
 ]
+
+
+class LoggingOff(Exception):
+    """Logging is switched off in this working copy (the marker file exists)."""
+
+
+def logging_off(path=LOG_PATH):
+    return (Path(path).parent / OFF_MARKER).exists()
 
 
 def check_text(text):
@@ -101,6 +116,8 @@ def format_entry(text, kind=None, today=None):
 def append_entry(text, kind=None, path=LOG_PATH, today=None):
     """Append an entry; returns the line written. Raises ValueError with all
     the reasons if the entry is refused."""
+    if logging_off(path):
+        raise LoggingOff(f"usage logging is switched off in this working copy ({OFF_MARKER} exists)")
     text = " ".join(text.split())
     problems = check_text(text)
     if kind is not None and kind not in KINDS:
@@ -143,6 +160,9 @@ def main(argv=None):
         kind, argv = argv[1], argv[2:]
     try:
         line = append_entry(" ".join(argv), kind)
+    except LoggingOff as e:
+        print(f"Not logged: {e}.")
+        return 0
     except ValueError as e:
         print(f"Not logged: {e}", file=sys.stderr)
         return 1

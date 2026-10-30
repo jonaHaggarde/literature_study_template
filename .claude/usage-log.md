@@ -19,9 +19,9 @@ who knows the project, it does not belong here.
 **What to do with it.** Nothing, until you want to give feedback to the template:
 copy the file to wherever that is tracked. It is committed with the repo; if the
 remote is shared or public and you would rather it stayed local, add
-`.claude/usage-log.md` to `.gitignore`. To turn logging off, delete the
-"Usage log" section from the root `CLAUDE.md`.
+`.claude/usage-log.md` to `.gitignore`. To turn logging off, create an empty
+file `.claude/no-usage-log` (it is not committed), or delete the "Usage log" section
+from the root `CLAUDE.md`.
 
 ## Entries
 
-- **2026-10-30** [bug] — a page-reader run on one scanned page of a published paper ended in an API content-filter block, so transcribing whole pages of publisher text may not be viable

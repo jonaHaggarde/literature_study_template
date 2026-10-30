@@ -63,6 +63,24 @@ class Guards(unittest.TestCase):
         self.assertTrue(self.refused("   "))
 
 
+class SwitchedOff(unittest.TestCase):
+    def test_a_marker_file_stops_logging_and_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / lu.OFF_MARKER).write_text("", encoding="utf-8")
+            path = Path(tmp) / "usage-log.md"
+            self.assertTrue(lu.logging_off(path))
+            with self.assertRaises(lu.LoggingOff):
+                lu.append_entry("a line", path=path, today=DAY)
+            self.assertFalse(path.exists())
+
+    def test_without_the_marker_logging_works(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "usage-log.md"
+            self.assertFalse(lu.logging_off(path))
+            lu.append_entry("a line", path=path, today=DAY)
+            self.assertTrue(path.exists())
+
+
 class Append(unittest.TestCase):
     def test_creates_the_file_with_header_then_appends(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -84,8 +84,10 @@ but not yet a `/process-batch` argument), F5, F7, S1 to S7, L1 to L6, and the
 
 `main` must stay clean and cloneable. Before a release from `development`:
 
-- **Reset `.claude/usage-log.md` to the header only** (no entries): sessions in
-  this repo may have appended entries while the template was being developed.
+- **Check `.claude/usage-log.md` has no entries.** Logging is switched off in the
+  template's own working copy by the uncommitted `.claude/no-usage-log` marker, so it
+  should be header-only already; a clone of the template on another machine that lacks
+  the marker would log.
 - Remove `roadmap-notes.md` and `feedback-notes.md` if they should not ship
   (they are template-development notes, not part of the template).
 - Run the validator and the script tests, and check the Actions tab.

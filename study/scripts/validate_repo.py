@@ -848,7 +848,9 @@ def check_usage_log():
             continue
         for problem in lu.check_text(m.group(3)):
             log("WARN", "usage-log", f".claude/usage-log.md:{lineno}: {problem}")
-    log("INFO", "usage-log", f"{n} entr{'y' if n == 1 else 'ies'} in .claude/usage-log.md")
+    off = (log_path.parent / lu.OFF_MARKER).exists()
+    log("INFO", "usage-log", f"{n} entr{'y' if n == 1 else 'ies'} in .claude/usage-log.md"
+        + (" (logging is switched off in this working copy)" if off else ""))
 
 
 REQUIREMENTS_DIR = REPO_ROOT.parent / "requirements"

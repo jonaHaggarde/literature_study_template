@@ -16,3 +16,6 @@ Thumbs.db
 
 # OCR work area: page images, requests and the page ledger (ephemeral)
 /study/.ocr/
+
+# Local switch: usage logging off in the template's own working copy
+/.claude/no-usage-log

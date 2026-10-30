@@ -219,11 +219,17 @@ quantities, no file contents, no confidential material. If a line would only mak
 sense to someone who knows the project, it does not belong. The log records the
 shape of a session, not what it was about.
 
+**Off in the template's own repo.** If `.claude/no-usage-log` exists, logging is
+switched off and the script refuses (it exits normally and writes nothing). That
+file is deliberately not committed, so repos made from the template log as usual
+and the template's own development does not. Creating the file is also the easy
+way for anyone to turn logging off.
+
 **Honesty about what this is.** The rule is followed because it is written here,
 not enforced by a hook, so entries will sometimes be missed. That is acceptable:
 the log is a sample of how the template gets used, not an audit. It is committed
 with the repo, so the user can see exactly what is recorded. To turn logging off,
-delete this section; the README says the same in plain words.
+create that file or delete this section; the README says the same in plain words.
 
 ## Git
 
