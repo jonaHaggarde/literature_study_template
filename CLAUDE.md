@@ -175,7 +175,7 @@ worth fixing rather than a licence to drop it.
 
 Scanned PDFs are OCR'd by script, which costs no tokens. OCR gets equations and
 tables wrong, and the only fix is to have a model look at the page image, which
-costs several thousand tokens per page (roughly 5,000 to 8,000 for a dense one). So that is rationed, by a process and not by
+costs thousands of tokens per page (not yet measured). So that is rationed, by a process and not by
 good intentions (`study/ai_instructions/vision-budget.md`):
 
 - **Never read a page image, never render a page, and never launch the

@@ -5,7 +5,7 @@ bad on equations, symbols and tables. When a page that matters is one of those,
 the only fix is to have a model *look at the page image* and transcribe it. That
 works well (equations and block diagrams came out readable in testing), and it
 **costs real tokens**: each page is an image to read plus a transcription to
-write, roughly 5,000 to 8,000 tokens for a dense page (an image of about 3,000 tokens to read, plus 2,000 to 4,000 tokens of transcription; a scanned book spread like the test document is at the high end, a single-column paper page is cheaper). A long scanned thesis read this way would
+write. The cost has **not been measured**: the image alone is roughly 3,000 tokens at the size tested (by the usual width times height over 750 rule of thumb), and the transcription adds more, depending on how dense the page is. It is thousands of tokens per page, not a handful. A long scanned thesis read this way would
 be expensive, and a coordinator that fanned out one subagent per page could spend
 a great deal before anyone noticed.
 
@@ -19,8 +19,6 @@ Edit the numbers to fit your budget; the scripts read them from here. They are
 
 - `pages_per_ticket` = 4 — most pages one subagent call may be given
 - `pages_per_request` = 12 — most pages one planned request may cover
-- `pages_per_day` = 24 — most pages issued in total on one calendar day, across everything
-- `tokens_per_page_estimate` = 6000 — a rough guess used only to show a cost estimate; adjust it after you have seen real usage
 
 ## The mechanism: five layers
 
@@ -29,7 +27,7 @@ Edit the numbers to fit your budget; the scripts read them from here. They are
    agent is handed that folder's paths and nothing else. Without a ticket there is
    nothing for it to read.
 2. **A plan, then your approval.** A request names the document and the exact
-   pages, and shows the estimate. It does nothing until **you** approve it. The
+   pages, It does nothing until **you** approve it, and it does not show a cost estimate: none has been measured. The
    approve command is deliberately not on the pre-approved list in
    `.claude/settings.json`, so running it asks you for permission, and you can
    also run it yourself in your own terminal.
@@ -38,10 +36,11 @@ Edit the numbers to fit your budget; the scripts read them from here. They are
    has been recorded. That makes parallel page-reading impossible by construction.
    Issuing a ticket also asks you for permission, so every batch of pages is
    a decision you see.
-4. **Hard caps.** A request cannot exceed `pages_per_request`, and the total
-   issued per day cannot exceed `pages_per_day`. Pages are counted when the ticket
-   is issued, even if the reading then fails, because that is when the cost is
-   incurred. Only one request can be open at a time.
+4. **A cap per request.** A request cannot exceed `pages_per_request`, and only one
+   request can be open at a time. There is **no daily limit**, on purpose: you approve
+   every request and every ticket by hand, so you decide how much to spend and when.
+   Pages are recorded in a ledger when the ticket is issued, even if the reading then
+   fails, because that is when the cost is incurred.
 5. **The agent can do almost nothing else.** The `page-reader` agent has only
    the tools to read an image and write one output file. It cannot run commands or
    start other agents. Launching it asks you for permission each time (an `ask`
@@ -54,6 +53,15 @@ page itself and reading it in its own context, outside the ticket process. That
 costs tokens in the main session, where you can see it, but it is not blocked. The
 rule against it is in the root `CLAUDE.md`, and it is the rule that matters most
 if the layers above are ever worked around.
+
+## What it actually costs
+
+Nothing here estimates cost, because an estimate that is wrong by half is worse than
+none. Instead the budget records what pages really cost: after a `page-reader` run,
+`record --tokens N` stores the usage the harness reported for it, and
+`python scripts/vision_pages.py status` shows the measured total and the average per
+page. Treat that as a guide for the next request, not a promise: a dense equation page
+and a sparse prose page differ a lot.
 
 ## Which pages to read
 

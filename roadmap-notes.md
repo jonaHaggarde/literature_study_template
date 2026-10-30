@@ -109,15 +109,15 @@ the gate design, so it is built after it. Not started.
 
 A hybrid, decided after testing on a scanned 1960 paper: **OCR by script is the
 base layer** (free, good on prose, bad on equations, symbols and tables), and
-**reading page images is on request only**, because it costs roughly 5,000 to
-8,000 tokens per dense page. `convert.py` OCRs a scan when `ocrmypdf` and Tesseract
+**reading page images is on request only**, because it costs thousands of
+tokens per page (not yet measured). `convert.py` OCRs a scan when `ocrmypdf` and Tesseract
 exist (it also finds them in their default install folders, prints install hints
 and never installs), on a copy, so the PDF and its hash never change. Pages are
 marked `(ocr)`, the note lists the equation-heavy ones, and `--reocr` fixes scans
 converted earlier without touching what is already written in their notes.
 
 Reading page images is rationed by structure: a plan, the user's approval, small
-one-at-a-time tickets, per-request and per-day caps in `vision-budget.md`, and a
+one-at-a-time tickets, a per-request cap in `vision-budget.md` (no daily limit: every ticket is approved by hand, and measured token usage is recorded instead of estimated), and a
 `page-reader` agent with only `Read` and `Write` whose launch asks the user each
 time. Method cards that rest on OCR equations carry `read_from: ocr` and are not
 counted as verified. Not built: tables were not tested, non-English text was not

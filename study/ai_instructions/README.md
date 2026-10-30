@@ -27,7 +27,7 @@ Situational, read only when they apply — not part of the standard read
 order above, since most sessions don't need them:
 
 - **`vision-budget.md`** — before any page of a scan is read from its image. The
-  limits (pages per ticket, per request, per day) and the five-layer mechanism that
+  limits (pages per ticket and per request) and the five-layer mechanism that
   keeps that spending small. Claude never edits it.
 - **`method-card.md`** — before writing or editing a `## Method Cards`
   section in a note. Defines the card fields (the columns of the review

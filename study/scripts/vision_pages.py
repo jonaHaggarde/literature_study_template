@@ -5,13 +5,13 @@ record. See ai_instructions/vision-budget.md for why it exists and its limits.
 
 The point of the design is that spending is hard to do by accident:
 
-  plan     names a document and exact pages, checks the caps, shows an estimate.
+  plan     names a document and exact pages, checks the per-request cap.
            Does nothing by itself.
   approve  is a human decision. It is not pre-approved in .claude/settings.json,
            so running it asks the user for permission.
   ticket   renders at most `pages_per_ticket` pages of an approved request into a
-           folder that exists for that ticket only, counts them against the daily
-           cap, and refuses to issue another ticket until this one is recorded.
+           folder that exists for that ticket only, records them in the page ledger,
+           and refuses to issue another ticket until this one is recorded.
            Also not pre-approved, so every batch is a visible decision.
   record   merges the page-reader agent's transcription into the note and marks
            those pages `(vision)`.
@@ -23,7 +23,7 @@ Usage (from study/):
     python scripts/vision_pages.py plan DOC --pages 5,6,7
     python scripts/vision_pages.py approve R1
     python scripts/vision_pages.py ticket R1
-    python scripts/vision_pages.py record R1-T1
+    python scripts/vision_pages.py record R1-T1 [--tokens N]   # N: usage the harness reported
     python scripts/vision_pages.py cancel R1          # close a request
     python scripts/vision_pages.py abandon R1-T1      # close a stuck ticket (its pages stay counted)
 """
@@ -46,8 +46,6 @@ PDFS_DIR = REPO_ROOT / "PDFs"
 DEFAULT_CAPS = {
     "pages_per_ticket": 4,
     "pages_per_request": 12,
-    "pages_per_day": 24,
-    "tokens_per_page_estimate": 6000,
 }
 CAP_RE = re.compile(r"^- `([a-z_]+)`\s*=\s*(\d+)", re.MULTILINE)
 RENDER_DPI = 110
@@ -154,14 +152,10 @@ def plan(store, caps, manifest, doc, pages, today):
     requests = store.requests()
     if active_request(requests):
         raise Refused(f"request {active_request(requests)} is still open; finish or cancel it first")
-    left = caps["pages_per_day"] - spent_today(store.ledger(), today)
-    if len(pages) > left:
-        raise Refused(f"{len(pages)} pages would pass today's limit of {caps['pages_per_day']} "
-                      f"({left} left). Reduce the pages or wait until tomorrow.")
     rid = f"R{len(requests) + 1}"
     requests[rid] = {
         "doc": relpath, "pages": pages, "status": "planned", "created": today,
-        "estimated_tokens": len(pages) * caps["tokens_per_page_estimate"], "tickets": {},
+        "tickets": {},
     }
     store.save_requests(requests)
     return rid, requests[rid]
@@ -199,9 +193,6 @@ def ticket(store, caps, rid, today, render):
         raise Refused(f"every page of {rid} already has a ticket")
     batch = remaining[:caps["pages_per_ticket"]]
     ledger = store.ledger()
-    left = caps["pages_per_day"] - spent_today(ledger, today)
-    if len(batch) > left:
-        raise Refused(f"{len(batch)} pages would pass today's limit of {caps['pages_per_day']} ({left} left)")
     tid = f"{rid}-T{len(r['tickets']) + 1}"
     dest = store.ticket_dir(tid)
     dest.mkdir(parents=True, exist_ok=True)
@@ -237,8 +228,10 @@ def merge_vision_pages(note_text, texts):
     return note_text
 
 
-def record(store, tid, manifest, note_path_for):
-    """Merge a finished ticket into its note. `note_path_for(doc)` gives the note path."""
+def record(store, tid, manifest, note_path_for, tokens=None):
+    """Merge a finished ticket into its note. `note_path_for(doc)` gives the note path.
+    `tokens` is what the harness reported the page-reader used, if known: a measured
+    number, stored so `status` can show what pages actually cost."""
     requests = store.requests()
     found = next(((rid, r, t) for rid, r in requests.items() for k, t in r["tickets"].items() if k == tid), None)
     if not found:
@@ -261,6 +254,8 @@ def record(store, tid, manifest, note_path_for):
     entry = manifest[r["doc"]]
     entry["vision_pages"] = sorted(set(entry.get("vision_pages", [])) | set(t["pages"]))
     t["status"] = "recorded"
+    if tokens is not None:
+        t["tokens"] = int(tokens)
     if all(p in entry["vision_pages"] for p in r["pages"]):
         r["status"] = "closed"
     store.save_requests(requests)
@@ -316,17 +311,37 @@ def _note_path(manifest):
     return lambda doc: REPO_ROOT / manifest[doc]["notes_path"]
 
 
+def measured_usage(requests):
+    """(tokens, pages) over every recorded ticket that has a measured token count."""
+    tokens = pages = 0
+    for r in requests.values():
+        for t in r["tickets"].values():
+            if t["status"] == "recorded" and t.get("tokens"):
+                tokens += t["tokens"]
+                pages += len(t["pages"])
+    return tokens, pages
+
+
 def _status_lines(store, caps, today):
     requests = store.requests()
-    lines = [f"Today: {spent_today(store.ledger(), today)} of {caps['pages_per_day']} pages issued "
-             f"(per ticket {caps['pages_per_ticket']}, per request {caps['pages_per_request']}, "
-             f"estimate ~{caps['tokens_per_page_estimate']} tokens per page)."]
+    lines = [f"Pages issued today: {spent_today(store.ledger(), today)} (there is no daily limit: every request and "
+             f"ticket is approved by hand). Limits: {caps['pages_per_ticket']} per ticket, "
+             f"{caps['pages_per_request']} per request."]
+    tokens, pages = measured_usage(requests)
+    if pages:
+        lines.append(f"Measured so far: {tokens:,} subagent tokens over {pages} page(s), about "
+                     f"{tokens // pages:,} per page (as reported for each page-reader run; the coordinator's "
+                     "own tokens are not included). Past pages are not a promise about future ones.")
+    else:
+        lines.append("No measured usage yet. Cost is not estimated: it depends on the page and has not been "
+                     "measured. After a page-reader run, `record --tokens N` stores what the harness reported.")
     if not requests:
         lines.append("No requests.")
     for rid, r in requests.items():
-        lines.append(f"{rid} [{r['status']}] {r['doc']} pages {r['pages']} (~{r['estimated_tokens']} tokens)")
+        lines.append(f"{rid} [{r['status']}] {r['doc']} pages {r['pages']}")
         for tid, t in r["tickets"].items():
-            lines.append(f"    {tid} [{t['status']}] pages {t['pages']}")
+            used = f", {t['tokens']:,} tokens measured" if t.get("tokens") else ""
+            lines.append(f"    {tid} [{t['status']}] pages {t['pages']}{used}")
     return lines
 
 
@@ -350,16 +365,16 @@ def main(argv=None):
             pages = parse_pages(argv[argv.index("--pages") + 1])
             rid, r = plan(store, caps, manifest, doc, pages, today)
             print(f"Planned {rid}: {len(pages)} page(s) of {r['doc']}: {pages}")
-            print(f"Estimated cost: about {r['estimated_tokens']:,} tokens (a rough estimate).")
-            print(f"Today's budget: {spent_today(store.ledger(), today)} of {caps['pages_per_day']} pages used.")
+            print("Cost is not estimated: it depends on the page and has not been measured reliably. "
+                  "`status` shows measured usage once tickets are recorded.")
             print(f"NOT approved. Approval is the user's decision: they run "
                   f"`python scripts/vision_pages.py approve {rid}` (this asks for permission), "
                   "or approve it in their own terminal.")
         elif cmd == "approve":
             r = approve(store, argv[1], now)
             print(f"Approved {argv[1]} ({len(r['pages'])} pages of {r['doc']}). Active limits: "
-                  f"{caps['pages_per_ticket']} per ticket, {caps['pages_per_request']} per request, "
-                  f"{caps['pages_per_day']} per day.")
+                  f"{caps['pages_per_ticket']} per ticket, {caps['pages_per_request']} per request. "
+                  "Every ticket still needs approval.")
         elif cmd == "ticket":
             tid, batch, images, out, left = ticket(store, caps, argv[1], today, render_pages)
             print(f"Ticket {tid}: pages {batch}.")
@@ -369,8 +384,16 @@ def main(argv=None):
             print(f"Output file the page-reader must write: {Path(out).as_posix()}")
             print(f"Pages still without a ticket in this request: {left}. Do not issue another ticket "
                   "until this one is recorded and the user has been told.")
+            print("When the page-reader finishes, record with `--tokens N`, where N is the token usage the "
+                  "harness reported for that run.")
         elif cmd == "record":
-            rid, status, pages = record(store, argv[1], manifest, _note_path(manifest))
+            tokens = None
+            if "--tokens" in argv:
+                try:
+                    tokens = int(argv[argv.index("--tokens") + 1])
+                except (IndexError, ValueError):
+                    raise Refused("--tokens needs a whole number")
+            rid, status, pages = record(store, argv[1], manifest, _note_path(manifest), tokens)
             MANIFEST_PATH.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
             print(f"Recorded {argv[1]}: pages {pages} are now marked (vision) in the note. Request {rid} is {status}.")
             print("If a method card rested on these pages, update or remove its `read_from: ocr` line.")
@@ -379,7 +402,7 @@ def main(argv=None):
             print(f"Cancelled {argv[1]}.")
         elif cmd == "abandon":
             abandon(store, argv[1])
-            print(f"Abandoned {argv[1]}. Its pages stay counted against today's limit.")
+            print(f"Abandoned {argv[1]}. Its pages stay in the page ledger.")
     except (Refused, IndexError, KeyError) as e:
         print(f"Refused: {e}", file=sys.stderr)
         return 1

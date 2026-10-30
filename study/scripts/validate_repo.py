@@ -942,7 +942,7 @@ def check_ocr():
             used = int(json.loads(ledger.read_text(encoding="utf-8")).get(date.today().isoformat(), 0))
         except (ValueError, OSError):
             used = 0
-        log("INFO", "ocr", f"vision budget: {used} page(s) read from images today")
+        log("INFO", "ocr", f"vision usage: {used} page(s) read from images today")
 
 
 def check_catalog_index(rebuild=True):

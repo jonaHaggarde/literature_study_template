@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import vision_pages as v  # noqa: E402
 
 DAY = "2026-10-30"
-CAPS = {"pages_per_ticket": 2, "pages_per_request": 5, "pages_per_day": 6, "tokens_per_page_estimate": 1000}
+CAPS = {"pages_per_ticket": 2, "pages_per_request": 5}
 MANIFEST = {"scan.pdf": {"extraction": "ocr", "ocr_pages": [1, 2, 3, 4, 5, 6, 7, 8], "notes_path": "notes/scan.md"},
             "plain.pdf": {"extraction": "layout"}}
 NOTE = ("---\ntitle: t\n---\n\n## Key Findings\n\nwritten\n\n## Content\n\n"
@@ -69,10 +69,10 @@ class Parsing(unittest.TestCase):
 
 
 class Plan(Env):
-    def test_a_good_plan_has_an_estimate_and_is_not_approved(self):
+    def test_a_good_plan_is_not_approved_and_carries_no_cost_estimate(self):
         rid, r = v.plan(self.store, CAPS, self.manifest, "scan", [5, 6, 7], DAY)
         self.assertEqual(r["status"], "planned")
-        self.assertEqual(r["estimated_tokens"], 3000)
+        self.assertNotIn("estimated_tokens", r)
 
     def test_only_ocr_documents_can_be_read_from_images(self):
         with self.assertRaises(v.Refused):
@@ -102,11 +102,9 @@ class Plan(Env):
         with self.assertRaises(v.Refused):
             self.planned((5, 6))
 
-    def test_the_daily_cap_is_checked_at_plan_time(self):
-        self.store.save_ledger({DAY: 5})
-        with self.assertRaises(v.Refused) as cm:
-            self.planned((1, 2))
-        self.assertIn("today", str(cm.exception))
+    def test_there_is_no_daily_limit_on_planning(self):
+        self.store.save_ledger({DAY: 500})
+        self.planned((1, 2))  # does not raise
 
 
 class Approval(Env):
@@ -153,12 +151,11 @@ class Tickets(Env):
         self.ticket(rid)
         self.assertEqual(v.spent_today(self.store.ledger(), DAY), 2)
 
-    def test_the_daily_cap_stops_a_ticket(self):
+    def test_there_is_no_daily_limit_on_tickets_only_a_ledger(self):
         rid = self.approved((5, 6, 7))
-        self.store.save_ledger({DAY: 5})
-        with self.assertRaises(v.Refused) as cm:
-            self.ticket(rid)
-        self.assertIn("today", str(cm.exception))
+        self.store.save_ledger({DAY: 500})
+        self.ticket(rid)  # does not raise: the user approves each ticket instead
+        self.assertEqual(v.spent_today(self.store.ledger(), DAY), 502)
 
     def test_a_pending_ticket_blocks_even_a_new_request(self):
         rid = self.approved((5, 6))
@@ -227,6 +224,28 @@ class Record(Env):
         self.assertEqual(status, "closed")
         self.assertIsNone(v.active_request(self.store.requests()))
 
+    def test_measured_tokens_are_stored_and_summarised(self):
+        rid = self.approved((5, 6, 7))
+        t1, *_ = self.ticket(rid)
+        self.write_out(t1, [5, 6])
+        self.record_with(t1, 9000)
+        t2, *_ = self.ticket(rid)
+        self.write_out(t2, [7])
+        self.record_with(t2, 3000)
+        self.assertEqual(v.measured_usage(self.store.requests()), (12000, 3))
+        lines = "\n".join(v._status_lines(self.store, CAPS, DAY))
+        self.assertIn("12,000 subagent tokens over 3 page(s)", lines)
+        self.assertIn("4,000 per page", lines)
+        self.assertNotIn("estimate ~", lines)
+
+    def test_without_measured_tokens_the_status_says_so_and_does_not_guess(self):
+        lines = "\n".join(v._status_lines(self.store, CAPS, DAY))
+        self.assertIn("No measured usage yet", lines)
+        self.assertIn("not estimated", lines)
+
+    def record_with(self, tid, tokens):
+        return v.record(self.store, tid, self.manifest, lambda doc: self.note, tokens)
+
     def test_the_images_are_deleted_after_recording(self):
         rid = self.approved((5, 6))
         tid, *_ = self.ticket(rid)
@@ -250,15 +269,15 @@ class Caps(unittest.TestCase):
     def test_values_come_from_the_file(self):
         with tempfile.TemporaryDirectory() as tmp:
             p = Path(tmp) / "b.md"
-            p.write_text("- `pages_per_ticket` = 2 — x\n- `pages_per_day` = 10 — y\n", encoding="utf-8")
+            p.write_text("- `pages_per_ticket` = 2 — x\n- `pages_per_request` = 10 — y\n", encoding="utf-8")
             caps = v.load_caps(p)
             self.assertEqual(caps["pages_per_ticket"], 2)
-            self.assertEqual(caps["pages_per_day"], 10)
-            self.assertEqual(caps["pages_per_request"], v.DEFAULT_CAPS["pages_per_request"])
+            self.assertEqual(caps["pages_per_request"], 10)
+            self.assertEqual(set(caps), {"pages_per_ticket", "pages_per_request"})
 
     def test_the_shipped_caps_file_parses_to_sane_limits(self):
         caps = v.load_caps()
-        self.assertTrue(0 < caps["pages_per_ticket"] <= caps["pages_per_request"] <= caps["pages_per_day"])
+        self.assertTrue(0 < caps["pages_per_ticket"] <= caps["pages_per_request"])
 
 
 if __name__ == "__main__":

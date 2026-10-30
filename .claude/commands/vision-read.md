@@ -32,9 +32,9 @@ to overspend. **Follow it exactly. The process is the point.**
    stop: that is a good outcome.
 
 2. **Plan.** `python study/scripts/vision_pages.py plan "<document>" --pages 5,6,7`.
-   It refuses pages that were not OCR'd, too many pages, or a day's limit already
-   used, and says why. Show the user the plan and its estimate, and ask whether to
-   approve it.
+   It refuses pages that were not OCR'd, too many pages, or a second open request, and
+   says why. Show the user the plan (it gives no cost estimate: none has been measured),
+   and ask whether to approve it.
 
 3. **Approve (user's decision).** Once the user says yes, run
    `python study/scripts/vision_pages.py approve R1`. It prompts for permission.
@@ -46,15 +46,17 @@ to overspend. **Follow it exactly. The process is the point.**
 5. **Launch exactly one `page-reader` agent** (it will ask the user to allow it).
    Give it the image paths and the output path from the ticket, and nothing else.
 
-6. **Record.** `python study/scripts/vision_pages.py record R1-T1`. It merges the
+6. **Record.** `python study/scripts/vision_pages.py record R1-T1 --tokens N`, with N
+   the token usage the harness reported for the page-reader run (leave `--tokens` out only if
+   no figure was reported). It merges the
    transcription into the note, marks those pages `(vision)`, and refuses (merging
    nothing) if the transcription does not cover exactly the ticket's pages.
 
 7. **Report and stop.** Say which pages are now `(vision)`, what is left in the
-   request, and what has been spent today (`status`). If a method card rested on
+   request, and the measured usage so far (`status`). If a method card rested on
    these pages, say so: its `read_from: ocr` line can be updated once the user has
    looked at the transcription.
 
 If the page-reader's file is missing or wrong, `record` will refuse. Do not rerun
 the agent blindly: tell the user, and `abandon` the ticket only if they agree (its
-pages stay counted against the day's limit).
+pages stay in the page ledger).
