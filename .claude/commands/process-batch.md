@@ -86,6 +86,9 @@ Structural checks passing does not mean the batch is factually sound.
 Run 2-3 real discovery queries against the freshly-updated catalog (see
 `study/ai_instructions/workflow.md`) and sanity-check the results by eye.
 
+Merge the workers' JSON blocks with `python study/scripts/merge_worker_report.py`
+(see `study/ai_instructions/batch-orchestration.md`), not by hand.
+
 Then commit, and push only if the user has said pushing is allowed for this
 run (the notes hold copyrighted extracted text; ask once at the start, and
 mention the unpushed-commit count every few batches). **Commit after every batch** — never let more than

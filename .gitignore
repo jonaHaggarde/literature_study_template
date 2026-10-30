@@ -10,3 +10,6 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Worker reports saved for the coordinator's merge: ephemeral
+/study/.batch/

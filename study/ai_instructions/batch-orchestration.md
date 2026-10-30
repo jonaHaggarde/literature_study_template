@@ -31,6 +31,13 @@ the tag ceiling, the propose-vs-decide split, and the "do not, under any
 circumstance" list — so none of that depends on the coordinator
 remembering to paste it.
 
+**Put the report schema in the worker prompt, or tell the worker to read it.**
+An agent definition edited mid-session may not be reloaded until the session
+restarts: in a test, a worker launched right after the contract gained its
+JSON schema reported that it did not have the schema and invented a shape.
+`merge_worker_report.py` rejects a report that does not match (it names what
+it found instead and merges nothing), but a rejected report costs a rerun.
+
 Practical consequence, whichever way a worker is launched: every worker
 prompt must contain everything the worker needs (it has no memory of
 this conversation) and nothing it doesn't. Name the exact documents.
@@ -49,8 +56,19 @@ adjust based on how the first batch goes.
 
 After every parallel batch, the coordinating session — not a worker:
 
-1. **Merges** each worker's proposed entries and note content into the
-   shared files. Workers never write shared state.
+1. **Merges** each worker's proposed entries into the shared files, with
+   `scripts/merge_worker_report.py`, not by hand. Workers never write shared
+   state. Save each worker's final JSON block (see the `note-extractor`
+   contract) as a file under `study/.batch/` (gitignored). Run
+   `python scripts/merge_worker_report.py --check-tags study/.batch/*.json`
+   to list near-duplicate tag proposals across workers and proposals not yet
+   in the vocabulary. Then ratify (step 2): add an `"approved"` object to
+   each document in the file (`{"tags": [...], "families": {...}}`), and
+   merge with `python scripts/merge_worker_report.py study/.batch/*.json`
+   (`--dry-run` first if in doubt). The script fills only the stub's
+   document-derived fields plus the approved tags and families, leaves
+   `note:` and `source:` alone, and refuses an entry that is already filled
+   in. A hand-merge is where fields have gone missing before.
 2. **Ratifies the collection-derived fields.** This is a required step,
    not a review-if-you-have-time. `tags`, the in/out-of-scope verdict,
    and any gap flag depend on the state of the collection — which tags

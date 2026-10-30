@@ -257,14 +257,24 @@ DEFERRED_DIR = "_deferred"
 DEFAULT_TIMEOUT = 300  # seconds per file for layout extraction
 
 
+CONTROL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+def clean_text(text: str) -> str:
+    """Drop control characters (NUL, SOH, ...). Scrambled equation glyphs come
+    out of the extractor as these, and one NUL makes the whole note look binary
+    to grep, to git and to the tools that read it."""
+    return CONTROL_RE.sub("", text)
+
+
 def extract_one(pdf: str, mode: str, out: str) -> int:
     """Child-process entry point: write [{"text": ...}, ...] for one PDF."""
     if mode == "layout":
         pages = pymupdf4llm.to_markdown(pdf, page_chunks=True)
-        data = [{"text": p.get("text", "")} for p in pages]
+        data = [{"text": clean_text(p.get("text", ""))} for p in pages]
     else:
         doc = pymupdf.open(pdf)
-        data = [{"text": page.get_text()} for page in doc]
+        data = [{"text": clean_text(page.get_text())} for page in doc]
         doc.close()
     Path(out).write_text(json.dumps(data), encoding="utf-8")
     return 0

@@ -29,7 +29,9 @@
       "Bash(python study/scripts/convert.py:*)",
       "Bash(python study/scripts/build_review_table.py:*)",
       "Bash(python study/scripts/verification.py status:*)",
-      "Bash(python study/scripts/verification.py todo:*)"
+      "Bash(python study/scripts/verification.py todo:*)",
+      "Bash(python study/scripts/merge_worker_report.py:*)",
+      "Bash(python scripts/merge_worker_report.py:*)"
     ]
   }
 }
