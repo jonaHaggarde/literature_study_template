@@ -1,4 +1,4 @@
-# article/
+# article-review/
 
 The write-up of the study as a **literature review article** in LaTeX: an
 introduction, related work, and above all a **side-by-side comparison of
@@ -35,7 +35,7 @@ trail and the next edit can silently change it.
 | `main.tex` | Preamble, title, abstract, and the `\input` order of the sections |
 | `sections/` | One `.tex` file per section |
 | `sections/comparison_table.tex` | The table's float, caption and label. Hand-written |
-| `sections/comparison_rows.tex` | The table body. **Generated** from the notes' method cards by `study/scripts/build_article_table.py`; never hand-edit |
+| `sections/comparison_rows.tex` | The table body. **Generated** from the notes' method cards by `study/scripts/build_review_table.py`; never hand-edit |
 | `sections/references.tex` | The whole bibliography. **Generated** by the same script, in order of first citation; never hand-edit |
 | `sections/references_extra.tex` | Hand-written `ibitem`s for sources that are not in the catalog (a provided document, a rulebook) |
 | `figs/` | TikZ sources, one file per figure, `\input` from the sections |
@@ -66,7 +66,7 @@ flowchart LR
    `../study/ai_instructions/method-card.md`) and the method families
    (`../study/topics/families.md`, which ships empty), have the notes carry
    method cards, generate the table with
-   `study/scripts/build_article_table.py`, and draw `figs/taxonomy.tex` from
+   `study/scripts/build_review_table.py`, and draw `figs/taxonomy.tex` from
    the families. The table is the core; the rest explains it.
 3. **Related work and comparison text** next, one paragraph per family or
    earlier review.
@@ -91,7 +91,7 @@ cell, change the card in the note and rerun the script; never edit
   first appearance with a reference list at the end, local to each file. In
   LaTeX that is `\cite{key}` plus a plain `thebibliography` list (no
   bibtex run). `thebibliography` numbers entries by their position in the
-  list, not by citation order, so `build_article_table.py` writes
+  list, not by citation order, so `build_review_table.py` writes
   `sections/references.tex` in order of first citation in the source.
   Numbering is local to this article. A catalogued source is cited by its
   derived key (first author's surname + year); anything else goes in

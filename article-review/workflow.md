@@ -1,6 +1,6 @@
 # Workflow: producing the review article
 
-This file says how Claude and the user produce the article in `article/`.
+This file says how Claude and the user produce the article in `article-review/`.
 `README.md` in this folder says what the article is and what belongs in
 it. The whole sequence is available as the `/article` command
 (`.claude/commands/article.md`).
@@ -13,7 +13,7 @@ it. The whole sequence is available as the `/article` command
   concept phase (`../decisions.md`, `../ideation/`). Refining the *scope*
   of the study and of the article is allowed; deciding the product is not.
   `validate_repo.py` warns on decision language ("we chose", "our design",
-  "should be used", and similar) anywhere in `article/*.tex`. It is
+  "should be used", and similar) anywhere in `article-review/*.tex`. It is
   advisory, since a quoted source can say "we chose", but a hit means the
   article is drifting out of phase 1 and deserves a look.
 - **The article is a view of `study/`.** A finding is recorded in
@@ -62,7 +62,7 @@ flowchart TD
 4. **Table and references, generated.**
 
    ```bash
-   python study/scripts/build_article_table.py
+   python study/scripts/build_review_table.py
    ```
 
    rewrites two derived files, neither of which is ever hand-edited:

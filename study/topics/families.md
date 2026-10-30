@@ -37,13 +37,13 @@ ratifying against this file, exactly as for `tags`
 (`../ai_instructions/delegation.md`).
 
 `validate_repo.py` warns when a card's family is not listed here. When
-any card has a family, `scripts/build_article_table.py` groups the table
+any card has a family, `scripts/build_review_table.py` groups the table
 rows by family, in the order listed below, with unlisted families after
 and cards without one last under "Ungrouped".
 
 ## Using the taxonomy in the article
 
-The families are the skeleton of `../../article/`: one subsection of
+The families are the skeleton of `../../article-review/`: one subsection of
 `sections/comparison.tex` per family, and the nodes of
 `figs/taxonomy.tex`. Writing the families is the hand-off from reading
 the literature to writing about it, which is why the user settles them

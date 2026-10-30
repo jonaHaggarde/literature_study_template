@@ -45,7 +45,7 @@ doi: "10.xxxx/xxxxx"
      technique), one "- key: value" line each. Plain text; leave a value
      empty rather than write n/a. Omit the whole section for a document
      with no method of its own. These cards become the rows of the
-     review article's comparison table (scripts/build_article_table.py). -->
+     review article's comparison table (scripts/build_review_table.py). -->
 
 ### Example method
 - input:

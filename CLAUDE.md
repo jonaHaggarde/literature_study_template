@@ -29,8 +29,8 @@ Routing, for a session starting at the repo root:
   the timeline) → the relevant root folder's own `README.md` states what
   belongs in it and what doesn't. Read that before adding a file.
 - Writing the study up as a literature review article (the comparison
-  table, introduction, related work) → `article/README.md`, then follow
-  `article/workflow.md` (the `/article` command runs that sequence and
+  table, introduction, related work) → `article-review/README.md`, then follow
+  `article-review/workflow.md` (the `/article` command runs that sequence and
   reports what is missing). The article is a view of `study/`, written from
   the dossiers; findings are recorded in `study/` first and never only in
   the article. **The review article contains no decisions**: it reports
@@ -44,7 +44,7 @@ See `README.md` for the full layout and the reasoning behind the split.
 ## Citations outside `study/`
 
 Files in the root-level folders (`ideation/`, `meetings/`, `theory/`,
-`decisions.md`, and similar; the LaTeX files in `article/` follow the same
+`decisions.md`, and similar; the LaTeX files in `article-review/` follow the same
 rule with `\cite` and a `thebibliography` list) that reference a specific external source —
 a catalogued paper, a document provided by the client or institution, or
 similar — use numbered inline markers (`[1]`, `[2]`, … `[n]`) **in order

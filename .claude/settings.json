@@ -27,7 +27,7 @@
       "Bash(python study/scripts/build_catalog_index.py:*)",
       "Bash(python study/scripts/build_gaps_index.py:*)",
       "Bash(python study/scripts/convert.py:*)",
-      "Bash(python study/scripts/build_article_table.py:*)",
+      "Bash(python study/scripts/build_review_table.py:*)",
       "Bash(python study/scripts/verification.py status:*)",
       "Bash(python study/scripts/verification.py todo:*)"
     ]

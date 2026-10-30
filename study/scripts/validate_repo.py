@@ -10,7 +10,7 @@ Implementation Notes, stale placeholder entries, tag-casing drift from
 topics/vocabulary.md, type/contribution values drifting from
 ai_instructions/catalog-schema.md, a stale "Comparison & survey papers"
 quick-reference list, dossiers missing their required Open-questions
-section, unbalanced mermaid fences, article/ citations without a
+section, unbalanced mermaid fences, article-review/ citations without a
 bibliography entry, malformed method cards, a stale article table, and whether reference-index.md and
 catalog-index.md are up to date with the current notes/ and catalog.md.
 
@@ -59,9 +59,9 @@ BUILD_CATALOG_INDEX_SCRIPT = REPO_ROOT / "scripts" / "build_catalog_index.py"
 # template is used with its full project layout. Checked opportunistically
 # so study/ still validates standalone.
 THEORY_DIR = REPO_ROOT.parent / "theory"
-# article/ is the LaTeX review-article template, also at the repo root.
-ARTICLE_DIR = REPO_ROOT.parent / "article"
-BUILD_ARTICLE_TABLE_SCRIPT = REPO_ROOT / "scripts" / "build_article_table.py"
+# article-review/ is the LaTeX review-article template, also at the repo root.
+ARTICLE_DIR = REPO_ROOT.parent / "article-review"
+BUILD_ARTICLE_TABLE_SCRIPT = REPO_ROOT / "scripts" / "build_review_table.py"
 ARTICLE_ROWS_PATH = ARTICLE_DIR / "sections" / "comparison_rows.tex"
 ARTICLE_REFS_PATH = ARTICLE_DIR / "sections" / "references.tex"
 ARTICLE_MAIN_PATH = ARTICLE_DIR / "main.tex"
@@ -510,7 +510,7 @@ def check_mermaid(entries):
 
 
 def check_article():
-    r"""article/ is a LaTeX paper with a plain thebibliography list, so a
+    r"""article-review/ is a LaTeX paper with a plain thebibliography list, so a
     \cite with no matching \bibitem renders as [?] and nothing in the
     build fails. That is mechanical, so it is a hard error; an uncited
     \bibitem is only a warning, and the remaining \todo count is
@@ -538,7 +538,7 @@ def check_article():
             log("FAIL", "article", f"{rel}: \\cite{{{key}}} has no matching \\bibitem in sections/references.tex")
     for key in sorted(bibitems - set(cited)):
         log("WARN", "article", f"\\bibitem{{{key}}} is never cited")
-    log("INFO", "article", f"{todos} \\todo marker(s) remaining in article/")
+    log("INFO", "article", f"{todos} \\todo marker(s) remaining in article-review/")
 
 
 def value_is_unlisted(value, families):
@@ -594,14 +594,14 @@ def check_method_cards(entries, exempt_types):
 
 
 def check_article_table(rebuild=True):
-    """article/sections/comparison_rows.tex and references.tex are derived
+    """article-review/sections/comparison_rows.tex and references.tex are derived
     from the method cards and the catalog. A stale table or reference list
     silently describes an out-of-date corpus in print, so both are rebuilt
     here, with a warning when they had to change."""
     if not ARTICLE_DIR.exists():
         return
     if not BUILD_ARTICLE_TABLE_SCRIPT.exists():
-        log("WARN", "article-table", "scripts/build_article_table.py not found")
+        log("WARN", "article-table", "scripts/build_review_table.py not found")
         return
 
     def snapshot():
@@ -615,12 +615,12 @@ def check_article_table(rebuild=True):
             capture_output=True, text=True, cwd=REPO_ROOT,
         )
         if proc.returncode != 0:
-            log("FAIL", "article-table", f"build_article_table.py failed: {proc.stderr.strip()[:300]}")
+            log("FAIL", "article-table", f"build_review_table.py failed: {proc.stderr.strip()[:300]}")
             return
         if before != snapshot():
             log(
                 "WARN", "article-table",
-                "article/sections/comparison_rows.tex or references.tex changed after "
+                "article-review/sections/comparison_rows.tex or references.tex changed after "
                 "rebuild — was stale before this run (now fixed, remember to commit it)",
             )
     else:
@@ -629,12 +629,12 @@ def check_article_table(rebuild=True):
             capture_output=True, text=True, cwd=REPO_ROOT,
         )
         if proc.returncode != 0:
-            log("WARN", "article-table", "article/ derived files are stale; run scripts/build_article_table.py")
+            log("WARN", "article-table", "article-review/ derived files are stale; run scripts/build_review_table.py")
 
 
 def check_verification(entries):
     """Method cards are checked against their source by the row-verifier
-    agent (article/workflow.md, step 6). Verdicts are stored against a hash
+    agent (article-review/workflow.md, step 6). Verdicts are stored against a hash
     of the card, so an edited card is stale. The article's status banner
     says 'not verified'; removing it while cards are unchecked is the one
     thing here that is warned about, because that banner is the only thing
@@ -662,7 +662,7 @@ def check_verification(entries):
         if not banner and unchecked:
             log(
                 "WARN", "verification",
-                f"article/main.tex no longer carries the 'not verified' banner, but "
+                f"article-review/main.tex no longer carries the 'not verified' banner, but "
                 f"{unchecked} method card(s) are not verified",
             )
 
@@ -682,7 +682,7 @@ DECISION_RE = re.compile("|".join(DECISION_PHRASES), re.IGNORECASE)
 
 
 def check_article_decisions():
-    """Warn on decision language in article/. The review reports what the
+    """Warn on decision language in article-review/. The review reports what the
     literature says; deciding the product is a later phase."""
     if not ARTICLE_DIR.exists():
         return

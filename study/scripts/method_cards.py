@@ -4,7 +4,7 @@ Shared helpers for method cards: the field list from
 ai_instructions/method-card.md, card parsing from a note, and the
 BibTeX-style citation key derived from a catalog entry.
 
-Imported by validate_repo.py and build_article_table.py; not run directly.
+Imported by validate_repo.py and build_review_table.py; not run directly.
 """
 
 import hashlib

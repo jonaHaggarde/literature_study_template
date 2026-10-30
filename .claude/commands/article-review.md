@@ -3,7 +3,7 @@ description: Build the review article from the study — preflight, cards, table
 argument-hint: "[optional: one step to run, e.g. verify | table | check]"
 ---
 
-Run the review-article workflow in `article/workflow.md` and report where
+Run the review-article workflow in `article-review/workflow.md` and report where
 it stands.
 $ARGUMENTS
 
@@ -13,7 +13,7 @@ user chooses columns, families, and what the scope is.
 
 ## How to run it
 
-1. **Preflight.** Read `article/workflow.md` and
+1. **Preflight.** Read `article-review/workflow.md` and
    `study/ai_instructions/scope.md`. If `scope.md` still carries the
    `<!-- placeholder -->` marker, stop: the article's scope section is that
    scope in prose, and filling it in with the user is the real task.
@@ -38,9 +38,9 @@ user chooses columns, families, and what the scope is.
    write them into the cards.
 
 4. **Build the derived files.**
-   `python study/scripts/build_article_table.py` rewrites
-   `article/sections/comparison_rows.tex` and `references.tex`. Sources not
-   in the catalog go in `article/sections/references_extra.tex`.
+   `python study/scripts/build_review_table.py` rewrites
+   `article-review/sections/comparison_rows.tex` and `references.tex`. Sources not
+   in the catalog go in `article-review/sections/references_extra.tex`.
 
 5. **Verification pass.** `python study/scripts/verification.py todo`
    lists cards that are unverified or stale, grouped by note. For each note
@@ -53,13 +53,13 @@ user chooses columns, families, and what the scope is.
    quote and the card, and fix the card or the note with their say-so.
 
 6. **Check.** `python study/scripts/validate_repo.py`, then build:
-   `pdflatex main.tex` twice in `article/`. Report: FAIL and WARN lines,
+   `pdflatex main.tex` twice in `article-review/`. Report: FAIL and WARN lines,
    the `\todo` count, verified vs total cards, and any `article-decision`
    warning. A decision-language warning is not a style nit: it means the
    article is drifting out of phase 1, so show the line and ask.
 
 7. **Report, ranked by what blocks "done".** Done means (see
-   `article/workflow.md`): no `\todo`, every citation resolves, every card
+   `article-review/workflow.md`): no `\todo`, every citation resolves, every card
    verified, scope final, status banner removed, and the user has read the
    whole PDF. Say which of those are not met. Never remove the status
    banner yourself.
