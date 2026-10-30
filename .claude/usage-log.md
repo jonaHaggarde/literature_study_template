@@ -24,3 +24,4 @@ remote is shared or public and you would rather it stayed local, add
 
 ## Entries
 
+- **2026-10-30** [bug] — a page-reader run on one scanned page of a published paper ended in an API content-filter block, so transcribing whole pages of publisher text may not be viable
