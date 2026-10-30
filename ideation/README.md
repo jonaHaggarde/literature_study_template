@@ -2,11 +2,18 @@
 
 **Everything in this folder is unverified.** Brainstorming, half-formed
 ideas, notes from conversations — not literature, not a decision. This is
-a structural distinction, not just a disclaimer: content only ever moves
-*out* of `ideation/` into `../decisions.md` once it has actually been
-decided, and only ever moves into `../study/catalog.md` /
-`../study/notes/` if it turns out to reference real, verifiable
-literature that gets independently checked and added properly.
+a structural distinction, not just a disclaimer: a decision is only ever
+recorded in `../decisions.md`, and a reference only ever enters
+`../study/catalog.md` / `../study/notes/` if it turns out to be real,
+verifiable literature that gets independently checked and added properly.
+
+**A decided file stays.** When a recommendation here becomes a decision, the
+decision goes in `../decisions.md` (linking back to the recommendation), and
+the recommendation stays in place with one line added under its banner:
+`Decided in: <decisions.md entry title>`. The full reasoning, including the
+options that lost, then survives next to the one-paragraph decision. The banner
+still applies to everything else in the file: being decided does not make the
+brainstorm literature.
 
 Every file added here must start with this banner:
 
@@ -55,6 +62,34 @@ New content goes into the stage it belongs to rather than becoming a new
 top-level file. Anything used by two stages gets its own shared file
 rather than being duplicated — a duplicated fact is a fact that will
 diverge.
+
+## Three kinds of file, with templates
+
+`_templates/` holds a starting point for each kind. Copy one, delete its
+comment, fill it in; each already begins with the required banner.
+
+- **Map** (`_templates/map.md`): the entry point for a topic. Names the stages,
+  states what each kind of edge means *before* drawing, carries the pipeline
+  diagram, and lists the deep-dives, including ones not written yet.
+- **Deep-dive** (`_templates/deep-dive.md`): one stage, neutral. The question it
+  answers, what crosses its boundaries, the method families, and an
+  *evidence-by-context* table. It does not pick a winner.
+- **Recommendation** (`_templates/recommendation.md`): weighs candidates against
+  stated criteria and reaches a conclusion. The only kind that argues for
+  something, and still unverified until the user decides. It carries a
+  **decision tree** (root `CLAUDE.md`, "Decision trees"): a table of questions
+  and answers is the source, and `study/scripts/build_decision_trees.py`
+  generates the diagram from it. Any file in this folder can hold a tree, not
+  only a recommendation.
+
+## When a topic needs its own folder
+
+One file per stage is right until a topic outgrows it: it splits into several
+surveys, or a stage's deep-dive passes what one file can hold. Then the topic
+gets a subfolder, `<topic>/`, with its own `README.md` stating what belongs in
+it, its own map, and its own numbered deep-dives (numbering restarts inside).
+The top-level map links to the subfolder's map. Do not nest further: a
+subfolder inside a subfolder means the topic should have been split earlier.
 
 ## Conventions
 

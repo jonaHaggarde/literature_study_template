@@ -20,7 +20,12 @@ Copy this block per decision:
   "none — no literature covers this, see study/topics/gaps.md">
 - project context (from you, not the literature): <constraints/judgment
   driving this>
+- rests on: <the assumptions this depends on, stated plainly: a quoted
+  figure, a constant held fixed, a source taken at its word>
 - decision / conclusion:
+- alternatives rejected (and why not): <each option that was on the table and
+  the reason it lost, one line each; a decision with no listed alternatives
+  cannot be reviewed>
 - rationale: <synthesis of the above>
 - revisit if: <what would invalidate this>
 ```
@@ -35,6 +40,15 @@ is what I decided given my own constraints" for "this is what the
 literature says." Keeping the two apart is the single most useful
 convention in this file; a decision that blurs them cannot be audited
 later.
+
+**Why `rests on` and `alternatives rejected`:** a decision is only as good as
+the assumptions under it, and the assumptions that cause trouble are the ones
+nobody wrote down (a figure held constant, a bandwidth quoted from a datasheet).
+Listing them up front is what lets a reviewer challenge the right thing.
+Listing the options that lost, and why, turns the entry into something that can
+be re-opened: when a reason stops being true, the option it killed is visible.
+If the decision came out of a recommendation in `ideation/`, link it from the
+entry; that file stays, marked as decided (see `ideation/README.md`).
 
 **Decisions are living entries, not an append-only log.** When new
 context changes your reasoning on something already decided, update that

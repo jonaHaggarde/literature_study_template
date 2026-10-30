@@ -1,10 +1,17 @@
 ---
 description: Process a backlog of new documents into the catalog via parallel note-extractor workers, then merge, validate, and commit centrally.
-argument-hint: "[optional: how many documents per worker, default 5-10]"
+argument-hint: "[optional: documents per worker, e.g. 6; default 5-10]"
 ---
 
 Process the outstanding document backlog for this literature study.
 $ARGUMENTS
+
+If an argument gives a number (for example `6`), that is the batch size: how
+many documents go to each worker, and how many are ratified and committed at a
+time. It does **not** limit conversion: `convert.py` runs once over everything
+outstanding, and the size governs only how work is dispatched. "Process N at a
+time" is ambiguous between the two, and only dispatch is something you can
+control.
 
 You are the **coordinator** for this run. Read
 `study/ai_instructions/batch-orchestration.md` and

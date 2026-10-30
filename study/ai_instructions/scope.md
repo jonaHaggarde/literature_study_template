@@ -61,6 +61,16 @@ Affects how much weight to put on e.g. peer-reviewed vs. preprint sources,
 how deep the synthesis needs to go, whether practical/implementation
 detail matters or only high-level findings do.>
 
+## Scope changes
+
+<A dated list of every change to this scope after the study began: what
+changed and why, one line each. The scope is allowed to change during the
+project, and it should: a study that never refines its scope is probably not
+learning anything. What it must not do is change silently, because catalog
+verdicts and gap-flagging are judged against it. If a search, a paper or a new
+project goal shows the scope is wrong, edit the sections above and log it here
+first, then carry on. Format: "2026-01-01: added X to in-scope because Y.">
+
 ## Status
 
 <Living document — update whenever the study's understanding of its own

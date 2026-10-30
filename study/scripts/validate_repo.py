@@ -45,6 +45,7 @@ import _console  # noqa: F401  (UTF-8 console output on Windows)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import method_cards  # noqa: E402
 import verification  # noqa: E402
+import build_decision_trees as decision_trees  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CATALOG_PATH = REPO_ROOT / "catalog.md"
@@ -702,6 +703,51 @@ def check_article_decisions():
                 )
 
 
+# A relative path into study/notes/, as written in a root document's
+# References section (root CLAUDE.md): `../study/notes/x.md`, `study/notes/x.md`.
+NOTE_REF_RE = re.compile(r"(?<![A-Za-z0-9_])study/notes/([^\s)\]`'\"<>*]+?\.md)")
+# Root-level folders and files that cite catalogued sources.
+ROOT_CITING_DOCS = ["decisions.md", "timeline.md"]
+ROOT_CITING_DIRS = ["ideation", "theory", "meetings", "article-review"]
+
+
+def find_note_refs(text):
+    """Note paths (relative to study/notes/) cited in a root document."""
+    return list(dict.fromkeys(NOTE_REF_RE.findall(text)))
+
+
+def check_root_citations(entries):
+    """Root documents cite catalogued papers by path into study/notes/. A
+    citation of a note that does not exist is a broken link, so it fails, as a
+    \\cite with no \\bibitem does. A citation of a note whose catalog entry is
+    still an unfilled stub is only a warning: the file exists, but the document
+    is leaning on something nobody has read yet, and a structural check cannot
+    see that any other way (a crashed session once left a document resting on
+    exactly such a stub, and everything still validated). README.md files are
+    skipped: they document the convention with example paths and cite nothing."""
+    root = REPO_ROOT.parent
+    files = [root / name for name in ROOT_CITING_DOCS]
+    for d in ROOT_CITING_DIRS:
+        base = root / d
+        if base.exists():
+            files += [p for p in sorted(base.rglob("*.md"))
+                      if "_templates" not in p.parts and p.name != "README.md"]
+    stubs = {f["note"] for _id, f in entries
+             if f["note"] and (not f["summary"] or "TODO" in f["summary"])}
+    for path in files:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        rel = path.relative_to(root).as_posix()
+        for name in find_note_refs(text):
+            note = REPO_ROOT / "notes" / name
+            if not note.exists():
+                log("FAIL", "root-citation", f"{rel}: cites study/notes/{name}, which does not exist")
+            elif f"notes/{name}" in stubs:
+                log("WARN", "root-citation",
+                    f"{rel}: cites study/notes/{name}, whose catalog entry is still an unfilled stub")
+
+
 def check_path_lengths():
     """Windows rejects paths past about 260 characters, and the failure shows
     up at `git add`, long after the file was created. Warn well before."""
@@ -716,6 +762,58 @@ def check_path_lengths():
                     f"{path.relative_to(REPO_ROOT).as_posix()}: full path is {len(str(path))} "
                     f"characters (Windows limit is about 260) - shorten the filename",
                 )
+
+
+def check_decision_trees(rebuild=True):
+    """A decision tree is a table (the source) plus a generated mermaid diagram.
+    A malformed table is a FAIL, since the diagram built from it would be wrong;
+    a stale diagram is rebuilt (or warned about), like the other derived files.
+    The statistics are information only: they say how much of a decision rests on
+    options nobody examined, which no structural rule can judge."""
+    for path in decision_trees.tree_files():
+        text = path.read_text(encoding="utf-8")
+        if "<!-- decision-tree" not in text:
+            continue
+        rel = path.relative_to(REPO_ROOT.parent).as_posix()
+        new_text, results = decision_trees.process_text(text)
+        any_problem = False
+        for rows, problems in results:
+            for pr in problems:
+                log("FAIL", "decision-tree", f"{rel}: {pr}")
+                any_problem = True
+            if rows and "_templates" not in path.parts:
+                st = decision_trees.stats(rows)
+                log(
+                    "INFO", "decision-tree",
+                    f"{rel}: {st['decided']} of {st['questions']} questions decided; "
+                    f"{st['explored']} of {st['alternatives']} rejected alternatives examined; "
+                    f"{st['motivations_missing']} motivation(s) still to write",
+                )
+        if new_text != text and not any_problem:
+            if rebuild:
+                path.write_text(new_text, encoding="utf-8")
+                log("WARN", "decision-tree", f"{rel}: diagram was stale, rebuilt (remember to commit it)")
+            else:
+                log("WARN", "decision-tree", f"{rel}: diagram is stale; run scripts/build_decision_trees.py")
+
+
+def check_gaps_index(rebuild=True):
+    """topics/gaps.md's auto-aggregated blocks are derived from the dossiers'
+    Open questions and from the unexamined alternatives of decision trees. A
+    stale block lists gaps that are closed or misses ones that were just
+    created, so it is rebuilt here, with a warning when it had to change."""
+    script = REPO_ROOT / "scripts" / "build_gaps_index.py"
+    gaps = TOPICS_DIR / "gaps.md"
+    if not rebuild or not script.exists() or not gaps.exists():
+        return
+    before = gaps.read_text(encoding="utf-8")
+    proc = subprocess.run([sys.executable, str(script)], capture_output=True, text=True, cwd=REPO_ROOT)
+    if proc.returncode != 0:
+        log("FAIL", "gaps-index", f"build_gaps_index.py failed: {proc.stderr.strip()[:300]}")
+        return
+    if gaps.read_text(encoding="utf-8") != before:
+        log("WARN", "gaps-index",
+            "topics/gaps.md changed after rebuild - was stale before this run (now fixed, remember to commit it)")
 
 
 def check_catalog_index(rebuild=True):
@@ -845,6 +943,9 @@ def main():
     check_dossiers()
     check_mermaid(entries)
     check_path_lengths()
+    check_root_citations(entries)
+    check_decision_trees(rebuild=rebuild)
+    check_gaps_index(rebuild=rebuild)
     check_article()
     check_method_cards(entries, exempt_types)
     check_article_table(rebuild=rebuild)

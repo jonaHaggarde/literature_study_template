@@ -71,3 +71,13 @@ it as a gap rather than letting the recommendation just trail off.
 If a source-acquisition MCP server is attached to this session, it
 short-circuits most of this — see `../study/ai_instructions/mcp.md` for
 what such a server can and cannot be trusted to do.
+
+## Open access is something you check, not something you assume
+
+A repository serving a full file with no login does not make the file openly
+licensed: a university repository can serve a PDF at full size while its own
+page offers only "request a copy". Before treating a file as openly accessible,
+look for an explicit licence or open-access statement on the publisher or the
+DOI landing page. If there is none, record the lead as `blocked` in
+`../study/leads.md` with that note, and let the user decide. Do not use sources
+that bypass a paywall.

@@ -13,11 +13,13 @@ $ARGUMENTS
    stop: no coverage claim means anything without a real scope
    statement, and filling it in with the user is the actual task.
 
-2. **Read `study/topics/gaps.md`.** It has two halves with different
-   trust levels: the auto-aggregated block is mirrored from each
-   dossier's `## Open questions` section and is only as fresh as the last
+2. **Read `study/topics/gaps.md`.** It has three parts with different
+   trust levels: the first auto-aggregated block is mirrored from each
+   dossier's `## Open questions` section, and the second lists every
+   alternative that a decision tree under `ideation/` names but never
+   examined (a dashed box). Both are only as fresh as the last
    `python scripts/build_gaps_index.py` run — re-run it before trusting
-   the block. The "Flagged directly" section is hand-written and may
+   them. Neither judges scope, which is your job in step 3. The "Flagged directly" section is hand-written and may
    contain items a dossier has since covered.
 
 3. **Cross-check each gap against scope.** For every entry, decide:
@@ -37,7 +39,15 @@ $ARGUMENTS
    least likely to be already written down, because nothing ever
    prompted anyone to notice it.
 
-5. **Report, ranked by consequence.** For each genuine gap: what is
+5. **Check the scope against the project.** Read `decisions.md` and the
+   goals stated in `ideation/` and compare them with `scope.md`'s exclusions
+   and its "Scope changes" log. A project goal that the scope excludes (or an
+   exclusion a decision now depends on) means catalog verdicts and gap flags are
+   being judged against a stale boundary, and nothing else in the repo will
+   notice. Report each conflict and propose the change to `scope.md`; the user
+   decides, and the change goes in "Scope changes" with its date.
+
+6. **Report, ranked by consequence.** For each genuine gap: what is
    missing, what currently rests on it (a dossier recommendation, a
    `decisions.md` entry), and a concrete acquisition direction — a
    search term, a venue, a citation trail in
@@ -45,7 +55,7 @@ $ARGUMENTS
    `project_documents/source-access.md` so each suggestion points
    somewhere real rather than trailing off.
 
-6. **Ask the user directly** whether they can source material for the
+7. **Ask the user directly** whether they can source material for the
    top gaps, rather than silently working around the hole. Update
    `study/topics/gaps.md`'s "Flagged directly" section with anything new
    you found — do not hand-edit the auto-aggregated block.
