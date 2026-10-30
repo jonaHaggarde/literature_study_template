@@ -15,7 +15,12 @@ per-document and apply whether run serially or inside a worker.
 
 1. User drops PDFs into `PDFs/` (subfolders are fine, the script
    recurses).
-2. Run `python scripts/convert.py` from `study/`. It hashes every PDF,
+2. Run `python scripts/convert.py` from `study/` (`--dry-run` first to see
+   what it would do; PDFs the user does not want yet go in
+   `PDFs/_deferred/`; a byte-identical duplicate is skipped and reported; a
+   file whose layout extraction times out is re-read as plain text, and its
+   note carries a warning that tables and structure are lost, so treat
+   anything resting on a table or formula in it as unread). It hashes every PDF,
    skips anything already converted and unchanged, and for everything
    new/changed writes a `.md` file into `notes/` (mirroring the `PDFs/`
    path) and appends a stub entry to `catalog.md`.

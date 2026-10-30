@@ -5,8 +5,22 @@ already-converted files by content hash so re-runs only touch new or
 changed PDFs. Also appends stub entries to catalog.md for anything new.
 
 Usage (from study/, with dependencies installed):
-    python scripts/convert.py
-    python scripts/convert.py --pdfs-dir PDFs --notes-dir notes
+    python scripts/convert.py                      # convert everything new or changed
+    python scripts/convert.py --dry-run            # list what would happen, convert nothing
+    python scripts/convert.py --only Smith2020     # only PDFs whose path contains this
+    python scripts/convert.py --timeout 120        # per-file extraction limit, seconds
+
+Triage, before converting a pile of new documents: move a PDF you do not
+want processed (a whole edited book of which one chapter matters, a thesis
+on an out-of-scope subject) into PDFs/_deferred/, where it is ignored until
+you move it back. A PDF that is byte-identical to one already converted is
+skipped and reported, whatever its filename.
+
+Each file is extracted in a child process with a time limit, because the
+layout extractor can hang on a particular PDF. On a timeout the file is
+re-extracted as plain text (tables and structure are lost, and the note says
+so). The manifest and catalog stub are saved after every file, so an
+interrupted run loses at most the file it was on.
 
 title/authors/year are best-effort pre-filled from each PDF's own
 metadata (often empty or wrong - treat as a starting point, not fact).
@@ -20,7 +34,9 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -136,7 +152,8 @@ def entry_id_for(relpath_no_ext: str) -> str:
     return relpath_no_ext
 
 
-def build_note_markdown(relpath: str, pdf_hash: str, pages: list, meta_guess: dict) -> tuple[str, bool]:
+def build_note_markdown(relpath: str, pdf_hash: str, pages: list, meta_guess: dict,
+                        extraction: str = "layout") -> tuple[str, bool]:
     total_chars = sum(len(p.get("text", "")) for p in pages)
     avg_chars = total_chars / len(pages) if pages else 0
     low_yield = avg_chars < LOW_YIELD_CHARS_PER_PAGE
@@ -163,6 +180,13 @@ def build_note_markdown(relpath: str, pdf_hash: str, pages: list, meta_guess: di
             "own metadata (or blank if metadata was empty/unusable) - PDF "
             "metadata is frequently wrong or stale, verify against the actual "
             "text before trusting, especially authors/year. -->"
+        )
+        lines.append("")
+    if extraction != "layout":
+        lines.append(
+            "<!-- WARNING: layout extraction timed out on this PDF, so the text below is a "
+            "plain-text fallback: tables, equations and structure are lost or scrambled. "
+            "Treat anything that depends on a table or a formula as unread. -->"
         )
         lines.append("")
     if low_yield:
@@ -229,13 +253,78 @@ def append_catalog_stubs(catalog_path: Path, new_entries: list) -> None:
             f.write("\n" + "\n".join(additions))
 
 
+DEFERRED_DIR = "_deferred"
+DEFAULT_TIMEOUT = 300  # seconds per file for layout extraction
+
+
+def extract_one(pdf: str, mode: str, out: str) -> int:
+    """Child-process entry point: write [{"text": ...}, ...] for one PDF."""
+    if mode == "layout":
+        pages = pymupdf4llm.to_markdown(pdf, page_chunks=True)
+        data = [{"text": p.get("text", "")} for p in pages]
+    else:
+        doc = pymupdf.open(pdf)
+        data = [{"text": page.get_text()} for page in doc]
+        doc.close()
+    Path(out).write_text(json.dumps(data), encoding="utf-8")
+    return 0
+
+
+def extract_pages(pdf_path: Path, timeout: float) -> tuple[list, str]:
+    """Extract in a child process so a hang can be killed. Returns (pages,
+    extraction) where extraction is "layout" or "plain-text-fallback"."""
+    last_error = ""
+    for mode, limit in (("layout", timeout), ("plain", max(30.0, timeout / 4))):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = str(Path(tmp) / "pages.json")
+            try:
+                proc = subprocess.run(
+                    [sys.executable, str(Path(__file__).resolve()), "--extract-one", str(pdf_path),
+                     "--mode", mode, "--out", out],
+                    capture_output=True, text=True, timeout=limit,
+                )
+            except subprocess.TimeoutExpired:
+                last_error = f"{mode} extraction timed out after {limit:.0f}s"
+                print(f"  {last_error}", file=sys.stderr)
+                continue
+            if proc.returncode == 0 and Path(out).exists():
+                pages = json.loads(Path(out).read_text(encoding="utf-8"))
+                return pages, ("layout" if mode == "layout" else "plain-text-fallback")
+            last_error = (proc.stderr or "").strip().splitlines()[-1:] or ["unknown error"]
+            last_error = f"{mode} extraction failed: {last_error[0]}"
+            print(f"  {last_error}", file=sys.stderr)
+    raise RuntimeError(last_error)
+
+
+def page_count(pdf_path: Path) -> str:
+    try:
+        doc = pymupdf.open(str(pdf_path))
+        n = len(doc)
+        doc.close()
+        return str(n)
+    except Exception:  # noqa: BLE001
+        return "?"
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--pdfs-dir", default=str(REPO_ROOT / "PDFs"))
     parser.add_argument("--notes-dir", default=str(REPO_ROOT / "notes"))
     parser.add_argument("--catalog", default=str(REPO_ROOT / "catalog.md"))
     parser.add_argument("--manifest", default=str(REPO_ROOT / "manifest.json"))
+    parser.add_argument("--only", action="append", default=[], metavar="TEXT",
+                        help="only PDFs whose path contains TEXT (repeatable)")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="list what would be converted, deferred or skipped; convert nothing")
+    parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT,
+                        help=f"seconds allowed for layout extraction of one file (default {DEFAULT_TIMEOUT})")
+    parser.add_argument("--extract-one", help=argparse.SUPPRESS)
+    parser.add_argument("--mode", default="layout", help=argparse.SUPPRESS)
+    parser.add_argument("--out", help=argparse.SUPPRESS)
     args = parser.parse_args()
+
+    if args.extract_one:
+        return extract_one(args.extract_one, args.mode, args.out)
 
     pdfs_dir = Path(args.pdfs_dir)
     notes_dir = Path(args.notes_dir)
@@ -247,14 +336,19 @@ def main():
         sys.exit(1)
 
     manifest = load_json(manifest_path)
-    pdf_files = sorted(pdfs_dir.rglob("*.pdf"))
+    all_pdfs = sorted(pdfs_dir.rglob("*.pdf"))
+    deferred = [p for p in all_pdfs if DEFERRED_DIR in p.relative_to(pdfs_dir).parts]
+    pdf_files = [p for p in all_pdfs if p not in deferred]
+    if args.only:
+        pdf_files = [p for p in pdf_files
+                     if any(t.lower() in p.relative_to(pdfs_dir).as_posix().lower() for t in args.only)]
 
-    if not pdf_files:
+    if not all_pdfs:
         print(f"No PDFs found under {pdfs_dir}")
-        return
+        return 0
 
-    converted, skipped, warnings = 0, 0, []
-    new_catalog_entries = []
+    known_hashes = {m.get("hash"): rel for rel, m in manifest.items() if m.get("hash")}
+    converted, skipped, duplicates, warnings = 0, 0, 0, []
 
     for pdf_path in pdf_files:
         relpath = pdf_path.relative_to(pdfs_dir).as_posix()
@@ -265,18 +359,34 @@ def main():
             skipped += 1
             continue
 
+        twin = known_hashes.get(pdf_hash)
+        if twin and twin != relpath:
+            duplicates += 1
+            msg = f"{relpath}: byte-identical to already-converted {twin}; skipped"
+            warnings.append(msg)
+            print(f"Duplicate:  {msg}")
+            continue
+
+        if args.dry_run:
+            print(f"Would convert: {relpath}  ({page_count(pdf_path)} pages, "
+                  f"{pdf_path.stat().st_size // 1024} KB)")
+            continue
+
         print(f"Converting: {relpath}")
         try:
-            pages = pymupdf4llm.to_markdown(str(pdf_path), page_chunks=True)
+            pages, extraction = extract_pages(pdf_path, args.timeout)
         except Exception as e:  # noqa: BLE001
             print(f"  FAILED: {e}", file=sys.stderr)
             warnings.append(f"{relpath}: conversion failed ({e})")
             continue
+        if extraction != "layout":
+            warnings.append(f"{relpath}: layout extraction timed out, used plain-text fallback "
+                            f"(tables and structure lost)")
 
         first_pages_text = "\n".join(p.get("text", "") for p in pages[:2])
         meta_guess = best_effort_metadata(pdf_path, first_pages_text)
 
-        note_content, low_yield = build_note_markdown(relpath, pdf_hash, pages, meta_guess)
+        note_content, low_yield = build_note_markdown(relpath, pdf_hash, pages, meta_guess, extraction)
 
         note_relpath = short_note_relpath(relpath)
         note_path = notes_dir / note_relpath
@@ -288,25 +398,32 @@ def main():
             "converted_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "notes_path": f"notes/{note_relpath}",
             "low_text_yield": low_yield,
+            "extraction": extraction,
         }
+        known_hashes[pdf_hash] = relpath
         converted += 1
         if low_yield:
             warnings.append(f"{relpath}: LOW TEXT YIELD, likely scanned - consider OCR")
 
         entry_id = entry_id_for(Path(note_relpath).with_suffix("").as_posix())
-        new_catalog_entries.append((
+        # Saved per file: a killed run keeps everything finished so far.
+        save_json(manifest_path, manifest)
+        append_catalog_stubs(catalog_path, [(
             entry_id,
             meta_guess["title"] or Path(relpath).stem,
             f"notes/{note_relpath}",
             f"PDFs/{relpath}",
             meta_guess["authors"],
             meta_guess["year"],
-        ))
+        )])
 
-    save_json(manifest_path, manifest)
-    append_catalog_stubs(catalog_path, new_catalog_entries)
+    if args.dry_run:
+        print(f"\nDry run. Would convert the files listed above; unchanged: {skipped}, "
+              f"duplicates: {duplicates}, deferred: {len(deferred)}.")
+        return 0
 
-    print(f"\nDone. Converted: {converted}, skipped (unchanged): {skipped}")
+    print(f"\nDone. Converted: {converted}, skipped (unchanged): {skipped}, "
+          f"duplicates: {duplicates}, deferred: {len(deferred)}")
     if warnings:
         print("\nWarnings:")
         for w in warnings:
@@ -322,7 +439,8 @@ def main():
             "build_catalog_index.py, validate_repo.py --fix."
         )
         print(COPYRIGHT_NOTICE)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

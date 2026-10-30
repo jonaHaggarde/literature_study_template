@@ -96,7 +96,17 @@ real backlog. By hand:
    ```powershell
    python scripts\convert.py
    ```
-   It hashes every PDF, skips anything already converted and unchanged,
+   Before a big pile, triage first: `python scripts\convert.py --dry-run`
+   lists what would convert (with page counts) and converts nothing, and a
+   PDF you do not want processed yet goes in `PDFs/_deferred/`, where it is
+   ignored until you move it back. A PDF that is byte-identical to one
+   already converted is skipped and reported, whatever its filename.
+   `--only TEXT` converts only matching paths. Each file is extracted with a
+   time limit (`--timeout`, default 300 s): on a hang the file is re-read as
+   plain text and the note says so, since tables and structure are lost.
+   The manifest and catalog stub are saved after every file.
+
+   The script hashes every PDF, skips anything already converted and unchanged,
    and for everything new/changed writes a `.md` file into `notes/`
    (mirroring the `PDFs/` path) and appends a stub entry to `catalog.md`.
 3. Ask Claude to fill in the TODO fields (summary, tags, type,
