@@ -21,6 +21,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import _console  # noqa: F401  (UTF-8 console output on Windows)
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from build_catalog_index import parse_catalog  # noqa: E402

@@ -69,14 +69,23 @@ After every parallel batch, the coordinating session — not a worker:
    `build_gaps_index.py` if a dossier changed. Never per-worker: running
    these concurrently across workers risks concurrent-edit conflicts on
    the same shared files.
-5. **Commits and pushes.**
+5. **Commits** (and pushes, only with the user's go-ahead; see below).
 
 ## Resilience: commit after every batch, never accumulate
 
-Commit and push after every single batch — never let more than one
-batch's worth of work sit uncommitted. This is what makes an interrupted
-run (a rate limit, a token/usage reset, a crash, the user closing their
-laptop) safe: at most one batch is ever at risk, and recovery is cheap.
+**Commit** after every single batch — never let more than one batch's
+worth of work sit uncommitted. This is what makes an interrupted run (a
+rate limit, a token/usage reset, a crash, the user closing their laptop)
+safe: at most one batch is ever at risk, and recovery is cheap.
+
+**Push only with the user's go-ahead.** `notes/` holds substantial
+extracted text from the source documents, so a push publishes copyrighted
+material to wherever the remote is (see the copyright warning in the root
+`README.md`). Ask once at the start of a run whether pushing is allowed;
+a standing yes covers the run. Without one, keep committing locally, and
+say how many commits are unpushed every few batches, so a long run does not
+quietly pile up dozens of local-only commits that one disk failure would
+lose.
 
 ## Resuming after an interruption
 

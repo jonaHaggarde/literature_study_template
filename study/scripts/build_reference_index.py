@@ -13,6 +13,8 @@ import re
 from difflib import SequenceMatcher
 from pathlib import Path
 
+import _console  # noqa: F401  (UTF-8 console output on Windows)
+
 # Two refs in the same publication year with a normalized-text similarity
 # above this are treated as the same source (different citation-style
 # formatting of the same document), not two different documents.

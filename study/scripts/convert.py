@@ -24,6 +24,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import _console  # noqa: F401  (UTF-8 console output on Windows)
+
 try:
     import pymupdf4llm
     import pymupdf
@@ -75,14 +77,18 @@ def best_effort_metadata(pdf_path: Path, first_pages_text: str) -> dict:
     if author and not JUNK_TITLE_RE.search(author):
         guess["authors"] = author
 
+    # The PDF's creation date is when the *file* was made, which for a scan
+    # or a re-hosted paper is often decades after publication (a 1960 paper
+    # came out as 2023). Only prefill the year when the first pages' own text
+    # contains it; a blank is better than a confident wrong value.
     creation_date = meta.get("creationDate") or ""
     m = CREATION_DATE_RE.search(creation_date)
-    if m:
+    if m and re.search(r"(?<!\d)" + m.group(1) + r"(?!\d)", first_pages_text):
         guess["year"] = m.group(1)
 
     doi_match = DOI_RE.search(first_pages_text)
     if doi_match:
-        guess["doi"] = doi_match.group(0).rstrip(".,);]")
+        guess["doi"] = doi_match.group(0).rstrip(".,);]_-")
 
     return guess
 
@@ -106,6 +112,24 @@ def save_json(path: Path, data: dict) -> None:
     with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, sort_keys=True)
         f.write("\n")
+
+
+# Windows limits a full path to about 260 characters, and the repo prefix,
+# study/notes/ and the filename add up. conversion succeeds and `git add`
+# fails much later, so note names are capped here instead. The full title
+# stays in the catalog entry.
+MAX_STEM = 80
+
+
+def short_note_relpath(relpath: str) -> str:
+    """Note path (relative to notes/) for a PDF path, with an over-long stem
+    shortened to a readable prefix plus a short hash of the full stem."""
+    p = Path(relpath)
+    stem = p.stem
+    if len(stem) > MAX_STEM:
+        digest = hashlib.sha1(stem.encode("utf-8")).hexdigest()[:6]
+        stem = f"{stem[:MAX_STEM - 7].rstrip('-_ ')}-{digest}"
+    return p.with_name(stem + ".md").as_posix()
 
 
 def entry_id_for(relpath_no_ext: str) -> str:
@@ -254,7 +278,7 @@ def main():
 
         note_content, low_yield = build_note_markdown(relpath, pdf_hash, pages, meta_guess)
 
-        note_relpath = Path(relpath).with_suffix(".md").as_posix()
+        note_relpath = short_note_relpath(relpath)
         note_path = notes_dir / note_relpath
         note_path.parent.mkdir(parents=True, exist_ok=True)
         note_path.write_text(note_content, encoding="utf-8")
@@ -269,7 +293,7 @@ def main():
         if low_yield:
             warnings.append(f"{relpath}: LOW TEXT YIELD, likely scanned - consider OCR")
 
-        entry_id = entry_id_for(Path(relpath).with_suffix("").as_posix())
+        entry_id = entry_id_for(Path(note_relpath).with_suffix("").as_posix())
         new_catalog_entries.append((
             entry_id,
             meta_guess["title"] or Path(relpath).stem,

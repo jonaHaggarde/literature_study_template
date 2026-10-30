@@ -35,7 +35,11 @@ Before processing anything, read, in this order:
 ## Per document
 
 Do a **full, non-lazy read of the note** — not just enough to write a
-summary — and then produce:
+summary — and then produce. A long note will not come back from one `Read`
+call: the tool caps the lines it returns. Read in ranges (`offset` and
+`limit`) until you have reached the note's last `<!-- page: N -->` marker,
+and say in your report if you did not. A worker that silently stops at the
+cap has not read the document.
 
 - The note's own `## Key Findings` (3-6 sentences: method, key claims,
   results) and `## Implementation Notes` (parameters and settings

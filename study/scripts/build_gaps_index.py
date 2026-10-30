@@ -19,6 +19,8 @@ import re
 import sys
 from pathlib import Path
 
+import _console  # noqa: F401  (UTF-8 console output on Windows)
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TOPICS_DIR = REPO_ROOT / "topics"
 GAPS_PATH = TOPICS_DIR / "gaps.md"
