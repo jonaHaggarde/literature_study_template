@@ -7,9 +7,38 @@ this template does *today* (checked against the code on 2026-10-30, not
 assumed), a proposal, and a rough size. Items link to `roadmap-notes.md`
 where they belong to the phase model.
 
-**`usage-log.md` itself stays out of git.** It is full of one project's
-content (a vehicle-control design), and `main` has to stay topic-neutral
-and cloneable. It is the evidence base for this file, kept locally.
+**`usage-log.md` was deleted from this repo on 2026-10-30** once its findings
+were captured here. It was full of one project's content (a vehicle-control
+design), and `main` has to stay topic-neutral and cloneable.
+
+## Decisions taken (2026-10-30)
+
+- **Articles are sibling `article-*/` folders** (`article-review/`,
+  `article-spec/`, `article-manual/`, ...). A shared `article-common/`
+  (preamble only; each article keeps its own reference list, per the
+  per-file numbering rule) is created when the second article exists, not
+  before. Settles L1.
+- **Positioning: engineering-leaning, neutral core.** Most use is
+  engineering projects, so the template should carry many tools for them,
+  but nothing may be so built in that a non-engineering study cannot use it.
+  Working rule: the **core** (catalog, notes, dossiers, scope, review
+  article) must still pass the "eighteenth-century agriculture" test in the
+  root README; **engineering tools are optional modules** at the root, each
+  with its own README, absent from the validator's hard checks when the
+  folder is missing or empty (the pattern `article-review/` already uses),
+  and deletable without breaking anything. Settles the placement of L2.
+- **Requirements engine (L2): to be investigated and developed, optional.**
+  Not built yet; first a design discussion, then its own branch.
+- **Usage log is automatic in every fork (L6, upgraded).** Every fork starts
+  building a usage log without the user doing anything and without opening
+  it. Location: `.claude/usage-log.md` (inside the harness folder, not the
+  root). Written by Claude under a rule in the root `CLAUDE.md`, through a
+  small script that dates and length-limits each entry. Entries describe the
+  shape of a session, never content, and never confidential values. The README
+  states it plainly (what it is, where it lives, how to turn it off). The user
+  carries it back to this template by hand. Own branch, `dev-usage-log`.
+- **`feedback-notes.md` stays separate from `roadmap-notes.md`** (Q1, no
+  objection raised).
 
 ## 1. Bugs that are real in this template today
 
@@ -253,7 +282,7 @@ lines" rule often; the convention should say so and enforce brevity. Small.
    gates): discuss, then one branch each; L1 and L5 first, since the phase
    model depends on them.
 
-## 6. Questions for the user
+## 6. Questions (answered 2026-10-30, see "Decisions taken")
 
 1. Is `feedback-notes.md` the right place, or should its contents be merged into
    `roadmap-notes.md`? (I kept them apart: roadmap = where the template is
