@@ -164,7 +164,7 @@ Also from our own test run on 2026-10-30 (not in the log):
   empty unless the first page confirms it. (Small.)
 - **B8.** A DOI picked up with a trailing underscore
   (`10.1109/ACCESS.2024.3402429_`). Strip trailing punctuation. (Small.)
-- **B9.** Tables and equations did not convert (all six tables of one survey
+- **B9 (OCR part built 2026-10-30, branch `dev-ocr`).** Tables and equations did not convert (all six tables of one survey
   were empty; equations stripped). This caps what method cards and the
   `row-verifier` can see. Track as a conversion-quality limit; relates to
   the OCR / vision-read decision in `roadmap-notes.md`.

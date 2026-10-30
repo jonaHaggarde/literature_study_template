@@ -25,6 +25,11 @@ FAMILIES_PATH = REPO_ROOT / "topics" / "families.md"
 # and it is collection-derived (proposed by a worker, ratified centrally),
 # so it is not listed in method-card.md's '## Fields'.
 FAMILY_KEY = "family"
+# Reserved card key: `read_from: ocr` marks a card whose values rest on an equation,
+# table or figure from a page that was OCR'd and not read from its image. Such a
+# card is never counted as verified (see verification.py).
+READ_FROM_KEY = "read_from"
+READ_FROM_VALUES = ("ocr", "vision")
 
 # Used only if method-card.md is missing or has no parsable field list;
 # the real source of truth is that file.

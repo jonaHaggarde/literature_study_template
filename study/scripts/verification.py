@@ -48,22 +48,28 @@ def card_key(note_rel, name):
     return f"{note_rel}#{name}"
 
 
+def status_for(name, values, rec):
+    """Status of one card given its verification record (or None): ocr-only (the
+    card rests on OCR text of an equation or table, so it cannot be verified
+    until the page is read from its image), verified (current hash, verdict pass),
+    failed (current hash, verdict fail or unclear), stale (the card changed since
+    it was checked), or unverified."""
+    if values.get("read_from") == "ocr":
+        return "ocr-only"
+    if rec is None:
+        return "unverified"
+    if rec.get("hash") != card_hash(name, values):
+        return "stale"
+    return "verified" if rec.get("verdict") == "pass" else "failed"
+
+
 def card_statuses(entries):
-    """[(key, status)] for every card. status is one of: verified (current
-    hash, verdict pass), failed (current hash, verdict fail or unclear),
-    stale (the card changed since it was checked), unverified."""
+    """[(key, status)] for every card; see status_for."""
     record = load_record()
     out = []
     for _id, _f, note_rel, name, values, _ck in iter_cards(entries):
         key = card_key(note_rel, name)
-        rec = record.get(key)
-        if rec is None:
-            status = "unverified"
-        elif rec.get("hash") != card_hash(name, values):
-            status = "stale"
-        else:
-            status = "verified" if rec.get("verdict") == "pass" else "failed"
-        out.append((key, status))
+        out.append((key, status_for(name, values, record.get(key))))
     return out
 
 
@@ -85,15 +91,21 @@ def main():
         return 0
 
     if argv[0] == "todo":
-        by_note = {}
+        by_note, waiting = {}, []
         for key, status in card_statuses(entries):
-            if status != "verified":
+            if status == "ocr-only":
+                waiting.append(key)
+            elif status != "verified":
                 note, name = key.split("#", 1)
                 by_note.setdefault(note, []).append((name, status))
         for note, cards in sorted(by_note.items()):
             print(note)
             for name, status in cards:
                 print(f"  {status:10} {name}")
+        if waiting:
+            print("\nWaiting for page images (rest on OCR text; do not send to the verifier yet):")
+            for key in waiting:
+                print(f"  {key}")
         return 0
 
     if len(argv) < 3 or argv[2] not in VERDICTS:

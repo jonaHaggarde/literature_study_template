@@ -17,6 +17,10 @@ echo "Installing dependencies..."
 .venv/bin/python -m pip install -r scripts/requirements.txt
 
 echo ""
+echo "OCR (optional, for scanned PDFs):"
+.venv/bin/python scripts/ocr_support.py || true
+
+echo ""
 echo "Done. Activate the environment in your shell with:"
 echo "  source .venv/bin/activate"
 echo "Then drop PDFs into PDFs/ and run: python scripts/convert.py"

@@ -35,6 +35,16 @@ It groups the rows of the table by method family and is defined in
 worker proposes it in its report and the coordinator writes it into the card
 after ratifying, as for `tags`.
 
+## Another reserved key: `read_from`
+
+`- read_from: ocr` marks a card whose values rest on an equation, table or figure
+from a page that was OCR'd and never read from its image. OCR garbles exactly
+those, so such a card cannot be checked: the validator counts it as resting on
+OCR, never as verified, and `verification.py todo` keeps it away from the
+verifier. When the page has been read from its image (`../scripts/vision_pages.py`,
+see `vision-budget.md`), remove the line. Workers set it; they never read page
+images themselves.
+
 ## Where a card lives
 
 In the document's note, after `## Implementation Notes`, as one

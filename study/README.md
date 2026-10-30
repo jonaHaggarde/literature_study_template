@@ -35,6 +35,8 @@ study/
     build_review_table.py           <- rebuilds ../article-review/sections/comparison_rows.tex from the notes' method cards
     build_decision_trees.py           <- regenerates the mermaid diagram under each decision-tree table in ../ideation/
     method_cards.py                   <- shared helpers for method cards (imported, not run)
+    ocr_support.py                     <- OCR tool discovery and OCR of scans (run it alone to see what is missing)
+    vision_pages.py                    <- the budgeted way to read page images: plan, approve, ticket, record
     verification.py                    <- records and reports which method cards the row-verifier has checked
     validate_repo.py                 <- structural health check + --fix, rerun after every batch
     requirements.txt
@@ -147,14 +149,20 @@ real backlog. By hand:
    ```
    to regenerate the auto-aggregated part of `topics/gaps.md` from their
    Open-questions sections.
-7. If a PDF is a scan and comes out with a `LOW TEXT YIELD` warning, OCR
-   it first and re-run:
-   ```powershell
-   ocrmypdf PDFs\scan.pdf PDFs\scan.pdf --skip-text
-   python scripts\convert.py
-   ```
-   (`pip install ocrmypdf`, plus Tesseract + Ghostscript — see
-   https://ocrmypdf.readthedocs.io/en/latest/installation.html)
+7. **Scans.** A PDF with no extractable text is OCR'd automatically when
+   `ocrmypdf` and Tesseract are installed. `python scripts\ocr_support.py` shows
+   what is missing and the commands to install it (nothing is installed for you;
+   the scripts also look in the default install folders, so a Tesseract that is
+   not on PATH still works). OCR runs on a copy and never changes the PDF. A scan
+   converted earlier without OCR is fixed in place, keeping everything already
+   written in its note, with `python scripts\convert.py --reocr`.
+   OCR text is marked `(ocr)` per page. It is good on prose and bad on equations,
+   symbols and tables, so the note lists the equation-heavy pages, and a method
+   card that rests on one carries `read_from: ocr` and is not counted as verified.
+   Reading such pages from their images is possible but costs tokens, so it is
+   rationed: `/vision-read`, under the limits in
+   `ai_instructions/vision-budget.md`, one small ticket at a time, with your
+   approval.
 
 ## How Claude should use this repo
 

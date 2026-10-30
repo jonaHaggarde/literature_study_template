@@ -54,6 +54,13 @@ cap has not read the document.
   other people's work, a standard or a dataset gets no section. Use the
   document's own terms, plain text, short phrases, blank rather than
   `n/a`. Describe what the document reports, never a judgment.
+  **If the note's `## Content` begins with an OCR notice, check each pages'
+  marker:** a card value that rests on an equation, a table, a symbol or a figure
+  from a page marked `(ocr)` has not really been read (OCR garbles exactly those).
+  Add `- read_from: ocr` to that card; it keeps the card out of verification
+  until the page is read from its image. Prose-based values from `(ocr)` pages
+  are fine, and pages marked `(vision)` count as read. You never read page images
+  yourself and never ask for pages: report which pages the card needed.
 - The catalog fields: `authors`, `year`, `type`, `approach`,
   `contribution`, `compares` where applicable, `tags`, `summary`.
   Title/authors/year in the stub were pre-filled from the source file's
