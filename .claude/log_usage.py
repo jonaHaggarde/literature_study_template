@@ -71,7 +71,7 @@ remote is shared or public and you would rather it stayed local, add
 GUARDS = [
     (re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+"), "an email address"),
     (re.compile(r"https?://|www\."), "a URL"),
-    (re.compile(r"[A-Za-z]:[\\/]|(?:^|\s)/(?:home|Users|mnt|var|etc)/"), "a file path"),
+    (re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/]|(?:^|\s)/(?:home|Users|mnt|var|etc)/"), "a file path"),
     (re.compile(r"\b[A-Za-z0-9_\-]{32,}\b"), "a long token-like string"),
     (re.compile(r"(?i)\b(password|passwd|secret|api[_ -]?key|token)\s*[:=]"), "a credential"),
 ]

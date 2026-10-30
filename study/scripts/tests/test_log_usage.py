@@ -47,6 +47,14 @@ class Guards(unittest.TestCase):
         ):
             self.assertTrue(self.refused(bad), bad)
 
+    def test_a_url_is_reported_once_not_also_as_a_path(self):
+        problems = lu.check_text("see https://example.org/page")
+        self.assertEqual(len(problems), 1)
+        self.assertIn("URL", problems[0])
+
+    def test_a_windows_drive_path_is_still_caught(self):
+        self.assertTrue(any("path" in p for p in lu.check_text(r"opened C:\work\file.md")))
+
     def test_too_long_is_refused_with_the_limit_named(self):
         problems = lu.check_text("x " * 300)
         self.assertTrue(any("limit" in p for p in problems))

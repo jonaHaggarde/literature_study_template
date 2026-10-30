@@ -70,6 +70,16 @@ but not yet a `/process-batch` argument), F5, F7, S1 to S7, L1 to L6, and the
   loudly (it first returned success and merged nothing), and the batch docs
   say to put the schema in the worker prompt.
 
+## Release checklist for `main` (noted 2026-10-30)
+
+`main` must stay clean and cloneable. Before a release from `development`:
+
+- **Reset `.claude/usage-log.md` to the header only** (no entries): sessions in
+  this repo may have appended entries while the template was being developed.
+- Remove `roadmap-notes.md` and `feedback-notes.md` if they should not ship
+  (they are template-development notes, not part of the template).
+- Run the validator and the script tests, and check the Actions tab.
+
 ## Deferred and dropped (2026-10-30)
 
 - **S5, versioning: deferred.** How a spec is versioned feels project-specific
@@ -91,6 +101,17 @@ but not yet a `/process-batch` argument), F5, F7, S1 to S7, L1 to L6, and the
   source, `study/scripts/build_decision_trees.py` generates the mermaid, the
   validator checks the table and reports how many rejected alternatives were
   examined; the style and its reason are in the root `CLAUDE.md`).
+
+### The usage log (built 2026-10-30, branch `dev-usage-log`)
+
+`.claude/usage-log.md` ships empty in every fork. A rule in the root `CLAUDE.md`
+tells Claude when to append a line (a new kind of request, a structural rework,
+friction, a bug, an idea) and what never goes in; `.claude/log_usage.py` dates
+the entry, holds it to one line of at most 400 characters, and refuses text that
+looks like content (email, URL, path, secret, long token). The validator counts
+entries and warns on a hand-edited one that breaks the format. The README
+explains it in plain words, including how to gitignore or turn it off. It is a
+rule, not a hook, so entries will sometimes be missed; the rule says so.
 
 ### The decision tree and the GUI (agreed 2026-10-30)
 
