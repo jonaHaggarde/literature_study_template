@@ -5,11 +5,15 @@ on:
     paths:
       - "study/**"
       - "theory/**"
+      - "article/**"
+      - ".claude/**"
       - ".github/workflows/validate.yml"
   pull_request:
     paths:
       - "study/**"
       - "theory/**"
+      - "article/**"
+      - ".claude/**"
       - ".github/workflows/validate.yml"
 
 jobs:
@@ -20,6 +24,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Run structural validation (catalog/notes/manifest sync, schema, tags, dossiers, mermaid, derived-index freshness)
+      - name: Run structural validation (catalog/notes/manifest sync, schema, tags, dossiers, mermaid, derived-index freshness, article citations, method cards, derived article files)
         working-directory: study
         run: python scripts/validate_repo.py

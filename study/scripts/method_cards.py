@@ -7,12 +7,24 @@ BibTeX-style citation key derived from a catalog entry.
 Imported by validate_repo.py and build_article_table.py; not run directly.
 """
 
+import hashlib
 import re
+import sys
 import unicodedata
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from build_catalog_index import is_processed  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CARD_SCHEMA_PATH = REPO_ROOT / "ai_instructions" / "method-card.md"
+FAMILIES_PATH = REPO_ROOT / "topics" / "families.md"
+
+# Reserved card key: groups rows in the article table. It is not a column,
+# and it is collection-derived (proposed by a worker, ratified centrally),
+# so it is not listed in method-card.md's '## Fields'.
+FAMILY_KEY = "family"
 
 # Used only if method-card.md is missing or has no parsable field list;
 # the real source of truth is that file.
@@ -23,6 +35,7 @@ NEXT_H2_RE = re.compile(r"^## ", re.MULTILINE)
 CARD_HEAD_RE = re.compile(r"^### (.+?)\s*$")
 CARD_FIELD_RE = re.compile(r"^- ([A-Za-z_][A-Za-z0-9_]*):[ \t]*(.*)$")
 SCHEMA_FIELD_RE = re.compile(r"^- `([a-z_][a-z0-9_]*)`")
+FAMILY_LINE_RE = re.compile(r"^(?:- )?`([^`]+)`")
 
 
 def load_fields():
@@ -39,6 +52,41 @@ def load_fields():
             if m:
                 fields.append(m.group(1))
     return fields or list(DEFAULT_FIELDS)
+
+
+def load_families():
+    """Ordered canonical family names from topics/families.md: one
+    backtick-wrapped name at the start of a line (optionally after '- ').
+    Empty when the file is missing or ships empty."""
+    if not FAMILIES_PATH.exists():
+        return []
+    out = []
+    for line in FAMILIES_PATH.read_text(encoding="utf-8").splitlines():
+        m = FAMILY_LINE_RE.match(line.strip())
+        if m and m.group(1) not in out:
+            out.append(m.group(1))
+    return out
+
+
+def card_hash(name, values):
+    """Short content hash of a card, so a verification record can tell
+    whether the card changed after it was checked."""
+    blob = name + "\n" + "\n".join(f"{k}={values[k]}" for k in sorted(values))
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+
+def iter_cards(entries):
+    """Yield (entry_id, fields, note_rel, name, values, cite_key) for every
+    card in every processed entry's note, in catalog order."""
+    keys = assign_cite_keys(entries)
+    for entry_id, f in entries:
+        if entry_id == "EXAMPLE" or not is_processed(f) or not f.get("note"):
+            continue
+        note = REPO_ROOT / f["note"]
+        if not note.exists():
+            continue
+        for name, values in parse_cards(note.read_text(encoding="utf-8")):
+            yield entry_id, f, f["note"], name, values, keys[entry_id]
 
 
 def parse_cards(note_text):
@@ -87,6 +135,8 @@ def assign_cite_keys(entries):
     the same surname and year."""
     keys, seen = {}, {}
     for entry_id, f in entries:
+        if entry_id == "EXAMPLE":
+            continue
         base = cite_key_base(f.get("authors", ""), f.get("year", ""))
         n = seen.get(base, 0)
         seen[base] = n + 1

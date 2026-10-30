@@ -26,6 +26,15 @@ Changing a field afterwards means revisiting every card, which is the main
 cost of this design; the first dozen documents are the right time to find
 out the columns are wrong.
 
+## Grouping: the `family` key
+
+A card may carry one more key, `- family: name`, which is **not** a column.
+It groups the rows of the table by method family and is defined in
+`../topics/families.md` (which ships empty). Unlike the fields above it is
+**collection-derived**: it depends on the other methods in the corpus, so a
+worker proposes it in its report and the coordinator writes it into the card
+after ratifying, as for `tags`.
+
 ## Where a card lives
 
 In the document's note, after `## Implementation Notes`, as one

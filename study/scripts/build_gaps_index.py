@@ -22,7 +22,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TOPICS_DIR = REPO_ROOT / "topics"
 GAPS_PATH = TOPICS_DIR / "gaps.md"
-SKIP = {"README.md", "gaps.md", "vocabulary.md"}
+SKIP = {"README.md", "gaps.md", "vocabulary.md", "families.md"}
 
 BEGIN_MARKER = "<!-- BEGIN AUTO-GENERATED: scripts/build_gaps_index.py -->"
 END_MARKER = "<!-- END AUTO-GENERATED -->"

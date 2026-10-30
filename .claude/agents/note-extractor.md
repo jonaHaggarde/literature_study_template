@@ -98,8 +98,10 @@ document, and no amount of careful reading will recover it.
 - **Document-derived** — title, authors, year, type, approach, compares,
   summary, Key Findings, Implementation Notes, Method Cards. Yours; write
   them.
-- **Collection-derived** — `tags`, the in/out-of-scope verdict, and any
-  coverage gap you think the document exposes. **Propose these
+- **Collection-derived** — `tags`, the in/out-of-scope verdict, any
+  coverage gap you think the document exposes, and the `family` of each
+  method card (from `study/topics/families.md`; never write a `family:`
+  line in a card yourself). **Propose these
   explicitly and separately in your report**, with your reasoning, and
   flag them as needing ratification. Do not treat your scope verdict as
   settled: a document acquired deliberately to fill a known gap can look

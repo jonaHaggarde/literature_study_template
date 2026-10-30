@@ -49,6 +49,7 @@ re-checks them. What is genuinely cheap is *locating* things.
 | --- | --- | --- | --- |
 | **Scout** | Retrieval. Large inputs, tiny outputs, no interpretation. Returns paths, line numbers, short verbatim quotes — never bulk text. | "Which notes cover X?" · "Which ideation files mention Y?" · grepping `reference-index.md` for leads | `corpus-scout` — Sonnet, low effort |
 | **Extractor** | Structured fill-in under a schema that already exists. Bounded, checkable output. | Filling a `catalog.md` stub plus a note's `Key Findings` / `Implementation Notes` | `note-extractor` — Sonnet, medium effort |
+| **Verifier** | Narrow check of a claim against its source text. Bounded, binary-ish output, no judgment about quality. | Checking a note's method cards against its extracted text before they go into the article table | `row-verifier` — Haiku, low effort |
 | **Synthesist** | Judgment. Comparing sources against each other, forming a recommendation, deciding what is missing. | Building or updating a `topics/` dossier | `dossier-synthesist` — Opus, medium effort |
 | **Coordinator** | The main session. Merges worker output, ratifies judgment calls, runs the scripts, commits. | Everything in `batch-orchestration.md`'s coordinator responsibilities | Whatever the session is running on |
 
@@ -85,7 +86,7 @@ synthesis. It is:
 | | Fields | Handling |
 | --- | --- | --- |
 | **Document-derived** | title, authors, year, type, approach, compares, summary, Key Findings, Implementation Notes, Method Cards | Worker writes them, accepted as-is |
-| **Collection-derived** | `tags`, the scope verdict, any gap flag | Worker **proposes**, coordinator **ratifies** |
+| **Collection-derived** | `tags`, the scope verdict, any gap flag, a method card's `family` | Worker **proposes**, coordinator **ratifies** |
 
 Collection-derived fields depend on the state of the collection: which
 tags already exist and what they are used for, what `topics/gaps.md`

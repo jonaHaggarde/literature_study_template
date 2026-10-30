@@ -30,7 +30,8 @@ Routing, for a session starting at the repo root:
   belongs in it and what doesn't. Read that before adding a file.
 - Writing the study up as a literature review article (the comparison
   table, introduction, related work) → `article/README.md`, then follow
-  `article/workflow.md`. The article is a view of `study/`, written from
+  `article/workflow.md` (the `/article` command runs that sequence and
+  reports what is missing). The article is a view of `study/`, written from
   the dossiers; findings are recorded in `study/` first and never only in
   the article. **The review article contains no decisions**: it reports
   what the literature says, never what the project chose or recommends.

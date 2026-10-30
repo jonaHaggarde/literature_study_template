@@ -33,9 +33,11 @@ trail and the next edit can silently change it.
 | Path | Holds |
 |---|---|
 | `main.tex` | Preamble, title, abstract, and the `\input` order of the sections |
-| `sections/` | One `.tex` file per section, plus `references.tex` |
+| `sections/` | One `.tex` file per section |
 | `sections/comparison_table.tex` | The table's float, caption and label. Hand-written |
 | `sections/comparison_rows.tex` | The table body. **Generated** from the notes' method cards by `study/scripts/build_article_table.py`; never hand-edit |
+| `sections/references.tex` | The whole bibliography. **Generated** by the same script, in order of first citation; never hand-edit |
+| `sections/references_extra.tex` | Hand-written `ibitem`s for sources that are not in the catalog (a provided document, a rulebook) |
 | `figs/` | TikZ sources, one file per figure, `\input` from the sections |
 
 ## Filling it in
@@ -61,17 +63,19 @@ flowchart LR
 1. **Fix the scope** in `../study/ai_instructions/scope.md` first. The
    article's "Scope and method" section is that scope in prose.
 2. **Table and taxonomy first.** Decide the columns (the fields in
-   `../study/ai_instructions/method-card.md`) and the method families, have
-   the notes carry method cards, generate the table with
-   `study/scripts/build_article_table.py`, and draw `figs/taxonomy.tex`.
-   The table is the core; the rest explains it.
+   `../study/ai_instructions/method-card.md`) and the method families
+   (`../study/topics/families.md`, which ships empty), have the notes carry
+   method cards, generate the table with
+   `study/scripts/build_article_table.py`, and draw `figs/taxonomy.tex` from
+   the families. The table is the core; the rest explains it.
 3. **Related work and comparison text** next, one paragraph per family or
    earlier review.
 4. **Introduction, discussion and abstract last**, once you know what the
    comparison shows. They are the easiest to write and the easiest to get
    wrong early.
-5. **Remove the status banner** in the abstract only after every table entry
-   and claim has been checked against its source.
+5. **Verify, then remove the status banner.** A cheap `row-verifier` agent
+   checks every method card against its source text; the banner in the
+   abstract comes off only after that passes and you have read the PDF.
 
 A table row exists because a note has a method card, and its reference is
 derived from the catalog entry, so a row cannot lack a source. To change a
@@ -85,14 +89,18 @@ cell, change the card in the note and rerun the script; never edit
 - **`\openissue{...}`** sets off a question the sources do not settle.
 - **Citations.** The root `CLAUDE.md` requires numbered markers in order of
   first appearance with a reference list at the end, local to each file. In
-  LaTeX that is `\cite{key}` plus a plain `thebibliography` list in
-  `sections/references.tex` (no bibtex run). The `cite` package numbers
-  entries in order of first citation, and the numbering is local to this
-  article. Each source should be in `../study/catalog.md` with a note in
-  `../study/notes/`.
+  LaTeX that is `\cite{key}` plus a plain `thebibliography` list (no
+  bibtex run). `thebibliography` numbers entries by their position in the
+  list, not by citation order, so `build_article_table.py` writes
+  `sections/references.tex` in order of first citation in the source.
+  Numbering is local to this article. A catalogued source is cited by its
+  derived key (first author's surname + year); anything else goes in
+  `sections/references_extra.tex`.
 - **Check.** `study/scripts/validate_repo.py` fails if a `\cite` key has no
   matching `\bibitem` (it would render as `[?]`) and warns about a
-  `\bibitem` that is never cited.
+  `\bibitem` that is never cited. It also rebuilds the derived files, counts
+  verified method cards, and warns on decision language (the review contains
+  no decisions).
 - **Status banner.** The abstract says the draft is AI-assisted and
   unverified. That is the honest state of any draft until checked.
 
