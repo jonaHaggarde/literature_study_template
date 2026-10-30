@@ -107,8 +107,16 @@ per-document and apply whether run serially or inside a worker.
    this verifies factual accuracy. For that, spend two minutes running
    2-3 real discovery queries (see below) against the freshly-updated
    catalog and sanity-check the results by eye.
-7. If a PDF is a scan and comes out with a `LOW TEXT YIELD` warning, OCR
-   it first (`ocrmypdf`) and re-run `convert.py`.
+7. **Scans.** `convert.py` OCRs a PDF with no extractable text when the tools
+   exist (`python scripts/ocr_support.py` says what is missing; never install for
+   the user, print the hints). OCR'd pages are marked `(ocr)`, and the note's
+   Content opens with a notice listing the equation-heavy ones. Prose from OCR is
+   fine to use; a value resting on an `(ocr)` equation, table or figure is **not
+   read**: mark the method card `read_from: ocr`, and say so in the report. Reading
+   page images is rationed and is never your decision alone: use `/vision-read`
+   (`vision-budget.md`), one ticket at a time, with the user's approval. A scan
+   converted before OCR was available is fixed with
+   `python scripts/convert.py --reocr`, which keeps what is already written.
 
 ## Answering literature questions
 

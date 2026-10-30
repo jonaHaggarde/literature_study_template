@@ -34,6 +34,7 @@ Exit code: 1 if any FAIL, 0 otherwise (WARN/INFO never fail the run).
 """
 
 import json
+from datetime import date
 import re
 import subprocess
 import sys
@@ -580,7 +581,12 @@ def check_method_cards(entries, exempt_types):
                 log("WARN", "method-cards", f"'{title}': duplicate card name '{name}'")
             seen.add(name.lower())
             for key in values:
-                if key == method_cards.FAMILY_KEY:
+                if key == method_cards.READ_FROM_KEY:
+                    if values[key] not in method_cards.READ_FROM_VALUES:
+                        log("WARN", "method-cards",
+                            f"'{title}' / '{name}': read_from must be one of "
+                            f"{', '.join(method_cards.READ_FROM_VALUES)}, not '{values[key]}'")
+                elif key == method_cards.FAMILY_KEY:
                     if value_is_unlisted(values[key], families):
                         log("WARN", "method-cards", f"'{title}' / '{name}': family '{values[key]}' is not in topics/families.md (propose it there, or fold it into an existing family)")
                 elif key not in fields:
@@ -651,7 +657,7 @@ def check_verification(entries):
         "INFO", "verification",
         f"{counts.get('verified', 0)} of {len(statuses)} method card(s) verified "
         f"({counts.get('unverified', 0)} unverified, {counts.get('stale', 0)} stale, "
-        f"{counts.get('failed', 0)} failed/unclear)",
+        f"{counts.get('failed', 0)} failed/unclear, {counts.get('ocr-only', 0)} resting on OCR text)",
     )
     for key, status in statuses:
         if status == "stale":
@@ -898,6 +904,47 @@ def check_requirements(entries):
     log("INFO", "requirements", f"{len(files)} requirements file(s), {tbd} TBD/TBR marker(s) remaining")
 
 
+def check_ocr():
+    """Scanned PDFs and the budgeted reading of their page images.
+
+    A scan with no usable text that was never OCR'd is a document the study cannot
+    read at all, so it is a warning (it used to be a quiet info line). OCR'd
+    documents are counted, with how many equation-heavy pages have not been read
+    from their images; that number is information, since most such pages do not
+    matter. Pages marked (vision) must have been recorded through
+    scripts/vision_pages.py: a hand-edited marker would bypass the budget's audit."""
+    if not MANIFEST_PATH.exists():
+        return
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    n_ocr = unread = 0
+    for relpath, m in sorted(manifest.items()):
+        if m.get("extraction") == "ocr":
+            n_ocr += 1
+            unread += len([p for p in m.get("ocr_suspect_pages", []) if p not in m.get("vision_pages", [])])
+        elif m.get("low_text_yield"):
+            log("WARN", "ocr",
+                f"{relpath}: a scan with no usable text, not OCR'd, so the study cannot read it. "
+                "Run `python scripts/ocr_support.py` to see whether OCR is available, then "
+                "`python scripts/convert.py --reocr`.")
+        note = REPO_ROOT / m.get("notes_path", "")
+        if m.get("notes_path") and note.exists():
+            marked = {int(n) for n in re.findall(r"<!-- page: (\d+) \(vision\) -->",
+                                                 note.read_text(encoding="utf-8", errors="replace"))}
+            stray = sorted(marked - set(m.get("vision_pages", [])))
+            if stray:
+                log("WARN", "ocr",
+                    f"{m['notes_path']}: page(s) {stray} are marked (vision) but were not recorded through "
+                    "scripts/vision_pages.py, so they escaped the page budget's audit (hand-edited?)")
+    log("INFO", "ocr", f"{n_ocr} OCR'd document(s); {unread} equation-heavy page(s) not read from images")
+    ledger = REPO_ROOT / ".ocr" / "ledger.json"
+    if ledger.exists():
+        try:
+            used = int(json.loads(ledger.read_text(encoding="utf-8")).get(date.today().isoformat(), 0))
+        except (ValueError, OSError):
+            used = 0
+        log("INFO", "ocr", f"vision usage: {used} page(s) read from images today")
+
+
 def check_catalog_index(rebuild=True):
     """catalog-index.md is a derived view of catalog.md, read in full at
     the start of most sessions. A stale index is worse than no index: it
@@ -1029,6 +1076,7 @@ def main():
     check_decision_trees(rebuild=rebuild)
     check_gaps_index(rebuild=rebuild)
     check_usage_log()
+    check_ocr()
     check_requirements(entries)
     check_article()
     check_method_cards(entries, exempt_types)

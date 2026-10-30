@@ -16,6 +16,10 @@ Write-Host "Installing dependencies..."
 & .\.venv\Scripts\python.exe -m pip install -r scripts\requirements.txt
 
 Write-Host ""
+Write-Host "OCR (optional, for scanned PDFs):"
+& .\.venv\Scripts\python.exe scripts\ocr_support.py
+
+Write-Host ""
 Write-Host "Done. Activate the environment in your shell with:"
 Write-Host "  .venv\Scripts\Activate.ps1"
 Write-Host "Then drop PDFs into PDFs\ and run: python scripts\convert.py"

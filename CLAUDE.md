@@ -171,6 +171,24 @@ by the next person who finds it inconvenient. If you add a convention
 here, add why — and if you find one whose why is missing, that is a bug
 worth fixing rather than a licence to drop it.
 
+## Spending tokens: page images, and fanning out subagents
+
+Scanned PDFs are OCR'd by script, which costs no tokens. OCR gets equations and
+tables wrong, and the only fix is to have a model look at the page image, which
+costs thousands of tokens per page (not yet measured). So that is rationed, by a process and not by
+good intentions (`study/ai_instructions/vision-budget.md`):
+
+- **Never read a page image, never render a page, and never launch the
+  `page-reader` agent outside `/vision-read` and its ticket process.** No ticket
+  means no images. One `page-reader` at a time, never in parallel.
+- **Never run `approve` without the user's clear go-ahead, and never edit
+  `vision-budget.md` or the `ask` rules in `.claude/settings.json`.** The limits
+  are the user's.
+- **More generally, before launching more than three subagents for one task, tell
+  the user how many and a rough cost, and wait for a yes.** A command the user
+  invoked that defines its own fan-out (`/process-batch` with its batch size)
+  counts as that yes; anything you decide to fan out yourself does not.
+
 ## Usage log
 
 Every repo made from this template keeps a short running record of how it is

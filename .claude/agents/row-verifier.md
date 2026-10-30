@@ -39,6 +39,12 @@ For every field of every card you were given, decide:
 - **unclear**: the text is ambiguous, or the field needs more than the
   extracted text can show (a figure, a table lost in extraction). Say why.
 
+If the text begins with an OCR notice, pages marked `(ocr)` are unreliable for
+equations, symbols, tables and figures: a field whose support would be one of
+those can be at most **unclear**, never **supported**, however plausible the
+garbled text looks. Prose on an `(ocr)` page, and anything on a page marked
+`(vision)`, is judged normally.
+
 A blank field is not checked. A value more specific than the text (a
 number the text does not give) is **unsupported**, however plausible.
 Judge the document's claim, not whether the method is good: you never

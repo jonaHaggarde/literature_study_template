@@ -105,34 +105,30 @@ explaining the whole flow and every gate: what each phase is for, what is
 frozen at each gate, what the user is expected to read and do. Depends on
 the gate design, so it is built after it. Not started.
 
-## Scanned PDFs and OCR (own feature)
+## Scanned PDFs and OCR (built 2026-10-30, branch `dev-ocr`)
 
-Added 2026-10-30. Found when three sample papers went through the pipeline:
-a scanned 1960 paper converted to empty text. Today `convert.py` warns
-`LOW TEXT YIELD` and `study/README.md` tells the user to run `ocrmypdf` by
-hand; a scan fails safely (the extractor writes nothing from memory, the
-validator lists it as an unprocessed stub). Not designed: a proper fix is
-its own `dev-ocr` branch, because it is real work:
+A hybrid, decided after testing on a scanned 1960 paper: **OCR by script is the
+base layer** (free, good on prose, bad on equations, symbols and tables), and
+**reading page images is on request only**, because it costs thousands of
+tokens per page (not yet measured). `convert.py` OCRs a scan when `ocrmypdf` and Tesseract
+exist (it also finds them in their default install folders, prints install hints
+and never installs), on a copy, so the PDF and its hash never change. Pages are
+marked `(ocr)`, the note lists the equation-heavy ones, and `--reocr` fixes scans
+converted earlier without touching what is already written in their notes.
 
-- **Tooling.** Tesseract, Ghostscript and ocrmypdf are separate installs and
-  differ per OS, so `setup.ps1` / `setup.sh` need changes and a fallback for
-  when they are missing.
-- **Pipeline.** Detect, OCR and re-convert automatically. The manifest tracks
-  PDFs by hash, so OCR'ing in place changes the hash.
-- **Trust.** OCR garbles equations and symbols, especially in old scans. The
-  extractor and the `row-verifier` need a rule that OCR'd text is lower-trust,
-  and cards from it should be flagged.
-- **Validation.** Report scanned papers that are still unprocessed, instead
-  of a quiet info line.
-- **Alternative to decide on:** reading page images with a vision-capable
-  model instead of OCR, which may handle equations better.
+Reading page images is rationed by structure: a plan, the user's approval, small
+one-at-a-time tickets, a per-request cap in `vision-budget.md` (no daily limit: every ticket is approved by hand, and measured token usage is recorded instead of estimated), and a
+`page-reader` agent with only `Read` and `Write` whose launch asks the user each
+time. Method cards that rest on OCR equations carry `read_from: ocr` and are not
+counted as verified. Not built: tables were not tested, non-English text was not
+tested, and a live `page-reader` launch was not exercised (see `feedback-notes.md`).
 
 ## Where each piece lives
 
 - Phase 1 workflow and the review article: `article-review/` (merged into
   `development` 2026-10-30).
 - Gate events: `dev-gate-events`.
-- OCR and scanned PDFs: this file only, until a `dev-ocr` branch exists.
+- OCR and scanned PDFs: `dev-ocr` (built, not yet merged).
 - What real usage says about the template (bug table, engine features,
   structure and larger ideas, suggested order): `feedback-notes.md`.
 - Everything above beyond phase 1: this file only.

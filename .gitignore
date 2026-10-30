@@ -13,3 +13,6 @@ Thumbs.db
 
 # Worker reports saved for the coordinator's merge: ephemeral
 /study/.batch/
+
+# OCR work area: page images, requests and the page ledger (ephemeral)
+/study/.ocr/
