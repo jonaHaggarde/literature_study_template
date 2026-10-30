@@ -3,7 +3,7 @@
 Run from study/:  python -m unittest discover -s scripts/tests
 
 Why this exists: the tag-casing pass once merged an empty `tags:` line into
-the following `note:` line (the regex `\s?` after the colon matched the
+the following `note:` line (the regex whitespace-optional after the colon matched the
 newline, so the next line became the value). It only showed on unprocessed
 stub entries, only when something else made --fix write the file, and it was
 first blamed on convert.py. A fixture keeps it from coming back.

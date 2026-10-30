@@ -40,6 +40,36 @@ design), and `main` has to stay topic-neutral and cloneable.
 - **`feedback-notes.md` stays separate from `roadmap-notes.md`** (Q1, no
   objection raised).
 
+## Status board (updated 2026-10-30)
+
+Built on three stacked branches, each pushed and **not merged**: merge them in
+this order. Each is based on the one before it, because they touch the same
+files (`convert.py`, the extractor contract).
+
+| Branch | Contains | State |
+|---|---|---|
+| `dev-bugfixes` | B1, B2, B3, B5, B7, B8, B10, B11; regression tests and a CI step to run them | built, tested |
+| `dev-convert-robustness` | B4 (timeout, fallback, save per file), F2 (`_deferred/`, duplicate check, `--only`, `--dry-run`); control characters stripped from extracted text (found by testing) | built, tested |
+| `dev-worker-reports` | F1 (structured report, merge script, schema validation), B6, F6 (tag near-duplicates), reminders to add approved tags and families to the vocabulary files | built, tested |
+
+Open from this file: B9 (tables and equations lost in conversion: depends on
+the OCR / vision-read decision), F3, F4 (partly: the batch size is documented
+but not yet a `/process-batch` argument), F5, F7, S1 to S7, L1 to L6, and the
+`dev-usage-log` branch. OCR is deliberately not in these branches.
+
+**Corrections found while building:**
+
+- **B1's root cause was not carriage returns.** The regex `\s?` after the colon
+  matches the *newline* of an empty `tags:` line, so the next line becomes the
+  value (`tags: note: notes/x.md`). It reproduced here with a plain LF
+  fixture, so it hits every platform, not only CRLF files. The fix is
+  the same (`[ 	]?`), and a regression test pins it.
+- **An agent definition edited mid-session may not reach a worker launched
+  right after.** A worker reported that its contract had no JSON schema and
+  invented a different shape. The merge script now rejects a wrong shape
+  loudly (it first returned success and merged nothing), and the batch docs
+  say to put the schema in the worker prompt.
+
 ## 1. Bugs that are real in this template today
 
 These were found and fixed in the derived repo. Check whether the fix has

@@ -119,11 +119,56 @@ Those are per-document and no other worker touches them.
 Everything else is a report, not an edit. When you have processed all of
 your assigned documents, **stop** and report:
 
-- Per document: the proposed catalog fields, ready to paste.
+- Per document: the catalog fields, in the JSON block below (the
+  coordinator merges them with a script, so do not rely on anyone pasting
+  prose).
 - Separately: your proposed tags, scope verdicts, and gap flags, marked
-  as needing ratification.
+  as needing ratification, in the same JSON block and, briefly, in prose.
 - Anything you could not determine, stated as unknown rather than
   guessed.
+
+## The structured block
+
+End your report with **one fenced `json` block** and nothing after it. The
+coordinator saves it to a file and `study/scripts/merge_worker_report.py`
+writes it into the catalog stub, so the shape matters and the values are
+plain strings. Never put `note` or `source` in it (the stub already has
+them and the script refuses to touch them), and never write `n/a` for an
+empty field: use `""`.
+
+```json
+{
+  "documents": [
+    {
+      "entry_id": "the catalog entry id you were given",
+      "catalog": {
+        "title": "only if the stub title is wrong",
+        "authors": "First Last, First Last",
+        "year": "2020",
+        "type": "paper",
+        "approach": "...",
+        "contribution": "novel-contribution",
+        "compares": "",
+        "summary": "following the summary rule"
+      },
+      "proposed": {
+        "tags": ["tag-a", "tag-b"],
+        "scope_verdict": "in | out | borderline | unknown",
+        "scope_reason": "one sentence",
+        "gap_flags": ["..."],
+        "families": {"Method name exactly as in its card": "proposed-family"}
+      },
+      "unknown": ["names of fields you could not determine"]
+    }
+  ]
+}
+```
+
+`catalog` holds only document-derived fields. Leave out any field you could
+not determine and list it in `unknown`; do not guess. `proposed` is the
+collection-derived part: it is a proposal and the coordinator ratifies it
+before anything is written. If the document has no method card, `families`
+is `{}`.
 
 ## Do not, under any circumstance
 
