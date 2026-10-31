@@ -10,11 +10,12 @@
 \documentclass[10pt,a4paper,twocolumn]{article}
 
 \input{../common/preamble}
+\input{sections/versions}  % generated: \articleversion, \articlereviewstatus, \versiontable
 
 \title{\Large Title of the Review\\[3pt]
        \large A comparison of methods (draft)}
 \author{Authors}
-\date{Draft, \today}
+\date{Version \articleversion, \today}
 
 \begin{document}
 
@@ -28,7 +29,7 @@ chosen, what the comparison covers, and the main take-away. No results of our ow
 
 \smallskip\noindent
 \fcolorbox{red!60!black}{red!5}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\small
-\textbf{Status: first draft, not verified, AI-assisted.} Written with an AI assistant (Claude) from
+\textbf{Status: version \articleversion, \articlereviewstatus; not verified, AI-assisted.} Written with an AI assistant (Claude) from
 the project's literature notes. Every table entry and claim must be checked against the cited
 source before the text is relied on.}}
 \end{abstract}
@@ -44,5 +45,9 @@ source before the text is relied on.}}
 \input{sections/conclusion}
 
 \input{sections/references}
+
+\clearpage\onecolumn
+\section*{Revision history}
+\versiontable
 
 \end{document}

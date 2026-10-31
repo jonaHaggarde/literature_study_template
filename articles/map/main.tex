@@ -1,0 +1,31 @@
+% Map of the field -- skeleton. Gate: map (light). A breadth-first scouting pass: wide and shallow,
+% so the user can see the shape of the field and choose where the review goes deep.
+% Mostly figures and tables; prose is a sentence or two per section.
+% Build: python study/scripts/build_articles.py --only map  (writes articles/map.pdf)
+
+\documentclass[10pt,a4paper]{article}
+
+\input{../common/preamble}
+\input{sections/versions}  % generated: \articleversion, \articlereviewstatus, \versiontable
+
+\title{\Large Map of the Field}
+\author{Authors}
+\date{Version \articleversion, \today}
+
+\begin{document}
+\maketitle
+\statusbox
+
+\input{sections/search}
+\input{sections/taxonomy}
+\input{sections/families}
+\input{sections/vocabulary}
+\input{sections/coverage}
+\input{sections/depth}
+
+\input{sections/references}
+
+\section*{Revision history}
+\versiontable
+
+\end{document}

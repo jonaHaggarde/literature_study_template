@@ -1,0 +1,30 @@
+% Requirements -- skeleton. Gate: requirements (medium, skippable per project; optional module for
+% projects that build something). Version 1 comes after the review; derived requirements grow after
+% the concept decision, as new versions of this article.
+% Build: python study/scripts/build_articles.py --only requirements  (writes articles/requirements.pdf)
+
+\documentclass[10pt,a4paper]{article}
+
+\input{../common/preamble}
+\input{sections/versions}  % generated: \articleversion, \articlereviewstatus, \versiontable
+
+\title{\Large Requirements}
+\author{Authors}
+\date{Version \articleversion, \today}
+
+\begin{document}
+\maketitle
+\statusbox
+
+\input{sections/basis}
+\input{sections/primary}
+\input{sections/derived}
+\input{sections/tbd}
+\input{sections/traceability}
+
+\input{sections/references}
+
+\section*{Revision history}
+\versiontable
+
+\end{document}

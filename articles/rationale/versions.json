@@ -1,0 +1,31 @@
+{
+  "rows": [
+    {
+      "version": "0.1",
+      "time": "2026-10-31 01:10",
+      "kind": "draft",
+      "by": "Claude",
+      "changed": [
+        "main.tex",
+        "sections/assumptions.tex",
+        "sections/criteria.tex",
+        "sections/decision.tex",
+        "sections/options.tex",
+        "sections/rejected.tex",
+        "sections/risks.tex",
+        "sections/trials.tex"
+      ],
+      "summary": "First draft",
+      "files": {
+        "main.tex": "19b66e85cce9414ba081308aaf3121476b0231696279b02c6bfd84f53ed515e6",
+        "sections/assumptions.tex": "aba857b7d998d99669e02669b1ac97c6b9fe7a69aa4c9268d62f614c6b8f18a1",
+        "sections/criteria.tex": "7d3e09eacd1d162cd52169ae6a5248de12b6cebe6588d1279d0a896ae8d735d4",
+        "sections/decision.tex": "564177c9c6463b1f2ad0a79c27291bdc44434ce4c5b1172462c5fdc6f9aff809",
+        "sections/options.tex": "2f5e82ec7d48f15b8c1b9ba58b79cc1e64d43f9aa510a489553b477acc985156",
+        "sections/rejected.tex": "83c26b108074a5c147e10bac5526a039ecbf145786589b60f8bc1d68ab2f4bea",
+        "sections/risks.tex": "4fc75d03835960e2596b5717273856cbaa9e8be627c53e74451e04852f9fb41d",
+        "sections/trials.tex": "269554b33e2463a66d8616c12450d321e9a4a06ac010ac345c95cdd22cf85df0"
+      }
+    }
+  ]
+}

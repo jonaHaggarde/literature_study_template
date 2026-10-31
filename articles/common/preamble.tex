@@ -32,3 +32,16 @@
   \par\smallskip\noindent
   \fcolorbox{red!60!black}{red!5}{\parbox{\dimexpr\columnwidth-2\fboxsep-2\fboxrule\relax}{%
     \small\textbf{Open.} #1}}\par\smallskip}
+
+% \intake{I-12} tags a statement with the intake line it comes from (the definition article);
+% \inferred marks a statement Claude inferred, which the user must confirm or strike.
+\newcommand{\intake}[1]{\textsuperscript{\color{gray}[#1]}}
+\newcommand{\inferred}{\textsuperscript{\color{orange!70!black}[inferred]}}
+
+% \statusbox: version and review status, printed under the abstract. \articleversion and
+% \articlereviewstatus come from the generated sections/versions.tex, which every article
+% inputs after this preamble.
+\newcommand{\statusbox}{\par\noindent
+  \fcolorbox{red!60!black}{red!5}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\small
+    \textbf{Version \articleversion, \articlereviewstatus.} Written with an AI assistant
+    (Claude); check each claim against its source before relying on it.}}\par\bigskip}

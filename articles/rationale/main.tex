@@ -1,0 +1,35 @@
+% Rationale -- skeleton. Gate: concept (full). Chooses a concept, or two or more to be tested, by
+% engineering rationale: criteria, assumptions, prioritisation. Not derivations (those are in the
+% specification articles). No fixed length.
+% Build: python study/scripts/build_articles.py --only rationale  (writes articles/rationale.pdf)
+
+\documentclass[10pt,a4paper]{article}
+
+\input{../common/preamble}
+\input{sections/versions}  % generated: \articleversion, \articlereviewstatus, \versiontable
+
+\title{\Large Rationale for the Concept}
+\author{Authors}
+\date{Version \articleversion, \today}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+\noindent\todo{Contains: the decision, the concept(s) chosen and the main reason, in at most five sentences. Not here: anything the sections do not say.}
+\end{abstract}
+\statusbox
+
+\input{sections/criteria}
+\input{sections/assumptions}
+\input{sections/options}
+\input{sections/decision}
+\input{sections/rejected}
+\input{sections/trials}
+\input{sections/risks}
+
+\input{sections/references}
+
+\section*{Revision history}
+\versiontable
+
+\end{document}

@@ -34,6 +34,7 @@ Exit code: 1 if any FAIL, 0 otherwise (WARN/INFO never fail the run).
 """
 
 import json
+import os
 from datetime import date
 import re
 import subprocess
@@ -47,6 +48,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import method_cards  # noqa: E402
 import verification  # noqa: E402
 import build_bibliography as bibliography  # noqa: E402
+import article_version  # noqa: E402
 import build_decision_trees as decision_trees  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -541,6 +543,26 @@ def check_articles():
             todos += len(todo_re.findall(comment_re.sub("", path.read_text(encoding="utf-8", errors="replace"))))
     if dirs:
         log("INFO", "article", f"{todos} \\todo marker(s) remaining in articles/")
+
+
+def check_article_versions():
+    """Every article keeps a version history, so it is never edited silently. A file
+    changed since the last recorded version is a warning, and a failure in CI (where the
+    environment variable CI is set), so an edit that skipped `article_version.py edit`
+    cannot be merged. The printed table is derived, and rewritten here."""
+    severity = "FAIL" if os.environ.get("CI") else "WARN"
+    for adir in bibliography.article_dirs():
+        stale = article_version.stale_files(adir)
+        if stale is None:
+            log("WARN", "article-version",
+                f"articles/{adir.name}: no versions.json; run `python scripts/article_version.py {adir.name} draft`")
+            continue
+        if stale:
+            names = ", ".join(article_version.short_name(s) for s in stale)
+            log(severity, "article-version",
+                f"articles/{adir.name}: changed since version {article_version.load(adir)['rows'][-1]['version']} "
+                f"({names}); record it with `python scripts/article_version.py {adir.name} edit --summary ...`")
+        article_version.write_table(adir)
 
 
 def value_is_unlisted(value, families):
@@ -1071,6 +1093,7 @@ def main():
     check_root_citations(entries)
     check_decision_trees(rebuild=rebuild)
     check_gaps_index(rebuild=rebuild)
+    check_article_versions()
     check_usage_log()
     check_ocr()
     check_requirements(entries)

@@ -1,0 +1,29 @@
+{
+  "rows": [
+    {
+      "version": "0.1",
+      "time": "2026-10-31 01:10",
+      "kind": "draft",
+      "by": "Claude",
+      "changed": [
+        "main.tex",
+        "sections/coverage.tex",
+        "sections/depth.tex",
+        "sections/families.tex",
+        "sections/search.tex",
+        "sections/taxonomy.tex",
+        "sections/vocabulary.tex"
+      ],
+      "summary": "First draft",
+      "files": {
+        "main.tex": "e271fed29ade8a31e23452b22668833cb43ff58bb92c100d19c6e012c49343fb",
+        "sections/coverage.tex": "9255b1c98b414b711ce32c84f62f44b8f8822f5dbbd89d44182f40de39a1e933",
+        "sections/depth.tex": "87951356d6567161d100391c21283f31de87527dcc4c94c84b85142fb68977f7",
+        "sections/families.tex": "133d88b4837971180e5522c6d69a0a1feacf88dbd6a174b455c41b1a1fdb43fa",
+        "sections/search.tex": "374abbf1f59c28aebf28109d7f35f7a7544c04779626ab6d464355d9caea35b8",
+        "sections/taxonomy.tex": "fa851b0d4af21a5775748899b84a9d40cd4f3f5e6c8041a36543bae660ddfafd",
+        "sections/vocabulary.tex": "e2179b2c2cbcf79a8bd486c8e7bdbeb5c5955f8a3f0059854e0ef96240b11bdf"
+      }
+    }
+  ]
+}
