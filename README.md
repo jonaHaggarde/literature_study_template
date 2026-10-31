@@ -142,9 +142,12 @@ infrastructure.
    loads and routes literature work into `study/`) or with `cd study`
    first (`study/CLAUDE.md` loads and points straight at the operating
    manual). Then just say you're ready to start. Claude's first job is
-   helping you fill in `study/ai_instructions/scope.md` — everything
+   getting `study/ai_instructions/scope.md` written — everything
    downstream, gap-flagging in particular, depends on that being real
-   rather than a placeholder.
+   rather than a placeholder. It will suggest `/intake` first (your files
+   and an interview), then the definition article, which you review and
+   accept before `scope.md` is written from it. If you decline, it falls
+   back on filling in `scope.md` together with you.
 7. Then work through `study/README.md`'s "Adding PDFs" section, or run
    `/process-batch`.
 

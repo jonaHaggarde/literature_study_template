@@ -15,27 +15,28 @@ import intake_check as ic  # noqa: E402
 
 DIGEST = """# Intake digest
 
-| ID | Kind | Statement | Source |
-|---|---|---|---|
-| I-1 | goal | Cut lap time | brief.md, p. 1 |
-| I-2 | unknown | Budget | interview 2026-11-02 |
+| ID | Section | Kind | Statement | Source |
+|---|---|---|---|---|
+| I-1 | goal | goal | Cut lap time | brief.md, p. 1 |
+| I-2 | constraints | unknown | Budget | interview 2026-11-02 |
 """
 
 
 class Parsing(unittest.TestCase):
     def test_rows_are_read_and_the_header_is_skipped(self):
         self.assertEqual(ic.parse_intake(DIGEST),
-                         [("I-1", "goal", "Cut lap time", "brief.md, p. 1"),
-                          ("I-2", "unknown", "Budget", "interview 2026-11-02")])
+                         [("I-1", "goal", "goal", "Cut lap time", "brief.md, p. 1"),
+                          ("I-2", "constraints", "unknown", "Budget", "interview 2026-11-02")])
 
     def test_a_clean_digest_has_no_problems(self):
         self.assertEqual(ic.problems(ic.parse_intake(DIGEST)), [])
 
     def test_duplicates_missing_source_and_unknown_kind_are_found(self):
-        rows = ic.parse_intake("| I-1 | goal | a | s |\n| I-1 | hunch | b | |\n")
+        rows = ic.parse_intake("| I-1 | goal | goal | a | s |\n| I-1 | misc | hunch | b | |\n")
         text = " ".join(ic.problems(rows))
         self.assertIn("more than once", text)
         self.assertIn("kind 'hunch'", text)
+        self.assertIn("section 'misc'", text)
         self.assertIn("no source", text)
 
     def test_next_id_never_reuses_a_number(self):
@@ -43,6 +44,19 @@ class Parsing(unittest.TestCase):
         self.assertEqual(ic.next_id(rows), "I-3")
         self.assertEqual(ic.next_id(rows, dropped=["I-9"]), "I-10")
         self.assertEqual(ic.next_id([]), "I-1")
+
+
+class Coverage(unittest.TestCase):
+    def test_an_unknown_row_does_not_answer_its_section(self):
+        table, missing = ic.coverage(ic.parse_intake(DIGEST))
+        self.assertEqual(table["goal"], (1, 0))
+        self.assertEqual(table["constraints"], (0, 1))
+        self.assertIn("constraints", missing)
+        self.assertNotIn("goal", missing)
+
+    def test_every_section_answered_leaves_nothing_missing(self):
+        lines = "\n".join(f"| I-{i} | {sec} | fact | x | s |" for i, sec in enumerate(ic.SECTIONS, 1))
+        self.assertEqual(ic.coverage(ic.parse_intake(lines))[1], [])
 
 
 class Citations(unittest.TestCase):

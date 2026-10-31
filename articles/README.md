@@ -50,14 +50,24 @@ Folders starting with `_` (the templates) are ignored by the build and the valid
   hand-written entry in `common/references_extra.bib`.
 - **No article is edited silently.** Each has a `versions.json` and a printed
   revision table (version `N.n`, time, kind, sections changed, summary, by). The first draft
-  is `0.1`. Claude records every substantial edit with `python study/scripts/article_version.py
-  <name> edit --summary "..."`, which bumps the minor number and computes which sections
-  changed. Only the user bumps the major number (`review`), after a manual review, so major 0
-  means never reviewed, and the title page says so. When the major number is bumped, the
-  minor rows of the previous version collapse into one summary row in the printed table
-  (`0.1` and every `N.0` row stay); `versions.json` keeps all rows. The validator compares
-  each article with its last version and warns about a change with no row, and fails on it
-  in CI.
+  is `0.1`. Five kinds of row:
+
+  | Kind | Who | Number | When |
+  |---|---|---|---|
+  | `draft` | Claude | 0.1 | the first draft |
+  | `edit` | Claude | minor | a substantial change before acceptance |
+  | `review` | the user | major | after a manual review (major 0 = never reviewed) |
+  | `accepted` | the user | major | a review that also passes the article's gate |
+  | `refined` | Claude, on the user's request | minor | any change to an accepted article |
+
+  Claude records an edit with `python study/scripts/article_version.py <name> edit --summary
+  "..."`, which computes which sections changed. After acceptance `edit` is refused and
+  `refine` (which prompts the user) is the only way in; `review` and `accept` are the user's.
+  In the printed table, runs of `edit` rows fold into one summary row when the major number
+  is bumped; `0.1`, every `review`/`accepted` row and every `refined` row stay, and the
+  refinements fold only when the article is accepted again. `versions.json` keeps all rows.
+  The validator compares each article with its last version and warns about a change with
+  no row, and fails on it in CI.
 - **Derived files are never hand-edited.** `references.bib` and
   `sections/references.tex` and `sections/versions.tex` in each article, and the review's
   `sections/comparison_rows.tex`, are regenerated (by `build_articles.py`, and by

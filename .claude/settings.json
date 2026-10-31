@@ -58,7 +58,9 @@
       "Bash(python study/scripts/convert_intake.py:*)",
       "Bash(python scripts/convert_intake.py:*)",
       "Bash(python study/scripts/intake_check.py:*)",
-      "Bash(python scripts/intake_check.py:*)"
+      "Bash(python scripts/intake_check.py:*)",
+      "Bash(python study/scripts/scope_sync.py check)",
+      "Bash(python scripts/scope_sync.py check)"
     ],
     "ask": [
       "Agent(page-reader)",
@@ -67,6 +69,10 @@
       "Bash(python scripts/vision_pages.py approve *)",
       "Bash(python scripts/vision_pages.py ticket *)",
       "Bash(python study/scripts/article_version.py * review *)",
+      "Bash(python study/scripts/article_version.py * accept *)",
+      "Bash(python study/scripts/article_version.py * refine *)",
+      "Bash(python scripts/article_version.py * accept *)",
+      "Bash(python scripts/article_version.py * refine *)",
       "Bash(python scripts/article_version.py * review *)"
     ]
   }
