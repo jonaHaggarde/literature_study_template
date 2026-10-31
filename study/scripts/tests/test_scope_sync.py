@@ -36,6 +36,20 @@ class States(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(ss.state(Path(tmp) / "scope.md", Path(tmp) / "nope")[0], "no-pipeline")
 
+    def test_the_pipeline_counts_as_present_when_only_the_definition_template_exists(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "scope.md").write_text("<!-- placeholder -->\n", encoding="utf-8")
+            definition = root / "definition"   # not created yet
+            self.assertEqual(ss.state(root / "scope.md", definition)[0], "no-pipeline")
+            (root / "_templates" / "definition").mkdir(parents=True)
+            code, message = ss.state(root / "scope.md", definition)
+            self.assertEqual(code, "waiting")
+            self.assertIn("has not been started", message)
+            self.assertIsNotNone(ss.convert_warning(definition))
+            (root / "scope.md").write_text("# Real scope\n", encoding="utf-8")
+            self.assertEqual(ss.state(root / "scope.md", definition)[0], "fallback")
+
     def test_placeholder_waits_until_the_definition_is_accepted_then_is_ready(self):
         with tempfile.TemporaryDirectory() as tmp:
             d, scope = make(tmp)

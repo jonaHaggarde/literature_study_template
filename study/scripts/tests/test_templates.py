@@ -58,12 +58,12 @@ class Instantiating(unittest.TestCase):
     def test_the_tokens_are_filled_in_and_the_article_starts_at_0_1(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = articles_copy(tmp)
-            folder, _ = na.instantiate("specification", "torque-allocation", root)
-            self.assertEqual(folder.name, "specification-torque-allocation")
+            folder, _ = na.instantiate("specification", "concept-a", root)
+            self.assertEqual(folder.name, "specification-concept-a")
             text = "".join(p.read_text(encoding="utf-8") for p in folder.rglob("*") if p.suffix in (".tex", ".md"))
             self.assertNotIn("{{NAME}}", text)
             self.assertNotIn("{{TITLE}}", text)
-            self.assertIn("Specification: torque allocation", text)
+            self.assertIn("Specification: concept a", text)
             self.assertEqual([r["version"] for r in av.load(folder)["rows"]], ["0.1"])
 
     def test_a_specification_warns_when_the_rationale_is_not_accepted(self):
@@ -92,10 +92,11 @@ class EveryTemplate(unittest.TestCase):
             root, folders = self.instances(tmp)
             self.assertEqual({f.name for f in folders}, {d.name for d in bib.article_dirs(root)})
             phrases = sc.load_phrases()
+            extras = bib.parse_bib_entries((root / "common" / "references_extra.bib").read_text(encoding="utf-8"))
             for folder in folders:
                 with self.subTest(article=folder.name):
                     self.assertEqual(av.stale_files(folder), [])
-                    _bibtex, _refs, unresolved = bib.build_for_article(folder, [], {})
+                    _bibtex, _refs, unresolved = bib.build_for_article(folder, [], extras)
                     self.assertEqual(unresolved, [])
                     problems = [f for f in sc.check_article(folder, phrases) if f.severity == "problem"]
                     self.assertEqual(problems, [])

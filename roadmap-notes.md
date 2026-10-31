@@ -133,15 +133,12 @@ tested, and a live `page-reader` launch was not exercised (see `feedback-notes.m
   structure and larger ideas, suggested order): `feedback-notes.md`.
 - Everything above beyond phase 1: this file only.
 
-## Articles as templates (decided 2026-10-31)
+## Articles as templates (built 2026-10-31)
 
-Step 1 is built: `new_article.py` and `/new-article` create an article from a template in
-`articles/_templates/`, and `test_templates.py` instantiates every template and runs the
-article checks (and a real LaTeX build where installed). Only `specification` is a template,
-because it is the one article that is a family.
-
-Step 2, with the gate machinery: move `definition`, `map`, `review`, `requirements` and
-`rationale` into templates too, so a fresh fork ships no articles and opening a gate creates
-its article. `review` is the awkward one: `build_review_table.py`, the validator's table check
-and `/article` assume `articles/review/` exists and must tolerate its absence. The
-`draft --restart` special case in `article_version.py` then goes away.
+Every article is a template in `articles/_templates/`, created by `new_article.py` and
+`/new-article` when the work reaches it; a fresh repo ships none. `test_templates.py`
+instantiates every template, runs the article checks and builds the PDF where LaTeX is
+installed. `review` was the awkward one: its table builder and the validator checks tolerate
+its absence, and `/article-review` creates it when missing. The skeleton row at 0.1 stays, and
+the first real draft replaces it with `draft --restart`, so a first draft is 0.1. Opening a gate
+is expected to create its article once the gate machinery exists.

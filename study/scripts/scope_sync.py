@@ -66,18 +66,26 @@ def header_line(version, hashes):
     return f"<!-- derived-from: definition v{version}{pairs} -->"
 
 
+def pipeline_present(definition_dir=DEFINITION_DIR):
+    """Whether the repo has the intake pipeline: a definition article, or at least its template
+    (the article is created when the work reaches it, so it may not exist yet)."""
+    return definition_dir.exists() or (definition_dir.parent / "_templates" / "definition").exists()
+
+
 def state(scope_path=SCOPE_PATH, definition_dir=DEFINITION_DIR):
     """(code, message). Codes: no-pipeline, waiting, ready, fallback, unstamped, stale, ok."""
-    if not definition_dir.exists():
+    if not pipeline_present(definition_dir):
         return "no-pipeline", "no definition article: scope.md is written the original way"
-    rows = article_version.load(definition_dir)["rows"]
+    rows = article_version.load(definition_dir)["rows"] if definition_dir.exists() else []
     accepted = article_version.accepted_version(rows)
     scope = scope_path.read_text(encoding="utf-8") if scope_path.exists() else ""
     if PLACEHOLDER in scope[:200] or not scope.strip():
         if accepted:
             return "ready", f"the definition is accepted (v{accepted}): scope.md can be written from it"
-        return "waiting", ("the definition article is not accepted yet: scope.md comes after that gate, "
-                           "and no papers should be gathered or converted before it. Start with /intake")
+        return "waiting", ("the definition article is not accepted yet"
+                           + (" (it has not been started)" if not definition_dir.exists() else "")
+                           + ": scope.md comes after that gate, and no papers should be gathered or "
+                           "converted before it. Start with /intake, then /definition")
     header = read_header(scope)
     if not accepted:
         return "fallback", ("scope.md was written without an accepted definition (the original route); "
@@ -99,9 +107,9 @@ def state(scope_path=SCOPE_PATH, definition_dir=DEFINITION_DIR):
 def convert_warning(definition_dir=DEFINITION_DIR):
     """A warning for convert.py when the intake pipeline is present and the definition is not
     accepted, else None. A warning only: the engine must stay usable on its own."""
-    if not definition_dir.exists():
+    if not pipeline_present(definition_dir):
         return None
-    rows = article_version.load(definition_dir)["rows"]
+    rows = article_version.load(definition_dir)["rows"] if definition_dir.exists() else []
     if article_version.accepted_version(rows):
         return None
     return ("the definition article is not accepted yet (the `definition` gate). scope.md should come "

@@ -66,8 +66,8 @@ class Phrases(unittest.TestCase):
 
 
 class Restating(unittest.TestCase):
-    A = "The estimator fuses wheel speed and yaw rate to estimate vehicle sideslip angle during cornering."
-    B = "To estimate vehicle sideslip angle during cornering, the estimator fuses wheel speed with yaw rate."
+    A = "The estimator combines readings from two independent sensors to estimate the unknown quantity during every transition phase."
+    B = "To estimate the unknown quantity during every transition phase, the estimator combines readings from two independent sensors."
 
     def test_the_same_content_in_two_sections_is_a_problem(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -89,8 +89,8 @@ class Restating(unittest.TestCase):
 
     def test_a_nearby_sentence_that_repeats_is_a_judgment_call(self):
         with tempfile.TemporaryDirectory() as tmp:
-            d = article(tmp, intro="The controller limits yaw moment to protect tyre grip on wet roads. "
-                                    "Wet roads reduce tyre grip, so the limit on yaw moment applies there.\n")
+            d = article(tmp, intro="The scheduler limits the batch size to protect memory headroom on small machines. "
+                                    "Small machines have little memory headroom, so the limit on batch size applies there.\n")
             self.assertIn("restated in a nearby sentence", rules(sc.check_article(d, PHRASES), "judgment"))
 
     def test_two_clauses_of_one_sentence_saying_the_same_are_flagged(self):
@@ -101,8 +101,8 @@ class Restating(unittest.TestCase):
 
     def test_different_content_is_not_flagged(self):
         with tempfile.TemporaryDirectory() as tmp:
-            d = article(tmp, intro="The estimator fuses wheel speed and yaw rate to estimate sideslip angle.\n",
-                        method="The controller allocates torque to the four wheels from the yaw moment demand.\n")
+            d = article(tmp, intro="The estimator combines two sensor readings into one position estimate.\n",
+                        method="The planner assigns each task to a worker from the current queue length.\n")
             self.assertEqual(rules(sc.check_article(d, PHRASES)), [])
 
 
@@ -130,8 +130,8 @@ class Masking(unittest.TestCase):
 class Lists(unittest.TestCase):
     def test_a_list_of_bare_phrases_is_a_judgment_call(self):
         with tempfile.TemporaryDirectory() as tmp:
-            d = article(tmp, intro="\\begin{itemize}\n\\item Speed\n\\item Yaw rate\n\\item Steering\n"
-                                    "\\item Torque\n\\end{itemize}\n")
+            d = article(tmp, intro="\\begin{itemize}\n\\item Alpha\n\\item Beta\n\\item Gamma\n"
+                                    "\\item Delta\n\\end{itemize}\n")
             self.assertIn("list of bare phrases", rules(sc.check_article(d, PHRASES), "judgment"))
 
 

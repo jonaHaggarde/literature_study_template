@@ -44,7 +44,8 @@ Routing, for a session starting at the repo root:
   milestone and what it waits on. Never present a draft from outside, or an
   assumption, as a source of truth.
 - Writing the study up as a literature review article (the comparison
-  table, introduction, related work) → `articles/review/README.md`, then follow
+  table, introduction, related work) → create the article if it does not exist
+  (`/new-article review`), then `articles/review/README.md`, then follow
   `articles/review/workflow.md` (the `/article` command runs that sequence and
   reports what is missing). The article is a view of `study/`, written from
   the dossiers; findings are recorded in `study/` first and never only in

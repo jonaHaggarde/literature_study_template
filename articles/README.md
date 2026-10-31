@@ -2,14 +2,16 @@
 
 The LaTeX articles of a study, one folder each, and their generated PDFs. Every
 stage of the work that is accepted at a gate has an article here, so the root
-stays clear and the PDFs are easy to find.
+stays clear and the PDFs are easy to find. A fresh repo holds **no articles**, only
+their templates: each article is created when the work reaches it.
 
 ```
 articles/
   README.md
   common/           shared preamble, and the hand-written extra sources
-  review/           main.tex, sections/, figs/, references.bib (generated)
-  review.pdf        generated; PDFs sit here, directly in articles/
+  _templates/       one template per article (ignored by the build and the validator)
+  <name>/           a created article: main.tex, sections/, versions.json, references.bib (generated)
+  <name>.pdf        generated; PDFs sit here, directly in articles/
   gates/            reserved for gate definitions and records (not built yet)
   .build/           LaTeX auxiliary files (ignored)
 ```
@@ -25,13 +27,13 @@ name follows the article, not the gate that accepts it.
 | `review` | survey | full |
 | `requirements` | requirements | medium, optional |
 | `rationale` | concept | full |
-| `specification-<name>` | split | full, one per chosen concept; created from a template with `/new-article` |
+| `specification-<name>` | split | full, one per chosen concept |
 
-New articles are created from a template in `_templates/`, never by copying a folder by hand:
-`/new-article specification <name>` (or `python study/scripts/new_article.py ...`). Folders
-starting with `_` are ignored by the build and the validator, and `_templates/README.md`
-explains the mechanism. Today only the specification is a template; the others move into
-templates when the gate machinery is built, so that opening a gate creates its article.
+Create one with `/new-article <kind> [name]` (or `python study/scripts/new_article.py ...`),
+never by copying a folder by hand. The commands that work on an article create it themselves
+when it is missing (`/definition` creates the definition, `/article-review` the review).
+Folders starting with `_` are ignored by the build and the validator; `_templates/README.md`
+explains the mechanism.
 
 ## Rules
 
