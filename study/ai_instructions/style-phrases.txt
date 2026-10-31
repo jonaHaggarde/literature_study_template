@@ -1,0 +1,120 @@
+# Phrases the article style check looks for (study/scripts/style_check.py).
+#
+# One entry per line, matched case-insensitively as a whole phrase. Prefix a line with "re:" to
+# write a regular expression instead. Lines starting with # are comments. Add a phrase whenever
+# the user flags one in a review: this file is how their red pen becomes a check.
+#
+# Sections (the tier decides how a match is reported):
+#   [always]            a problem every time it appears
+#   [unless-conclusion] a problem, except in a conclusion or summary section
+#   [cluster]           vague or evaluative words: a judgment call, only when the sentence
+#                       carries no number and no citation
+#   [repeat]            a judgment call when the article uses it three or more times
+#   [hedge-stack]       two hedges in a row: a problem
+#   [attribution]       a claim with no named source: a problem unless a citation is in the sentence
+
+[always]
+it is important to note
+it should be noted
+it is worth noting
+it is worth mentioning
+needless to say
+in this section
+in this paper we
+in this article we
+as mentioned above
+as discussed above
+as stated above
+as we have seen
+in other words
+that is to say
+put differently
+in order to
+a number of
+the fact that
+due to the fact
+first and foremost
+each and every
+clear and concise
+quickly and easily
+various different
+very unique
+at the end of the day
+state-of-the-art
+cutting-edge
+game-changing
+comprehensive
+novel
+powerful
+pivotal
+leverage
+utilize
+delve
+re:plays? an? (significant|key|crucial|important|vital|major) role
+re:in (today's|the modern) (world|landscape)
+re:rapidly (evolving|changing)
+re:ever-(evolving|changing|growing)
+re:despite (these |the )?challenges
+
+[unless-conclusion]
+in summary
+to summarize
+to summarise
+in conclusion
+to conclude
+overall,
+
+[cluster]
+robust
+efficient
+efficiently
+significant
+significantly
+important
+importantly
+crucial
+key
+various
+numerous
+essentially
+basically
+notably
+substantial
+effective
+effectively
+seamless
+optimal
+
+[repeat]
+furthermore
+moreover
+additionally
+however
+therefore
+thus
+overall
+
+[hedge-stack]
+could potentially
+may potentially
+might potentially
+could possibly
+may possibly
+might possibly
+may perhaps
+could perhaps
+re:(may|might|could) (well )?(possibly|potentially|perhaps) (be|have)
+
+[attribution]
+studies show
+research shows
+research has shown
+experts believe
+experts agree
+it is well known
+it is widely known
+it is widely believed
+it is generally accepted
+many researchers
+some researchers
+re:it has been (shown|argued|suggested) that

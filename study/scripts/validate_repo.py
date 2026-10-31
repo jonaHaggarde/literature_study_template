@@ -51,6 +51,7 @@ import build_bibliography as bibliography  # noqa: E402
 import article_version  # noqa: E402
 import intake_check  # noqa: E402
 import scope_sync  # noqa: E402
+import style_check  # noqa: E402
 import build_decision_trees as decision_trees  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -545,6 +546,26 @@ def check_articles():
             todos += len(todo_re.findall(comment_re.sub("", path.read_text(encoding="utf-8", errors="replace"))))
     if dirs:
         log("INFO", "article", f"{todos} \\todo marker(s) remaining in articles/")
+
+
+def check_article_style():
+    """Advisory style check on the hand-written article text (style_check.py, rules in
+    ai_instructions/article-style.md). Clear problems are warnings, capped per article so one
+    padded draft does not bury everything else; judgment calls are only counted. Nothing here
+    fails a build: a style call is the kind of check people start routing around if it can."""
+    phrases = style_check.load_phrases()
+    for adir in bibliography.article_dirs():
+        findings = style_check.check_article(adir, phrases)
+        problems = [f for f in findings if f.severity == "problem"]
+        for f in problems[:8]:
+            log("WARN", "style", f"articles/{adir.name}/{f.file}:{f.line} {f.rule}: {f.text}")
+        if len(problems) > 8:
+            log("WARN", "style", f"articles/{adir.name}: {len(problems) - 8} more style problem(s); "
+                                 f"run `python scripts/style_check.py {adir.name}`")
+        judgments = len(findings) - len(problems)
+        if judgments:
+            log("INFO", "style", f"articles/{adir.name}: {judgments} style judgment call(s); "
+                                 f"run `python scripts/style_check.py {adir.name}`")
 
 
 def check_scope_sync():
@@ -1127,6 +1148,7 @@ def main():
     check_article_versions()
     check_intake()
     check_scope_sync()
+    check_article_style()
     check_usage_log()
     check_ocr()
     check_requirements(entries)
