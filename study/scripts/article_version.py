@@ -26,7 +26,7 @@ every `refined` row stay, until the article is accepted again: then its refineme
 `versions.json` keeps every row, so nothing is lost; only the printed view is pruned.
 
 Usage (from study/):
-    python scripts/article_version.py NAME draft  [--summary TEXT]
+    python scripts/article_version.py NAME draft  [--summary TEXT] [--restart]
     python scripts/article_version.py NAME edit   --summary TEXT [--by WHO]
     python scripts/article_version.py NAME refine --summary TEXT
     python scripts/article_version.py NAME review --summary TEXT [--condensed TEXT]
@@ -109,14 +109,18 @@ def stamp(now=None):
 
 # ---- the operations --------------------------------------------------------------------------
 
-def add_row(adir, kind, summary, by, condensed=None, now=None):
-    """Append a row for the article's current files. Returns (row, error)."""
+def add_row(adir, kind, summary, by, condensed=None, now=None, restart=False):
+    """Append a row for the article's current files. Returns (row, error).
+    `restart` lets a draft replace the one row of an article that is still the shipped skeleton,
+    so the first real draft of a project is 0.1 and not 0.2."""
     data = load(adir)
     rows = data["rows"]
     files = tracked_files(adir)
     if kind == "draft":
+        if restart and len(rows) == 1 and rows[0]["kind"] == "draft":
+            rows.clear()
         if rows:
-            return None, "this article already has versions; use edit or review"
+            return None, "this article already has versions; use edit or review (or draft --restart on an untouched skeleton)"
         version, changed = "0.1", sorted(files)
     else:
         if not rows:
@@ -273,6 +277,8 @@ def main(argv=None):
     p.add_argument("--summary", default="")
     p.add_argument("--by", default="")
     p.add_argument("--condensed", default="", help="review only: one summary for the minor rows it folds")
+    p.add_argument("--restart", action="store_true",
+                   help="draft only: replace the skeleton's single draft row, so the first real draft is 0.1")
     args = p.parse_args(argv)
 
     adir = ARTICLES_DIR / args.name
@@ -298,7 +304,7 @@ def main(argv=None):
         return 1
     summary = args.summary or "First draft"
     by = args.by or ("User" if args.command in ("review", "accept") else "Claude")
-    row, error = add_row(adir, args.command, summary, by, args.condensed or None)
+    row, error = add_row(adir, args.command, summary, by, args.condensed or None, restart=args.restart)
     if error:
         print(f"{args.name}: {error}", file=sys.stderr)
         return 1

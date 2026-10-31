@@ -55,8 +55,8 @@ not polished. You record; you do not decide, advise or propose solutions.
 
 6. **Check, report, and point to the next step.** Run `python study/scripts/intake_check.py`.
    Say in a few lines: rows by section, what is still `unknown`, which rows conflict. Then
-   always suggest the next step: **the definition article** (`articles/definition`, from
-   this digest). The user's acceptance of that article is the `definition` gate. Until it
+   always suggest the next step: **the definition article** (`/definition`, which drafts
+   `articles/definition` from this digest). The user's acceptance of that article is the `definition` gate. Until it
    passes, `study/ai_instructions/scope.md` is not written and no papers are gathered or
    converted.
 
