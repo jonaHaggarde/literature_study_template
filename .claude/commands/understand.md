@@ -1,6 +1,6 @@
 ---
 description: The understanding check before a gate: questions in chat, answered from memory, so the user slows down and thinks about what was produced. No hard effect on the gate.
-argument-hint: "<gate id>  (map | review | concept | split)"
+argument-hint: "<gate id>  (map | review | concept | split | adhoc)"
 ---
 
 Run the understanding check for the gate in $ARGUMENTS. Its purpose is to make the user think
@@ -35,6 +35,9 @@ about the article before deciding, not to grade them. It does not apply to `defi
    - `concept`: why was each rejected concept rejected?
    - `split`: what has to hold for the chosen concept to work?
 6. **Spot check:** name one claim from the article and ask which source backs it.
+
+For `adhoc` there is no article: ask 1 to 4 over the dossiers and what the study has found so
+far, and 5 as "which area of the scope has the least support, and why".
 
 Ask more or fewer when the article calls for it; this is a sequence to start from, not a form.
 

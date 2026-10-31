@@ -7,6 +7,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -15,6 +16,17 @@ import article_version as av  # noqa: E402
 import build_bibliography as bib  # noqa: E402
 import gate  # noqa: E402
 import new_article as na  # noqa: E402
+
+
+_PATCH = mock.patch.object(gate, "catalog_count", lambda: 0)
+
+
+def setUpModule():
+    _PATCH.start()
+
+
+def tearDownModule():
+    _PATCH.stop()
 
 
 def workspace(tmp):
@@ -194,6 +206,69 @@ class Skipping(unittest.TestCase):
             self.assertIsNone(error)
             self.assertTrue(gate.passed("requirements", gates))
             self.assertEqual(gate.status_lines(root, gates)[3].split()[2], "skipped")
+
+
+class Amendments(unittest.TestCase):
+    def passed_split(self, tmp):
+        root, gates = workspace(tmp)
+        drafted(root, "specification", "alpha")
+        for g in ("definition", "map", "review", "requirements", "concept"):
+            gate.save_record({"id": g, "article": None, "outcome": "passed"}, gates)
+        gate.open_gate("split", article="specification-alpha", **open_args(root, gates))
+        gate.close_gate("split", "first", **open_args(root, gates))
+        return root, gates
+
+    def test_a_later_specification_joins_through_an_amendment(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, gates = self.passed_split(tmp)
+            beta = drafted(root, "specification", "beta")
+            part, error = gate.open_gate("split", article="specification-beta", **open_args(root, gates))
+            self.assertIsNone(error)
+            self.assertEqual(part["article"], "specification-beta")
+            self.assertIn("amendment open", gate.status_lines(root, gates)[5])
+            part, error, _ = gate.close_gate("split", "second", article="specification-beta", **open_args(root, gates))
+            self.assertIsNone(error)
+            self.assertEqual(av.accepted_version(av.load(beta)["rows"]), part["accepted_version"])
+            self.assertEqual(gate.problems_for_validator(root, gates), [])
+            self.assertIn("1 amendment", gate.status_lines(root, gates)[5])
+
+    def test_an_accepted_specification_with_no_amendment_is_reported_and_a_repeat_is_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, gates = self.passed_split(tmp)
+            beta = drafted(root, "specification", "beta")
+            av.add_row(beta, "accept", "raw", "User")
+            self.assertTrue(any("specification-beta" in m for m in gate.problems_for_validator(root, gates)))
+            _, error = gate.open_gate("split", article="specification-alpha", **open_args(root, gates))
+            self.assertIn("already part", error)
+
+
+class AdHocAndNudge(unittest.TestCase):
+    def test_an_ad_hoc_gate_opens_checks_and_closes_with_no_article(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, gates = workspace(tmp)
+            part, error = gate.open_gate("adhoc", **open_args(root, gates))
+            self.assertIsNone(error)
+            self.assertTrue(part["id"].startswith("adhoc-"))
+            _, error = gate.open_gate("adhoc", **open_args(root, gates))
+            self.assertIn("already open", error)
+            gate.note_check("adhoc", "ready", gates_dir=gates)
+            part, error, warnings = gate.close_gate("adhoc", "paused to look", **open_args(root, gates))
+            self.assertIsNone(error)
+            self.assertEqual(part["outcome"], "done")
+            self.assertEqual(warnings, [])
+            self.assertIsNone(gate.load_record("adhoc", gates))
+            second, _ = gate.open_gate("adhoc", **open_args(root, gates))
+            self.assertNotEqual(second["id"], part["id"])
+
+    def test_the_nudge_counts_entries_since_the_last_closed_gate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, gates = workspace(tmp)
+            self.assertIsNone(gate.nudge(14, gates))
+            self.assertIn("15 documents", gate.nudge(15, gates))
+            gate.save_record({"id": "definition", "article": "definition", "outcome": "passed",
+                              "closed": "2026-01-01 10:00", "catalog_count": 20}, gates)
+            self.assertIsNone(gate.nudge(30, gates))
+            self.assertIn("16 documents", gate.nudge(36, gates))
 
 
 if __name__ == "__main__":

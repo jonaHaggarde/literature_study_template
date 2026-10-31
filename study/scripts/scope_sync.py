@@ -32,6 +32,7 @@ import _console  # noqa: F401  (UTF-8 console output on Windows)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import article_version  # noqa: E402
+import gate  # noqa: E402
 from build_bibliography import ARTICLES_DIR  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -66,6 +67,13 @@ def header_line(version, hashes):
     return f"<!-- derived-from: definition v{version}{pairs} -->"
 
 
+def accepted_version(definition_dir=DEFINITION_DIR):
+    """The version the `definition` gate accepted, or None. The gate record is the source of
+    truth (gate.py close writes it together with the article's `accepted` row)."""
+    record = gate.load_record("definition", definition_dir.parent / "gates")
+    return record.get("accepted_version") if record and record.get("outcome") == "passed" else None
+
+
 def pipeline_present(definition_dir=DEFINITION_DIR):
     """Whether the repo has the intake pipeline: a definition article, or at least its template
     (the article is created when the work reaches it, so it may not exist yet)."""
@@ -77,12 +85,12 @@ def state(scope_path=SCOPE_PATH, definition_dir=DEFINITION_DIR):
     if not pipeline_present(definition_dir):
         return "no-pipeline", "no definition article: scope.md is written the original way"
     rows = article_version.load(definition_dir)["rows"] if definition_dir.exists() else []
-    accepted = article_version.accepted_version(rows)
+    accepted = accepted_version(definition_dir)
     scope = scope_path.read_text(encoding="utf-8") if scope_path.exists() else ""
     if PLACEHOLDER in scope[:200] or not scope.strip():
         if accepted:
             return "ready", f"the definition is accepted (v{accepted}): scope.md can be written from it"
-        return "waiting", ("the definition article is not accepted yet"
+        return "waiting", ("the `definition` gate has not passed"
                            + (" (it has not been started)" if not definition_dir.exists() else "")
                            + ": scope.md comes after that gate, and no papers should be gathered or "
                            "converted before it. Start with /intake, then /definition")
@@ -109,18 +117,17 @@ def convert_warning(definition_dir=DEFINITION_DIR):
     accepted, else None. A warning only: the engine must stay usable on its own."""
     if not pipeline_present(definition_dir):
         return None
-    rows = article_version.load(definition_dir)["rows"] if definition_dir.exists() else []
-    if article_version.accepted_version(rows):
+    if accepted_version(definition_dir):
         return None
-    return ("the definition article is not accepted yet (the `definition` gate). scope.md should come "
+    return ("the `definition` gate has not passed. scope.md should come "
             "from it, and papers should wait. Converting anyway.")
 
 
 def stamp(scope_path=SCOPE_PATH, definition_dir=DEFINITION_DIR):
     """Write the derived-from header into scope.md. Returns (ok, message)."""
     rows = article_version.load(definition_dir)["rows"] if definition_dir.exists() else []
-    if not article_version.accepted_version(rows):
-        return False, "the definition is not accepted yet; scope.md is written only after that gate"
+    if not accepted_version(definition_dir):
+        return False, "the `definition` gate has not passed; scope.md is written only after it"
     scope = scope_path.read_text(encoding="utf-8") if scope_path.exists() else ""
     if PLACEHOLDER in scope[:200] or not scope.strip():
         return False, "scope.md is still the placeholder: write it from the definition first"

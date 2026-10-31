@@ -75,8 +75,8 @@ class NoteEdits(unittest.TestCase):
         self.assertIn("tags: [a, b]", m.set_note_tags(NOTE, ["a", "b"]))
 
     def test_family_inserted_under_the_card(self):
-        out = m.set_card_family(NOTE, "Alpha filter", "kalman-type")
-        self.assertIn("### Alpha filter\n- family: kalman-type\n- input: a", out)
+        out = m.set_card_family(NOTE, "Alpha filter", "family-a")
+        self.assertIn("### Alpha filter\n- family: family-a\n- input: a", out)
 
     def test_family_replaced_not_duplicated(self):
         once = m.set_card_family(NOTE, "Alpha filter", "x")
@@ -143,7 +143,7 @@ class EndToEnd(unittest.TestCase):
             (root / "notes" / "p1.md").write_text(NOTE, encoding="utf-8")
             report = {"documents": [{
                 "entry_id": "p1", "catalog": FIELDS, "unknown": ["compares"],
-                "approved": {"tags": ["t1", "t2"], "families": {"Alpha filter": "kalman-type"}},
+                "approved": {"tags": ["t1", "t2"], "families": {"Alpha filter": "family-a"}},
             }]}
             rp = root / "r.json"
             rp.write_text(json.dumps(report), encoding="utf-8")
@@ -159,7 +159,7 @@ class EndToEnd(unittest.TestCase):
             self.assertIn("tags: t1, t2\n", cat)
             self.assertIn("note: notes/p1.md\n", cat)
             self.assertIn("tags: [t1, t2]", note)
-            self.assertIn("- family: kalman-type", note)
+            self.assertIn("- family: family-a", note)
 
 
 if __name__ == "__main__":

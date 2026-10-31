@@ -203,6 +203,22 @@ turn, and tell the user which article moved to which version.
 The reason: the user reads these articles on paper at gates and must be able to trust that
 what they reviewed is what they are shown.
 
+## Assumptions made along the way
+
+When the user writes "assume", "let's assume" or similar, do not file it on a guess. Ask one
+short question with a recommendation: where does it live?
+
+| Level | Test | Where | Workflow to run, without asking again |
+|---|---|---|---|
+| Top-level | It changes the problem, goal, scope or constraints | a `suspicion` row in `intake/intake.md`, source `study <date>`; it reaches the definition when the user asks for a refinement | `intake_check.py --next` for the ID, add the row, `intake_check.py`, then say that the definition's register is behind and `scope.md` may be |
+| One article | It matters to that article only (an algorithm or specification choice) | that article's own assumptions section: a row with an ID, what breaks if false, the date | edit the section, `article_version.py <name> edit` (or `refine` if accepted, which prompts the user), rebuild, `style_check.py` |
+| This chat only | A working premise with no lasting effect | nowhere | none |
+
+The reason: a register that took every small assumption would bury the top-level ones, and one
+that took none would hide what a later article rests on. An assumption in a definition changes
+what the study is about, so it goes through intake, where the trace to what the user said stays
+whole.
+
 ## Reasoning travels with the rule
 
 **Every non-obvious default in this repo carries its reasoning next to

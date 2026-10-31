@@ -1,6 +1,6 @@
 ---
 description: Show where the gates stand, or open a gate and brief the user before the decision. Never closes one.
-argument-hint: "[optional: gate id, e.g. map | review | concept | split]"
+argument-hint: "[optional: gate id, e.g. map | review | concept | split | adhoc]"
 ---
 
 Gates are the points where the user stops, reads an article and decides whether the study moves
@@ -33,6 +33,22 @@ open, and what stops the next one from opening. Do not open anything.
 5. **The article stands still while the gate is open.** If the user's reading leads to a change,
    make it with `article_version.py <name> edit`, tell them, and say the validator will warn
    until `python study/scripts/gate.py refreeze <gate>` is run after they have been told.
+
+## Later specifications (the `split` gate after it has passed)
+
+The gate passes with the first specification article. For another one, the same steps apply
+with `--article specification-<name>` on `open`, `briefing`, `understand`, `close` and
+`refreeze`: it is an amendment recorded under the gate, and only the new article is read.
+
+## `adhoc`: a stop-and-look
+
+`/gate adhoc` is a pause with no article and no acceptance, for when the user wants to look
+at the whole study (or the validator's volume nudge suggests it). Open it the same way
+(`gate.py open adhoc`, the user's call). The briefing is about the study as a whole: entries
+since the last gate, open issues and `	odo` markers across the articles, articles with
+unrecorded changes, plus your own critique of where the study stands (gaps, one-sided
+coverage, anything you are unsure of). `/understand adhoc` asks the questions over the dossiers
+instead of an article. It closes with `gate.py close adhoc --summary "..."` and unlocks nothing.
 
 ## Closing
 

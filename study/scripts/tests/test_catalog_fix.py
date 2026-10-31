@@ -32,10 +32,10 @@ STUB = (
     "summary: TODO - fill in\n"
     "<!-- /entry -->\n"
 )
-DONE = STUB.replace("stub", "done").replace("tags:\n", "tags: Kalman-Filtering, other\n").replace(
+DONE = STUB.replace("stub", "done").replace("tags:\n", "tags: Signal-Filtering, other\n").replace(
     "summary: TODO - fill in", "summary: a real summary"
 )
-CANON = {"kalman-filtering": "kalman-filtering"}
+CANON = {"signal-filtering": "signal-filtering"}
 
 
 class TagCasingFix(unittest.TestCase):
@@ -52,7 +52,7 @@ class TagCasingFix(unittest.TestCase):
         fixed, changed = self.check(STUB + "\n" + DONE)
         self.assertTrue(changed)
         self.assertIn("tags:\nnote: notes/stub.md\n", fixed)
-        self.assertIn("tags: kalman-filtering, other\n", fixed)
+        self.assertIn("tags: signal-filtering, other\n", fixed)
 
     def test_crlf_text_keeps_empty_tags_line(self):
         crlf = (STUB + "\n" + DONE).replace("\n", "\r\n")

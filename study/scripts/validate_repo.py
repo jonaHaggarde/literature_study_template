@@ -585,6 +585,9 @@ def check_gates():
     with no gate record behind it. Warnings only: the user decides what to do with either."""
     for message in gate.problems_for_validator():
         log("WARN", "gate", message)
+    message = gate.nudge(gate.catalog_count())
+    if message:
+        log("INFO", "gate", message)
 
 
 def check_intake():
@@ -943,7 +946,7 @@ def requirements_too_early_reasons(scope_placeholder, n_processed, article_unfin
     elif n_processed == 0:
         reasons.append("no document has been processed into the catalog yet, so there is no survey to ground values in")
     if article_unfinished:
-        reasons.append("the review article is not finished (its 'not verified' status banner is still in place)")
+        reasons.append("the review article has not passed its gate (`review`)")
     return reasons
 
 
@@ -963,8 +966,7 @@ def check_requirements(entries):
     scope_placeholder = (not scope.exists()) or "<!-- placeholder -->" in scope.read_text(encoding="utf-8")
     n_processed = sum(1 for i, f in entries
                       if i != "EXAMPLE" and f["summary"] and "TODO" not in f["summary"])
-    main_tex = REPO_ROOT.parent / "articles" / "review" / "main.tex"
-    article_unfinished = main_tex.exists() and "not verified" in main_tex.read_text(encoding="utf-8")
+    article_unfinished = not gate.passed("review")
     reasons = requirements_too_early_reasons(scope_placeholder, n_processed, article_unfinished)
     if reasons:
         log(
