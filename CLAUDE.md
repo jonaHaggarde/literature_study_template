@@ -163,6 +163,16 @@ missing diagram. A document with no process, ordering, or structure to
 draw should not be forced to invent one, and a hard check on a judgment
 call is the kind of check people start routing around.
 
+## Articles are never edited silently
+
+Every article under `articles/` has a version history (`articles/README.md`). After a
+substantial edit to an article (a claim, number, source, equation, table row or structure),
+run `python study/scripts/article_version.py <name> edit --summary "one line"` in the same
+turn, and tell the user which article moved to which version. Never run its `review`
+command: the major number is the user's, bumped after their own review. The reason: the
+user reads these articles on paper at gates and must be able to trust that what they
+reviewed is what they are shown.
+
 ## Reasoning travels with the rule
 
 **Every non-obvious default in this repo carries its reasoning next to

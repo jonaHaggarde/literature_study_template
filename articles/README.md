@@ -14,10 +14,20 @@ articles/
   .build/           LaTeX auxiliary files (ignored)
 ```
 
-More articles are added as the work reaches them (the project definition, the
-rationale, the specification, and so on). Each is a sibling folder with its own
-`main.tex`; the folder name follows the article (`review`, `rationale`), not the gate
-that accepts it.
+The articles, in the order the work reaches them. Each is a sibling folder with its own
+`main.tex` and a `README.md` stating its purpose and what it is written from; the folder
+name follows the article, not the gate that accepts it.
+
+| Article | Gate | Kind |
+|---|---|---|
+| `definition` | definition | light |
+| `map` | map | light, mostly figures and tables |
+| `review` | survey | full |
+| `requirements` | requirements | medium, optional |
+| `rationale` | concept | full |
+| `specification-<name>` | split | full, one per chosen concept; copy `_templates/specification/` |
+
+Folders starting with `_` (the templates) are ignored by the build and the validator.
 
 ## Rules
 
@@ -38,8 +48,18 @@ that accepts it.
   derived key (first author's surname plus year) and written into the `.bib`
   from the catalog. Any other source (a provided document, a rulebook) is a
   hand-written entry in `common/references_extra.bib`.
+- **No article is edited silently.** Each has a `versions.json` and a printed
+  revision table (version `N.n`, time, kind, sections changed, summary, by). The first draft
+  is `0.1`. Claude records every substantial edit with `python study/scripts/article_version.py
+  <name> edit --summary "..."`, which bumps the minor number and computes which sections
+  changed. Only the user bumps the major number (`review`), after a manual review, so major 0
+  means never reviewed, and the title page says so. When the major number is bumped, the
+  minor rows of the previous version collapse into one summary row in the printed table
+  (`0.1` and every `N.0` row stay); `versions.json` keeps all rows. The validator compares
+  each article with its last version and warns about a change with no row, and fails on it
+  in CI.
 - **Derived files are never hand-edited.** `references.bib` and
-  `sections/references.tex` in each article, and the review's
+  `sections/references.tex` and `sections/versions.tex` in each article, and the review's
   `sections/comparison_rows.tex`, are regenerated (by `build_articles.py`, and by
   every `validate_repo.py` run).
 

@@ -1,0 +1,31 @@
+{
+  "rows": [
+    {
+      "version": "0.1",
+      "time": "2026-10-31 01:10",
+      "kind": "draft",
+      "by": "Claude",
+      "changed": [
+        "main.tex",
+        "sections/assumptions.tex",
+        "sections/constraints.tex",
+        "sections/goal.tex",
+        "sections/problem.tex",
+        "sections/scope.tex",
+        "sections/stakeholders.tex",
+        "sections/success.tex"
+      ],
+      "summary": "First draft",
+      "files": {
+        "main.tex": "72e9b9926f8fbd7809fe75c7c101f9e4fb1222edf2e1fa598306083d6031c0d5",
+        "sections/assumptions.tex": "af09aa4fb2975262b3214d5a2c19f96ab2fcd63ba3fcce78c6a1630858fa2fe6",
+        "sections/constraints.tex": "dceda41d3146190b6af4334e2e88cff88ca6f0f7367aa2c1af02d64311cbc60c",
+        "sections/goal.tex": "eb75967558ca7c024acbcc494ed014cd7e0223a3aa731d192381c41bd7320e40",
+        "sections/problem.tex": "0be409c6d947c2e8c26320db8c653790848a15bf6747e070edb87daa53a5769b",
+        "sections/scope.tex": "b375eab0fe43062dd1824125f051d1b941c7e011eb8a3005ef83338980dce605",
+        "sections/stakeholders.tex": "19764da3b313bf8c23d2196a782da750d0d846996d063fc93ee2223322b06fd3",
+        "sections/success.tex": "5bf67fb42d00c8831c57b498b16488ed04fec96d4a2a97c814a61468ead8b9bb"
+      }
+    }
+  ]
+}

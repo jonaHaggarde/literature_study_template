@@ -32,6 +32,7 @@ import _console  # noqa: F401  (UTF-8 console output on Windows)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from build_bibliography import ARTICLES_DIR, article_dirs  # noqa: E402
+import article_version  # noqa: E402
 from ocr_support import find_tool  # noqa: E402
 
 SCRIPTS = Path(__file__).resolve().parent
@@ -71,6 +72,7 @@ def generate_derived(name, scripts=SCRIPTS):
     if name == "review":
         steps.append("build_review_table.py")
     steps.append("build_bibliography.py")
+    article_version.write_table(ARTICLES_DIR / name)
     for step in steps:
         proc = run([sys.executable, str(scripts / step)], cwd=scripts.parent, timeout=120)
         if proc.returncode != 0:

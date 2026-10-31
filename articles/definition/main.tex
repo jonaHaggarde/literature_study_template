@@ -1,0 +1,34 @@
+% Project definition -- skeleton. Gate: definition (light). Written from intake.md; the
+% accepted source of everything after it. study/ai_instructions/scope.md is derived from it.
+% Build: python study/scripts/build_articles.py --only definition  (writes articles/definition.pdf)
+
+\documentclass[10pt,a4paper]{article}
+
+\input{../common/preamble}
+\input{sections/versions}  % generated: \articleversion, \articlereviewstatus, \versiontable
+
+\title{\Large Project Definition}
+\author{Authors}
+\date{Version \articleversion, \today}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+\noindent\todo{Contains: what the project is, its goal and its scope in at most four sentences. Not here: anything the sections do not say.}
+\end{abstract}
+\statusbox
+
+\input{sections/problem}
+\input{sections/goal}
+\input{sections/scope}
+\input{sections/stakeholders}
+\input{sections/constraints}
+\input{sections/success}
+\input{sections/assumptions}
+
+\input{sections/references}
+
+\section*{Revision history}
+\versiontable
+
+\end{document}

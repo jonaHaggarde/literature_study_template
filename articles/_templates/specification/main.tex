@@ -1,0 +1,39 @@
+% Specification -- template. Copy this folder to articles/specification-<name>/, then run
+%   python study/scripts/article_version.py specification-<name> draft
+% Gate: split (full). Must stand alone: a teammate can take this article as the only source for the
+% implementation. It cites the rationale and the review for the reasoning and the other methods.
+% Build: python study/scripts/build_articles.py --only specification-<name>
+
+\documentclass[10pt,a4paper]{article}
+
+\input{../common/preamble}
+\input{sections/versions}  % generated: \articleversion, \articlereviewstatus, \versiontable
+
+% Notation that belongs to this article only (symbols, macros) goes here, after the shared preamble.
+
+\title{\Large Specification: NAME}
+\author{Authors}
+\date{Version \articleversion, \today}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+\noindent\todo{Contains: what is specified, for what, and what the reader can do with it, in at most four sentences. Not here: anything the sections do not say.}
+\end{abstract}
+\statusbox
+
+\input{sections/introduction}
+\input{sections/assumptions}
+\input{sections/conventions}
+\input{sections/structure}
+\input{sections/component}
+\input{sections/parameters}
+\input{sections/evaluation}
+\input{sections/open_issues}
+
+\input{sections/references}
+
+\section*{Revision history}
+\versiontable
+
+\end{document}

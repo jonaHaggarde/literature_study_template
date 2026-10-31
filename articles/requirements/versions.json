@@ -1,0 +1,27 @@
+{
+  "rows": [
+    {
+      "version": "0.1",
+      "time": "2026-10-31 01:10",
+      "kind": "draft",
+      "by": "Claude",
+      "changed": [
+        "main.tex",
+        "sections/basis.tex",
+        "sections/derived.tex",
+        "sections/primary.tex",
+        "sections/tbd.tex",
+        "sections/traceability.tex"
+      ],
+      "summary": "First draft",
+      "files": {
+        "main.tex": "1269f9ce464d7f600fc8b64253634aad4a6ae65b15eba5c0e6a24ced48be946a",
+        "sections/basis.tex": "a614c34931917d2293b519e22b851524ff16720eb77992bd6b8ccf3ade7e7fd9",
+        "sections/derived.tex": "7d4e075d35347aad3d0a885d563560d91228e88dcf1a20305c2a48877ef073f7",
+        "sections/primary.tex": "6cb2002d1a9592eaa4a107ba4910b826580d66e802aa1e193d7f62365c858bac",
+        "sections/tbd.tex": "87f2fd91d0ee940e8e185ab9283ab3a13e632e9446a78ac025caa2cb765bd86c",
+        "sections/traceability.tex": "b7c1cd9dddb80c15747838f0ca957cca6f9a18bbc5492159fdc74bae02f044c9"
+      }
+    }
+  ]
+}

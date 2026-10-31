@@ -60,7 +60,8 @@ project_documents/      material handed down from outside — nothing self-autho
 ideation/               unverified brainstorming, never citable as literature
 theory/                 explainers of background concepts, for teammates
 meetings/               one file per counterparty, plus internal.md
-articles/                      the LaTeX articles, one folder each (review, ...), their PDFs, shared preamble
+intake/                        what the user hands over before anything is written; feeds the definition
+articles/                      the LaTeX articles, one folder each (definition, map, review, ...), their PDFs, shared preamble
 requirements/           OPTIONAL module (engineering-leaning): where requirements sit in the pipeline; delete if unused
 study/                  the literature-review engine — self-contained
 .claude/                agent definitions, slash commands, permissions
