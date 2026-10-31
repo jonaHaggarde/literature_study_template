@@ -25,9 +25,13 @@ name follows the article, not the gate that accepts it.
 | `review` | survey | full |
 | `requirements` | requirements | medium, optional |
 | `rationale` | concept | full |
-| `specification-<name>` | split | full, one per chosen concept; copy `_templates/specification/` |
+| `specification-<name>` | split | full, one per chosen concept; created from a template with `/new-article` |
 
-Folders starting with `_` (the templates) are ignored by the build and the validator.
+New articles are created from a template in `_templates/`, never by copying a folder by hand:
+`/new-article specification <name>` (or `python study/scripts/new_article.py ...`). Folders
+starting with `_` are ignored by the build and the validator, and `_templates/README.md`
+explains the mechanism. Today only the specification is a template; the others move into
+templates when the gate machinery is built, so that opening a gate creates its article.
 
 ## Rules
 
