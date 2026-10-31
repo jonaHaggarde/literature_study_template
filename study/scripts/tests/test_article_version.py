@@ -160,6 +160,27 @@ class PrintedTable(unittest.TestCase):
             self.assertIn("\\newcommand{\\versiontable}", text)
 
 
+class Restart(unittest.TestCase):
+    def test_a_restart_replaces_the_skeleton_row_so_the_first_real_draft_is_0_1(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = make_article(tmp)
+            v.add_row(d, "draft", "skeleton", "Claude")
+            write(d, "sections/intro.tex", "real text\n")
+            row, err = v.add_row(d, "draft", "First draft", "Claude", restart=True)
+            self.assertIsNone(err)
+            self.assertEqual(row["version"], "0.1")
+            self.assertEqual(len(v.load(d)["rows"]), 1)
+
+    def test_a_restart_is_refused_once_there_is_more_than_the_skeleton_row(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = make_article(tmp)
+            v.add_row(d, "draft", "skeleton", "Claude")
+            write(d, "sections/intro.tex", "x\n")
+            v.add_row(d, "edit", "e", "Claude")
+            self.assertIsNotNone(v.add_row(d, "draft", "again", "Claude", restart=True)[1])
+            self.assertEqual(len(v.load(d)["rows"]), 2)
+
+
 class Acceptance(unittest.TestCase):
     def accepted_article(self, tmp):
         d = make_article(tmp)
