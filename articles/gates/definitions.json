@@ -1,0 +1,23 @@
+{
+  "_comment": "The gates of the study, in order. A fork edits this file to change them. `article` is the folder under articles/ a gate accepts (for a family gate, the prefix: the folder is chosen when the gate opens). `after` lists the gates that must have passed or been skipped. `understand` says whether the gate has the /understand check. `skippable` says whether `gate.py skip` is allowed.",
+  "gates": [
+    {"id": "definition", "title": "Definition", "weight": "light", "article": "definition",
+     "after": [], "understand": false, "skippable": false,
+     "unlocks": "write scope.md from the definition (/definition scope), then gather and convert papers; create the map (/new-article map)"},
+    {"id": "map", "title": "Map", "weight": "light", "article": "map",
+     "after": ["definition"], "understand": true, "skippable": false,
+     "unlocks": "the survey: process papers and dossiers in the depth the map proposed; create the review (/new-article review)"},
+    {"id": "review", "title": "Survey", "weight": "full", "article": "review",
+     "after": ["map"], "understand": true, "skippable": false,
+     "unlocks": "requirements version 1 (/new-article requirements), or the concept stage (/new-article rationale)"},
+    {"id": "requirements", "title": "Requirements", "weight": "medium", "article": "requirements",
+     "after": ["review"], "understand": false, "skippable": true,
+     "unlocks": "the concept stage (/new-article rationale)"},
+    {"id": "concept", "title": "Concept", "weight": "full", "article": "rationale",
+     "after": ["review", "requirements"], "understand": true, "skippable": false,
+     "unlocks": "the specification of the chosen concept (/new-article specification <name>)"},
+    {"id": "split", "title": "Split", "weight": "full", "article": "specification-", "family": true,
+     "after": ["concept"], "understand": true, "skippable": false,
+     "unlocks": "the clean implementation repo; later specifications join by a recorded amendment"}
+  ]
+}

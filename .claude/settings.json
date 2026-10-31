@@ -60,7 +60,15 @@
       "Bash(python study/scripts/intake_check.py:*)",
       "Bash(python scripts/intake_check.py:*)",
       "Bash(python study/scripts/scope_sync.py check)",
-      "Bash(python scripts/scope_sync.py check)"
+      "Bash(python scripts/scope_sync.py check)",
+      "Bash(python study/scripts/gate.py status*)",
+      "Bash(python study/scripts/gate.py briefing *)",
+      "Bash(python study/scripts/gate.py understand *)",
+      "Bash(python study/scripts/gate.py refreeze *)",
+      "Bash(python scripts/gate.py status*)",
+      "Bash(python scripts/gate.py briefing *)",
+      "Bash(python scripts/gate.py understand *)",
+      "Bash(python scripts/gate.py refreeze *)"
     ],
     "ask": [
       "Agent(page-reader)",
@@ -73,7 +81,13 @@
       "Bash(python study/scripts/article_version.py * refine *)",
       "Bash(python scripts/article_version.py * accept *)",
       "Bash(python scripts/article_version.py * refine *)",
-      "Bash(python scripts/article_version.py * review *)"
+      "Bash(python scripts/article_version.py * review *)",
+      "Bash(python study/scripts/gate.py open *)",
+      "Bash(python study/scripts/gate.py close *)",
+      "Bash(python study/scripts/gate.py skip *)",
+      "Bash(python scripts/gate.py open *)",
+      "Bash(python scripts/gate.py close *)",
+      "Bash(python scripts/gate.py skip *)"
     ]
   }
 }

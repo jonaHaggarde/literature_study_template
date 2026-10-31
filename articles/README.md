@@ -74,6 +74,15 @@ explains the mechanism.
   refinements fold only when the article is accepted again. `versions.json` keeps all rows.
   The validator compares each article with its last version and warns about a change with
   no row, and fails on it in CI.
+- **Gates.** An article is accepted at a gate (`articles/gates/definitions.json` lists them;
+  `/gate` shows where they stand). A gate runs `open` (the user, once the entry checks pass),
+  a briefing in chat (script facts that need attention, and Claude's critique), for most gates
+  the `/understand` check (questions in chat, answered from memory; Claude ends with a
+  suggestion, ready or slower, which has no effect), then `close`, which is `accept` plus
+  `articles/gates/<id>.json`, so the article's status and the gate record cannot disagree.
+  While a gate is open the article stands still; the validator warns if it changes. There is
+  no gate report: the version table is the record, the briefing and the check are the
+  conversation, and a document nobody asked for would only duplicate both.
 - **Dense writing.** The text follows `study/ai_instructions/article-style.md`: each fact
   once, never restated in other words (an abstract and a conclusion may restate), numbers
   over adjectives. `python study/scripts/style_check.py <name>` reports what it can find;
