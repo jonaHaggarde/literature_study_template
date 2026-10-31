@@ -54,7 +54,11 @@
       "Bash(python scripts/article_version.py * edit *)",
       "Bash(python scripts/article_version.py * check)",
       "Bash(python scripts/article_version.py * render)",
-      "Bash(python scripts/article_version.py * draft*)"
+      "Bash(python scripts/article_version.py * draft*)",
+      "Bash(python study/scripts/convert_intake.py:*)",
+      "Bash(python scripts/convert_intake.py:*)",
+      "Bash(python study/scripts/intake_check.py:*)",
+      "Bash(python scripts/intake_check.py:*)"
     ],
     "ask": [
       "Agent(page-reader)",
