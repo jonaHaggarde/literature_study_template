@@ -51,7 +51,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_bibliography import ARTICLES_DIR, article_dirs  # noqa: E402
 from texutil import tex_escape  # noqa: E402
 
-GENERATED_SECTIONS = {"references.tex", "versions.tex", "comparison_rows.tex"}
+GENERATED_SECTIONS = {"references.tex", "versions.tex", "comparison_rows.tex", "coverage_table.tex",
+                      "traceability_table.tex", "decision_tree.tex"}
 VERSIONS_FILE = "versions.json"
 TABLE_FILE = Path("sections") / "versions.tex"
 
@@ -69,6 +70,7 @@ def tracked_files(adir):
     candidates = [adir / "main.tex"]
     candidates += sorted((adir / "sections").glob("*.tex")) if (adir / "sections").exists() else []
     candidates += sorted((adir / "figs").glob("*.tex")) if (adir / "figs").exists() else []
+    candidates += [adir / "decision_tree.md"]   # the data a rationale's generated tree is drawn from
     for path in candidates:
         if path.name in GENERATED_SECTIONS or not path.exists():
             continue

@@ -81,6 +81,7 @@ flowchart TD
   classDef open fill:#FAEEDA,stroke:#854F0B,color:#412402
   classDef recommended fill:#E1F5EE,stroke:#0F6E56,stroke-width:3px,color:#04342C
   classDef explored fill:#F1EFE8,stroke:#5F5E5A,color:#2C2C2A
+  classDef candidate fill:#E6F1FB,stroke:#185FA5,stroke-width:2px,color:#042C53
   classDef identified fill:#FFFFFF,stroke:#888780,color:#444441,stroke-dasharray:4 3
 ```
 <!-- /decision-tree-diagram -->

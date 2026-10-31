@@ -52,6 +52,7 @@ import article_version  # noqa: E402
 import intake_check  # noqa: E402
 import scope_sync  # noqa: E402
 import gate  # noqa: E402
+import build_article_parts  # noqa: E402
 import style_check  # noqa: E402
 import build_decision_trees as decision_trees  # noqa: E402
 
@@ -588,6 +589,32 @@ def check_gates():
     message = gate.nudge(gate.catalog_count())
     if message:
         log("INFO", "gate", message)
+
+
+def check_article_parts():
+    """The computed parts of the map, requirements and rationale articles (build_article_parts.py):
+    a stale generated file, an invalid decision table, and gaps in the requirements traceability
+    (a requirement with no path up, a primary one with no source) are warnings."""
+    for adir in bibliography.article_dirs():
+        if adir.name not in ("map", "requirements", "rationale"):
+            continue
+        try:
+            changed, problems = build_article_parts.build(adir.name, check=True)
+        except Exception as err:  # a broken method card must not hide the other checks
+            log("WARN", "article-parts", f"articles/{adir.name}: could not check generated parts ({err})")
+            continue
+        for name in changed:
+            log("WARN", "article-parts", f"articles/{adir.name}/sections/{name} is stale; run "
+                f"`python scripts/build_article_parts.py {adir.name}`")
+        for problem in problems:
+            log("WARN", "article-parts", f"articles/{adir.name}: {problem}")
+        if adir.name == "requirements":
+            read = lambda f: (adir / "sections" / f).read_text(encoding="utf-8") if (adir / "sections" / f).exists() else ""
+            _, _, gaps = build_article_parts.traceability(read("primary.tex"), read("derived.tex"))
+            for gap in gaps[:8]:
+                log("WARN", "traceability", f"articles/requirements: {gap}")
+            if len(gaps) > 8:
+                log("WARN", "traceability", f"articles/requirements: {len(gaps) - 8} more gap(s)")
 
 
 def check_intake():
@@ -1159,6 +1186,7 @@ def main():
     check_intake()
     check_scope_sync()
     check_gates()
+    check_article_parts()
     check_article_style()
     check_usage_log()
     check_ocr()
