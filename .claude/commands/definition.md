@@ -9,12 +9,14 @@ $ARGUMENTS
 
 ## Which mode
 
-If an argument names a mode, use it. Otherwise read `articles/definition/versions.json` and
-choose:
+If `articles/definition/` does not exist yet, create it first from its template
+(`python study/scripts/new_article.py definition`); it starts as a skeleton at version 0.1.
+Then, if an argument names a mode, use it. Otherwise read `articles/definition/versions.json`
+and choose:
 
 | State of the article | Mode |
 |---|---|
-| only the shipped skeleton row, no `\intake` tags in the sections | **draft** |
+| only the skeleton row, no `\intake` tags in the sections | **draft** |
 | drafted, not accepted | **revise** (when the user brings review comments) |
 | accepted | **refine** (only when the user asks for a change) and **scope** |
 

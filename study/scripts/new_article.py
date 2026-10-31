@@ -7,13 +7,18 @@ its text: `{{NAME}}` (the folder name given here) and `{{TITLE}}` (the same, wit
 new article gets its own folder under articles/, a generated references file, and its first
 version row (0.1, draft), so it is built, validated and version-tracked from the start.
 
-Only templates that exist can be created. Today that is `specification`, the one article that
-is a family (one per chosen concept, each named). The singleton articles ship as ready folders
-and move into templates when the gate machinery is built.
+Every article is created this way: the repo ships no articles. A singleton (`definition`,
+`map`, `review`, `requirements`, `rationale`) becomes `articles/<kind>/`. A family article, today
+only `specification` (one per chosen concept), takes a name and becomes `articles/<kind>-<name>/`.
+
+The new article starts with a skeleton row, version 0.1. The command that writes its first real
+draft replaces that row with `article_version.py <folder> draft --restart`, so the first real
+draft is 0.1 and not 0.2.
 
 Usage (from study/):
     python scripts/new_article.py --list
-    python scripts/new_article.py specification torque-allocation
+    python scripts/new_article.py definition
+    python scripts/new_article.py specification concept-a
 """
 
 import re
@@ -46,7 +51,7 @@ def folder_name(kind, name):
     return f"{kind}-{name}" if kind in FAMILY_KINDS else kind
 
 
-def instantiate(kind, name, articles_dir=ARTICLES_DIR, today_label="First draft from the template"):
+def instantiate(kind, name, articles_dir=ARTICLES_DIR, today_label="Skeleton from the template"):
     """Create articles_dir/<folder> from the template. Returns (folder_path, warnings) or raises
     ValueError with a plain-language reason."""
     templates_dir = articles_dir / "_templates"
@@ -56,9 +61,9 @@ def instantiate(kind, name, articles_dir=ARTICLES_DIR, today_label="First draft 
     if kind in FAMILY_KINDS and not name:
         raise ValueError(f"a {kind} needs a name: new_article.py {kind} <name>")
     if name and not SLUG_RE.match(name):
-        raise ValueError("the name must be lowercase letters, digits and single hyphens, e.g. torque-allocation")
+        raise ValueError("the name must be lowercase letters, digits and single hyphens, e.g. concept-a")
     if kind not in FAMILY_KINDS:
-        name = name or kind
+        name = kind   # a singleton has one folder, named after it
     folder = articles_dir / folder_name(kind, name)
     if folder.exists():
         raise ValueError(f"articles/{folder.name} already exists")
@@ -104,6 +109,10 @@ def main(argv=None):
     except ValueError as err:
         print(f"new_article: {err}", file=sys.stderr)
         return 1
+    import build_articles   # regenerates the files an article derives (the review's table, bibliographies)
+    problem = build_articles.generate_derived(folder.name)
+    if problem:
+        warnings.append(f"derived files were not regenerated: {problem}")
     for w in warnings:
         print(f"WARNING: {w}", file=sys.stderr)
     print(f"Created articles/{folder.name}/ at version 0.1. Next: write it (see its README.md), "

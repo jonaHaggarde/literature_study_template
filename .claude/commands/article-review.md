@@ -13,7 +13,9 @@ user chooses columns, families, and what the scope is.
 
 ## How to run it
 
-1. **Preflight.** Read `articles/review/workflow.md` and
+1. **Preflight.** If `articles/review/` does not exist yet, create it from its template
+   (`python study/scripts/new_article.py review`) and tell the user. Then read
+   `articles/review/workflow.md` and
    `study/ai_instructions/scope.md`. If `scope.md` still carries the
    `<!-- placeholder -->` marker, stop: the article's scope section is that
    scope in prose, and filling it in with the user is the real task.

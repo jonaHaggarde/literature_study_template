@@ -14,5 +14,5 @@ from it alone.
 behaviour specification, and for a non-engineering project the symbol table is a glossary.
 Copy `sections/component.tex` once per component, named after it, and add each to `main.tex`.
 
-The structure follows the LiUFS algorithm specification: introduction, assumptions,
-conventions, structure, one section per component, parameters, verification.
+The structure: introduction, assumptions, conventions, structure, one section per
+component, parameters, verification.
