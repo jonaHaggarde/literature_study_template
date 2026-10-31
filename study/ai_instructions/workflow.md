@@ -194,7 +194,7 @@ in order:
   and either an open-access link or a DOI plus a paywall verdict. See
   `mcp.md` — including the rule that anything it returns stays an
   unverified lead until the document itself is converted and read.
-- Otherwise, use `../../project_documents/source-access.md` to point the
+- Otherwise, use `../../intake/own/source-access.md` to point the
   user at where they might actually get the document (institutional
   access, open access, or a discovery tool to locate it first) instead of
   leaving "go find this" with nowhere to go.
@@ -222,7 +222,7 @@ audit.
    uncovered is not a gap, it's expected — don't flag it as one.
 4. When a real gap is identified, ask the user directly whether they can
    source more material in that area, rather than silently working around
-   the hole — check `../../project_documents/source-access.md` first so
+   the hole — check `../../intake/own/source-access.md` first so
    the suggestion points at somewhere real to look.
 
 ## Decisions grounded in the literature

@@ -49,6 +49,7 @@ import method_cards  # noqa: E402
 import verification  # noqa: E402
 import build_bibliography as bibliography  # noqa: E402
 import article_version  # noqa: E402
+import intake_check  # noqa: E402
 import build_decision_trees as decision_trees  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -543,6 +544,24 @@ def check_articles():
             todos += len(todo_re.findall(comment_re.sub("", path.read_text(encoding="utf-8", errors="replace"))))
     if dirs:
         log("INFO", "article", f"{todos} \\todo marker(s) remaining in articles/")
+
+
+def check_intake():
+    """intake/intake.md is Claude's digest of the user's input and the definition article
+    cites its IDs. A duplicate or sourceless line, or a cited ID that does not exist, breaks
+    the trace from the accepted article back to what the user said, so those are hard errors."""
+    found, count = intake_check.check_all()
+    for severity, message in found:
+        log(severity, "intake", message)
+    for pdf in intake_check.pending():
+        log("WARN", "intake",
+            f"intake/{pdf.relative_to(intake_check.INTAKE_DIR).as_posix()}: not converted yet (or changed since); "
+            "run `python study/scripts/convert_intake.py`")
+    for path in intake_check.unreadable():
+        log("INFO", "intake",
+            f"intake/{path.relative_to(intake_check.INTAKE_DIR).as_posix()}: an image or office file is not "
+            "converted; give a PDF or text, or decide on the vision step")
+    log("INFO", "intake", f"{count} intake line(s)")
 
 
 def check_article_versions():
@@ -1094,6 +1113,7 @@ def main():
     check_decision_trees(rebuild=rebuild)
     check_gaps_index(rebuild=rebuild)
     check_article_versions()
+    check_intake()
     check_usage_log()
     check_ocr()
     check_requirements(entries)

@@ -61,7 +61,7 @@ similar — use numbered inline markers (`[1]`, `[2]`, … `[n]`) **in order
 of first appearance**, with a `## References` section at the bottom of
 the file listing each source **once**: author(s), year, title, and a
 relative path (into `study/notes/` for catalogued papers,
-`project_documents/` for provided material, etc.).
+`intake/received/` for provided material, etc.).
 
 Numbering is **local to each file**, not shared across files.
 

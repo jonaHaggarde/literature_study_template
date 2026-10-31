@@ -46,14 +46,28 @@
       "Bash(python study/scripts/build_bibliography.py:*)",
       "Bash(python scripts/build_bibliography.py:*)",
       "Bash(python study/scripts/build_articles.py:*)",
-      "Bash(python scripts/build_articles.py:*)"
+      "Bash(python scripts/build_articles.py:*)",
+      "Bash(python study/scripts/article_version.py * edit *)",
+      "Bash(python study/scripts/article_version.py * check)",
+      "Bash(python study/scripts/article_version.py * render)",
+      "Bash(python study/scripts/article_version.py * draft*)",
+      "Bash(python scripts/article_version.py * edit *)",
+      "Bash(python scripts/article_version.py * check)",
+      "Bash(python scripts/article_version.py * render)",
+      "Bash(python scripts/article_version.py * draft*)",
+      "Bash(python study/scripts/convert_intake.py:*)",
+      "Bash(python scripts/convert_intake.py:*)",
+      "Bash(python study/scripts/intake_check.py:*)",
+      "Bash(python scripts/intake_check.py:*)"
     ],
     "ask": [
       "Agent(page-reader)",
       "Bash(python study/scripts/vision_pages.py approve *)",
       "Bash(python study/scripts/vision_pages.py ticket *)",
       "Bash(python scripts/vision_pages.py approve *)",
-      "Bash(python scripts/vision_pages.py ticket *)"
+      "Bash(python scripts/vision_pages.py ticket *)",
+      "Bash(python study/scripts/article_version.py * review *)",
+      "Bash(python scripts/article_version.py * review *)"
     ]
   }
 }

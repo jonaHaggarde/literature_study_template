@@ -17,7 +17,7 @@ questions, a decisions log, and the chronological log itself.
   `decisions.md` with its literature basis and project context. This
   folder is the minutes; `decisions.md` is the reasoning.
 - **Not documents received in a meeting.** Those go in
-  `project_documents/`; reference them from here by relative path.
+  `intake/received/`; reference them from here by relative path.
 - **Not speculation from a meeting.** An idea floated but not agreed is
   brainstorming — `ideation/`.
 

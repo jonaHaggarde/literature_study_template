@@ -52,7 +52,7 @@ $ARGUMENTS
    `decisions.md` entry), and a concrete acquisition direction — a
    search term, a venue, a citation trail in
    `study/reference-index.md`. Check
-   `project_documents/source-access.md` so each suggestion points
+   `intake/own/source-access.md` so each suggestion points
    somewhere real rather than trailing off.
 
 7. **Ask the user directly** whether they can source material for the

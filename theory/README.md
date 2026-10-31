@@ -20,7 +20,7 @@ purpose statement:**
   belongs in a `study/topics/` dossier. An explainer here draws on those
   but is written to teach a concept, not to report a source.
 - **Not project-provided material.** Anything handed down from outside
-  goes in `project_documents/` untouched.
+  goes in `intake/received/` untouched.
 
 ## Conventions
 
@@ -34,7 +34,7 @@ each diagram must stand alone for anyone reading the file as plain text.
 catalogued paper or provided document uses the repo-wide citation
 convention: inline `[1]`, `[2]` markers in order of first appearance,
 plus a `## References` section at the bottom listing each source once
-with a relative path (`study/notes/...`, `project_documents/...`).
+with a relative path (`study/notes/...`, `intake/received/...`).
 Numbering is local to this file. Plain links to sibling files are *not*
 citations and stay ordinary markdown links.
 

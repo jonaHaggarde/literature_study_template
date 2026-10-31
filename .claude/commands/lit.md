@@ -39,7 +39,7 @@ Answer this literature question against the study corpus:
      item as covered here or lead-only.
    - *"Find me a source on X"* → grep `study/reference-index.md` before
      saying nothing exists. Report matches as unverified leads and point
-     at `project_documents/source-access.md` for where they might
+     at `intake/own/source-access.md` for where they might
      actually be obtained.
 
 4. **Cite everything.** Every claim names its note file and page marker

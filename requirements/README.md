@@ -29,7 +29,7 @@ in the usage log (`../.claude/usage-log.md`).
   `../ideation/`. A requirement says what must hold; a decision says how it will
   be met.
 - **Material handed down from outside**, such as another team's draft
-  requirements. That stays in `../project_documents/`, untouched. Someone else's
+  requirements. That stays in `../intake/received/`, untouched. Someone else's
   draft is an input and a placeholder, never a source of truth.
 - **The design.** A requirement that names the solution is a decision in
   disguise.
@@ -126,7 +126,7 @@ It also counts the `TBD`/`TBR` markers in the folder, as information.
 
 The warning is a prompt to ask, not a ruling. A project may legitimately start
 from a fixed requirement, such as a customer specification; in that case keep the
-original in `../project_documents/` and carry its demands over knowingly. On
+original in `../intake/received/` and carry its demands over knowingly. On
 Claude's side, the rule is in the root `CLAUDE.md`: say what this README says,
 offer top-level facts and `TBD` entries instead, and let the user decide.
 

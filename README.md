@@ -56,11 +56,11 @@ CLAUDE.md               repo-wide conventions; routes literature work into study
 README.md               this file
 decisions.md            decision log, with the literature-basis / project-context split
 timeline.md             milestones, dependencies, blockers
-project_documents/      material handed down from outside — nothing self-authored
+intake/received/      material handed down from outside — nothing self-authored
 ideation/               unverified brainstorming, never citable as literature
 theory/                 explainers of background concepts, for teammates
 meetings/               one file per counterparty, plus internal.md
-intake/                        what the user hands over before anything is written; feeds the definition
+intake/                 what you hand over before anything is written: own/ (you wrote it), received/ (given to you)
 articles/                      the LaTeX articles, one folder each (definition, map, review, ...), their PDFs, shared preamble
 requirements/           OPTIONAL module (engineering-leaning): where requirements sit in the pipeline; delete if unused
 study/                  the literature-review engine — self-contained
@@ -134,8 +134,8 @@ infrastructure.
    ```
 4. Drop your source PDFs into `study/PDFs/`.
 5. Drop material you were handed from outside — a brief, a proposal, a
-   specification — into `project_documents/`, and check
-   `project_documents/source-access.md` against your own situation. It
+   specification — into `intake/received/`, and check
+   `intake/own/source-access.md` against your own situation. It
    ships with a real, working list of access channels rather than a
    placeholder; edit it where yours differ.
 6. **Open Claude Code**, either at the repo root (the root `CLAUDE.md`

@@ -78,7 +78,7 @@ How it is produced is open. Likely a combination of:
   definition needs answered.
 - **The user prompting**: free description, corrections, priorities.
 - **The user adding documents** (briefs, rules, specifications) to
-  `project_documents/`, which Claude reads and cites.
+  `intake/received/`, which Claude reads and cites.
 
 Needs a defined structure: what the questionnaire asks, how answers and
 documents become sections, and what "defined enough to proceed" means.
