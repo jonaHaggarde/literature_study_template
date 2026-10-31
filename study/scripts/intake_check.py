@@ -11,6 +11,7 @@ reused after a line is dropped, and every ID an article cites must exist.
 Usage (from study/):
     python scripts/intake_check.py          # report problems, exit 1 if any
     python scripts/intake_check.py --next   # print the next free ID
+    python scripts/intake_check.py --coverage   # rows per definition section, and what is missing
 """
 
 import hashlib
@@ -36,31 +37,36 @@ UNREADABLE_SUFFIXES = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".gif",
                        ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".odt", ".odp", ".ods"}
 LOW_YIELD_CHARS_PER_PAGE = 40
 KINDS = ("fact", "goal", "constraint", "preference", "said", "unknown", "suspicion", "out-of-bounds")
+# The definition article's sections, which the digest rows serve (`other` serves none yet).
+SECTIONS = ("problem", "goal", "scope", "stakeholders", "constraints", "success", "assumptions")
+ALL_SECTIONS = SECTIONS + ("other",)
 
 ROW_RE = re.compile(r"^\|\s*(I-\d+)\s*\|(.*)\|\s*$")
 CITE_RE = re.compile(r"\\intake\{([^}]*)\}")
 
 
 def parse_intake(text):
-    """[(id, kind, statement, source)] from the digest's table rows."""
+    """[(id, section, kind, statement, source)] from the digest's table rows."""
     rows = []
     for line in text.splitlines():
         m = ROW_RE.match(line)
         if not m:
             continue
         cells = [c.strip() for c in m.group(2).split("|")]
-        cells += [""] * (3 - len(cells))
-        rows.append((m.group(1), cells[0], cells[1], cells[2]))
+        cells += [""] * (4 - len(cells))
+        rows.append((m.group(1), cells[0], cells[1], cells[2], cells[3]))
     return rows
 
 
 def problems(rows):
     """Plain-language problems in the digest itself."""
     found, seen = [], set()
-    for rid, kind, statement, source in rows:
+    for rid, section, kind, statement, source in rows:
         if rid in seen:
             found.append(f"{rid} appears more than once")
         seen.add(rid)
+        if section not in ALL_SECTIONS:
+            found.append(f"{rid}: section '{section}' is not one of {', '.join(ALL_SECTIONS)}")
         if kind not in KINDS:
             found.append(f"{rid}: kind '{kind}' is not one of {', '.join(KINDS)}")
         if not statement:
@@ -68,6 +74,18 @@ def problems(rows):
         if not source:
             found.append(f"{rid}: no source (a file in intake/, or an interview answer with its date)")
     return found
+
+
+def coverage(rows):
+    """{section: (rows that answer it, rows left unknown)} for each definition section, and
+    the sections with no answering row. A row of kind `unknown` marks a question asked and not
+    answered, so it does not count as an answer."""
+    table = {sec: [0, 0] for sec in SECTIONS}
+    for _rid, section, kind, _statement, _source in rows:
+        if section in table:
+            table[section][1 if kind == "unknown" else 0] += 1
+    missing = [sec for sec in SECTIONS if table[sec][0] == 0]
+    return {sec: tuple(v) for sec, v in table.items()}, missing
 
 
 def next_id(rows, dropped=()):
@@ -170,6 +188,14 @@ def main():
     rows = parse_intake(INTAKE_PATH.read_text(encoding="utf-8")) if INTAKE_PATH.exists() else []
     if "--next" in sys.argv:
         print(next_id(rows))
+        return 0
+    if "--coverage" in sys.argv:
+        table, missing = coverage(rows)
+        for sec in SECTIONS:
+            answered, unknown = table[sec]
+            print(f"{sec:<13} {answered} answered, {unknown} unknown")
+        print("Every definition section has an answer: ready to suggest a draft." if not missing
+              else f"No answer yet for: {', '.join(missing)}.")
         return 0
     found, count = check_all()
     for severity, message in found:

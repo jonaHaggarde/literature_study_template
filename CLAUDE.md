@@ -20,6 +20,11 @@ This repo has two halves, and keeping them apart is the point:
 
 Routing, for a session starting at the repo root:
 
+- Starting a project, or `scope.md` still a placeholder → `/intake`, then the definition
+  article (`articles/definition`), then the user accepts it (the `definition` gate), then
+  `scope.md` is written from it, and only then are papers gathered. Always steer the user to
+  this route; the original route (filling in `scope.md` together) remains as a fallback.
+  See `intake/README.md`.
 - Literature work (processing PDFs, answering a question from the
   catalog, building a dossier, gap-flagging) → read
   `study/ai_instructions/README.md` and follow its read order. Working
@@ -168,10 +173,20 @@ call is the kind of check people start routing around.
 Every article under `articles/` has a version history (`articles/README.md`). After a
 substantial edit to an article (a claim, number, source, equation, table row or structure),
 run `python study/scripts/article_version.py <name> edit --summary "one line"` in the same
-turn, and tell the user which article moved to which version. Never run its `review`
-command: the major number is the user's, bumped after their own review. The reason: the
-user reads these articles on paper at gates and must be able to trust that what they
-reviewed is what they are shown.
+turn, and tell the user which article moved to which version.
+
+- **Never run `review` or `accept`.** The major number is the user's, bumped after their own
+  review; `accept` is a review that also passes the article's gate.
+- **After acceptance, `edit` is refused.** An accepted article changes only when the user
+  asks, with `refine --summary "..."`, which prompts them each time. Do not refine an
+  accepted article on your own initiative.
+- **Scope follows the definition, but not at once.** After a refinement of the definition,
+  `study/scripts/scope_sync.py check` will say `scope.md` is stale. Do not update it after
+  each refinement: say so, suggest updating it, and do it when the user says they are ready.
+  If they forget, warn them once at the start of literature work.
+
+The reason: the user reads these articles on paper at gates and must be able to trust that
+what they reviewed is what they are shown.
 
 ## Reasoning travels with the rule
 

@@ -12,11 +12,16 @@ follow the onboarding flow described there" — don't wait to be told
 literally.
 
 In particular, check `ai_instructions/scope.md` first: if it still has
-the `<!-- placeholder -->` marker at the top, your first task this
-session is helping the user fill it in (see `ai_instructions/README.md`
-for how) — before processing any PDFs sitting in `PDFs/`, before
-answering any literature question. Everything downstream, especially
-gap-flagging, depends on scope.md being real.
+the `<!-- placeholder -->` marker at the top, scope is not set, and
+nothing downstream (processing PDFs, answering literature questions,
+gap-flagging) works without it. Run `python scripts/scope_sync.py check`
+to see where things stand. When the repo has the intake pipeline (an
+`../intake/` folder and `../articles/definition`), scope comes from the
+accepted definition article, not from a quick chat: offer `/intake`
+first, then the definition article, and write `scope.md` only after the
+user accepts that article. Always steer the user to that route. If they
+decline, fall back on the original route in `ai_instructions/README.md`
+(fill in `scope.md` together with them); the engine works either way.
 
 This file deliberately owns nothing but that read-order pointer. The
 repo-wide conventions — the root/`study/` split, citations outside

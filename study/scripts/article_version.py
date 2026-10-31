@@ -5,29 +5,36 @@ Version history of one article, so an article is never edited silently.
 Each article under articles/ has a `versions.json` (the data) and a generated
 `sections/versions.tex` (the table and the version/status macros the article prints).
 
-Versions are `N.n`. The first draft is `0.1`.
-  - The minor number is bumped by Claude on any substantial edit: a claim, a number,
-    a source, an equation, a table row, the structure. Typos and formatting are exempt.
-  - The major number is bumped only by the user, after a manual review. Major 0 therefore
-    means "never reviewed", and the article says so on its title page.
+Versions are `N.n`. The first draft is `0.1`. Five kinds of row:
+  draft     Claude, 0.1.
+  edit      Claude, minor number: any substantial change before acceptance (a claim, a
+            number, a source, an equation, a table row, the structure; not typos).
+  review    the user, major number: after a manual review. Major 0 means "never reviewed".
+  accepted  the user, major number: a review that also passes the article's gate.
+  refined   Claude, on the user's request, minor number: any change to an accepted article.
+            Once an article is accepted, `edit` is refused and `refine` is the only way in;
+            it sits behind a permission prompt, so an accepted article changes only on request.
 
 How a silent edit is caught: every row stores a hash of each tracked file (main.tex and
 the hand-written sections). `check` compares the files on disk with the last row and names
 what changed since. The "sections changed" column is computed from those hashes, not
 written by hand.
 
-The printed table stays short. When the major number is bumped, the minor rows of the
-previous major collapse into one summary row; row 0.1 and every N.0 review row are always
-kept. `versions.json` keeps every row, so nothing is lost; only the printed view is pruned.
+The printed table stays short. When the major number is bumped, runs of `edit` rows in the
+previous major collapse into one summary row. Row 0.1, every review and accepted row, and
+every `refined` row stay, until the article is accepted again: then its refinements fold too.
+`versions.json` keeps every row, so nothing is lost; only the printed view is pruned.
 
 Usage (from study/):
     python scripts/article_version.py NAME draft  [--summary TEXT]
     python scripts/article_version.py NAME edit   --summary TEXT [--by WHO]
+    python scripts/article_version.py NAME refine --summary TEXT
     python scripts/article_version.py NAME review --summary TEXT [--condensed TEXT]
+    python scripts/article_version.py NAME accept --summary TEXT [--condensed TEXT]
     python scripts/article_version.py NAME check
     python scripts/article_version.py NAME render
 
-`review` is the user's decision and sits behind a permission prompt.
+`review`, `accept` and `refine` are the user's decisions and sit behind a permission prompt.
 """
 
 import argparse
@@ -116,12 +123,19 @@ def add_row(adir, kind, summary, by, condensed=None, now=None):
             return None, "no versions yet; run draft first"
         major, minor = parse_version(rows[-1]["version"])
         changed = changed_between(rows[-1]["files"], files)
-        if kind == "edit":
+        accepted = any(r["kind"] == "accepted" for r in rows)
+        if kind == "edit" and accepted:
+            return None, "this article is accepted; a change to it is a refinement: use refine"
+        if kind == "refine" and not accepted:
+            return None, "this article is not accepted yet; use edit"
+        if kind in ("edit", "refine"):
             if not changed:
                 return None, f"nothing changed since {rows[-1]['version']}; no new version needed"
             version = f"{major}.{minor + 1}"
+            kind = "refined" if kind == "refine" else "edit"
         else:
             version = f"{major + 1}.0"
+            kind = "accepted" if kind == "accept" else "review"
     row = {"version": version, "time": stamp(now), "kind": kind, "by": by,
            "changed": changed, "summary": summary, "files": files}
     if condensed:
@@ -142,38 +156,64 @@ def stale_files(adir):
 
 # ---- the printed table -----------------------------------------------------------------------
 
+def foldable(rows, index):
+    """Whether rows[index] may be folded into a summary row once its major version is closed.
+    A plain edit may. A refinement of an accepted article may only after the article has been
+    accepted again, so the audit trail of changes to the accepted text stays visible until then."""
+    r = rows[index]
+    if r["kind"] == "edit":
+        return True
+    return r["kind"] == "refined" and any(x["kind"] == "accepted" for x in rows[index + 1:])
+
+
 def display_rows(rows):
-    """The rows to print: the open major version in full; each closed major version with its
-    minor rows collapsed into one summary row (row 0.1 and every N.0 row stay)."""
+    """The rows to print: the open major version in full. In a closed major version, runs of
+    foldable minor rows collapse into one summary row. Row 0.1, every review and accepted row,
+    and refinements not yet followed by a new acceptance always stay."""
     if not rows:
         return []
     latest = parse_version(rows[-1]["version"])[0]
-    out = []
-    for g in sorted({parse_version(r["version"])[0] for r in rows}):
-        group = [r for r in rows if parse_version(r["version"])[0] == g]
-        if g == latest:
-            out += group
-            continue
-        keep = [r for r in group if parse_version(r["version"])[1] == 0 or r["version"] == "0.1"]
-        fold = [r for r in group if r not in keep]
-        if len(fold) < 2:
-            out += group
-            continue
-        successor = next((r for r in rows if parse_version(r["version"]) == (g + 1, 0)), {})
-        merged = {
-            "version": f"{fold[0]['version']}–{fold[-1]['version']}",
-            "time": fold[-1]["time"],
-            "kind": "edits",
-            "by": " / ".join(sorted({r["by"] for r in fold})),
-            "changed": sorted({c for r in fold for c in r["changed"]}),
-            "summary": successor.get("condenses") or "; ".join(r["summary"] for r in fold),
-        }
-        out += sorted(keep + [merged], key=lambda r: parse_version(r["version"].split("–")[0]))
+    out, run = [], []
+
+    def flush():
+        if len(run) < 2:
+            out.extend(run)
+        else:
+            after = rows[rows.index(run[-1]) + 1:]
+            successor = next((x for x in after if x.get("condenses")), {})
+            out.append({
+                "version": f"{run[0]['version']}–{run[-1]['version']}",
+                "time": run[-1]["time"],
+                "kind": "edits",
+                "by": " / ".join(sorted({r["by"] for r in run})),
+                "changed": sorted({c for r in run for c in r["changed"]}),
+                "summary": successor.get("condenses") or "; ".join(r["summary"] for r in run),
+            })
+        run.clear()
+
+    for i, r in enumerate(rows):
+        if parse_version(r["version"])[0] == latest or not foldable(rows, i):
+            flush()
+            out.append(r)
+        else:
+            run.append(r)
+    flush()
     return out
 
 
 def status_text(rows):
-    """What the title page says about review."""
+    """What the title page says about review and acceptance."""
+    accepted = [r for r in rows if r["kind"] == "accepted"]
+    if accepted:
+        last = accepted[-1]
+        after = rows[rows.index(last) + 1:]
+        text = f"accepted as v{last['version']} ({last['time'][:10]})"
+        refined = sum(1 for r in after if r["kind"] == "refined")
+        if refined:
+            text += f", refined since ({refined} change{'s' if refined > 1 else ''})"
+        if any(r["kind"] == "review" for r in after):
+            text += f", reviewed again as v{[r for r in after if r['kind'] == 'review'][-1]['version']}"
+        return text
     reviews = [r for r in rows if r["kind"] == "review"]
     if not reviews:
         return "not reviewed by the user"
@@ -182,6 +222,12 @@ def status_text(rows):
     if rows[-1] is not last:
         text += ", edited since"
     return text
+
+
+def accepted_version(rows):
+    """The version label of the last acceptance, or None."""
+    accepted = [r for r in rows if r["kind"] == "accepted"]
+    return accepted[-1]["version"] if accepted else None
 
 
 def render_table(data):
@@ -223,7 +269,7 @@ def write_table(adir):
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("name", help="article folder name under articles/")
-    p.add_argument("command", choices=["draft", "edit", "review", "check", "render"])
+    p.add_argument("command", choices=["draft", "edit", "refine", "review", "accept", "check", "render"])
     p.add_argument("--summary", default="")
     p.add_argument("--by", default="")
     p.add_argument("--condensed", default="", help="review only: one summary for the minor rows it folds")
@@ -247,11 +293,11 @@ def main(argv=None):
         print(f"{args.name}: matches version {load(adir)['rows'][-1]['version']}.")
         return 0
 
-    if args.command in ("edit", "review") and not args.summary:
+    if args.command != "draft" and not args.summary:
         print("--summary is required.", file=sys.stderr)
         return 1
     summary = args.summary or "First draft"
-    by = args.by or ("User" if args.command == "review" else "Claude")
+    by = args.by or ("User" if args.command in ("review", "accept") else "Claude")
     row, error = add_row(adir, args.command, summary, by, args.condensed or None)
     if error:
         print(f"{args.name}: {error}", file=sys.stderr)

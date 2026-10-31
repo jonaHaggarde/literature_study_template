@@ -6,10 +6,25 @@ this repo:
 1. **`scope.md`** — what this study is actually about. Everything else
    depends on this being real. If it still looks like the placeholder
    template (check for the `<!-- placeholder -->` marker at the top),
-   **your first job this session is helping the user fill it in** —
-   before processing any PDFs, before answering literature questions.
-   Ask about the topic, its boundaries, and what the study needs to
-   answer. See `scope.md` itself for the exact questions to work through.
+   **your first job this session is to get it written** — before
+   processing any PDFs, before answering literature questions.
+   - **The recommended route, when `../intake/` and `../articles/definition`
+     exist:** `/intake`, then the definition article, then the user
+     accepts it (the `definition` gate), and only then `scope.md`, written
+     from the accepted definition. Always steer the user to this route
+     and explain why: scope drawn from a reviewed, accepted document is
+     traceable, a quick chat is not.
+   - **The original route, if the user declines or the pipeline is not in
+     the repo:** ask about the topic, its boundaries, and what the study
+     needs to answer, and fill `scope.md` in together. See `scope.md`
+     itself for the exact questions to work through.
+   - **Keeping it current (pipeline route):** `scope.md` starts with a
+     `derived-from` line naming the definition version it was written from.
+     `python scripts/scope_sync.py check` says whether the definition has
+     changed since. Do not update `scope.md` after each refinement of the
+     definition: say that it is stale, suggest updating it, and wait until
+     the user is ready, then update it and run `scope_sync.py stamp`. If
+     the user forgets, warn them once at the start of literature work.
 2. **`catalog-schema.md`** — the field definitions for `../catalog.md`
    entries (title, type, contribution, tags, etc.) and this project's
    allowed values for `type`/`contribution`. Check it before adding or
@@ -68,11 +83,11 @@ scope, never flagged because scope.md never mentioned that area).
 material handed down from outside the project: a brief, a proposal, a
 specification, whatever explains why this study exists. Those documents
 are the source of truth but can be long.
-`scope.md` is a short, Claude-maintained *distillation* of them, kept small
-enough to read in full every session without burning context — update it
-whenever `intake/received/` changes or a conversation reveals the
-existing distillation is wrong or incomplete, don't let it silently drift
-out of sync.
+`scope.md` is a short, Claude-maintained *distillation*, kept small enough to
+read in full every session without burning context. With the intake pipeline
+it is distilled from the accepted definition article (which is itself written
+from `intake/`), not from `intake/received/` directly. Don't let it silently
+drift out of sync: `scope_sync.py check` says when it has.
 
 ## Where things live
 

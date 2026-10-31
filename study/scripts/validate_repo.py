@@ -50,6 +50,7 @@ import verification  # noqa: E402
 import build_bibliography as bibliography  # noqa: E402
 import article_version  # noqa: E402
 import intake_check  # noqa: E402
+import scope_sync  # noqa: E402
 import build_decision_trees as decision_trees  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -544,6 +545,17 @@ def check_articles():
             todos += len(todo_re.findall(comment_re.sub("", path.read_text(encoding="utf-8", errors="replace"))))
     if dirs:
         log("INFO", "article", f"{todos} \\todo marker(s) remaining in articles/")
+
+
+def check_scope_sync():
+    """scope.md follows the accepted definition article (scope_sync.py). Stale or never
+    derived is a warning, not a failure: updating it waits until the user says they are ready
+    after a few refinements, so a failure would only push for an update on every change."""
+    code, message = scope_sync.state()
+    if code in ("stale", "unstamped"):
+        log("WARN", "scope", message)
+    elif code != "no-pipeline":
+        log("INFO", "scope", message)
 
 
 def check_intake():
@@ -1114,6 +1126,7 @@ def main():
     check_gaps_index(rebuild=rebuild)
     check_article_versions()
     check_intake()
+    check_scope_sync()
     check_usage_log()
     check_ocr()
     check_requirements(entries)

@@ -455,6 +455,14 @@ def main():
     if args.extract_one:
         return extract_one(args.extract_one, args.mode, args.out)
 
+    try:
+        import scope_sync
+        warning = scope_sync.convert_warning()
+        if warning:
+            print(f"WARNING: {warning}", file=sys.stderr)
+    except Exception:  # noqa: BLE001  (a check on the article pipeline must never stop a conversion)
+        pass
+
     pdfs_dir = Path(args.pdfs_dir)
     notes_dir = Path(args.notes_dir)
     catalog_path = Path(args.catalog)

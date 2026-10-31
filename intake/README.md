@@ -5,13 +5,19 @@ written.
 
 ```
 your files + interview  →  intake.md (Claude's digest)  →  articles/definition
+                                                              ↓ you accept it (definition gate)
+                                                           scope.md  →  papers
 ```
 
 - **Your files go here untouched,** in one of two folders so you can always tell whose they
   are: `own/` for what you wrote, `received/` for what someone else gave you (a client, a
   university, a rulebook). Claude never edits either. A PDF is converted to markdown next to
   itself (`convert_intake.py`), so it is read from text and not from the PDF again.
-- **The interview** adds what the files do not say. Claude asks; the answers are recorded.
+- **The interview** adds what the files do not say, and only what the first definition draft
+  needs. Each digest row names the definition section it serves (`problem`, `goal`, `scope`,
+  `stakeholders`, `constraints`, `success`, `assumptions`), so Claude can see which sections
+  have no answer yet. It ends when you say stop or start the article, or when every section
+  has an answer and Claude suggests drafting.
 - **`intake.md`** is Claude's digest of both. It is for Claude, not for reading, and it is
   not reviewed: each line has an ID (`I-12`) and names the file or interview answer it came
   from. The definition article cites these IDs, and anything it states that has no intake line

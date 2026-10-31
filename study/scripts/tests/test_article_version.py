@@ -160,5 +160,70 @@ class PrintedTable(unittest.TestCase):
             self.assertIn("\\newcommand{\\versiontable}", text)
 
 
+class Acceptance(unittest.TestCase):
+    def accepted_article(self, tmp):
+        d = make_article(tmp)
+        v.add_row(d, "draft", "First draft", "Claude")
+        write(d, "sections/intro.tex", "a\n")
+        v.add_row(d, "edit", "e", "Claude")
+        row, err = v.add_row(d, "accept", "Accepted", "User")
+        self.assertIsNone(err)
+        self.assertEqual((row["version"], row["kind"]), ("1.0", "accepted"))
+        return d
+
+    def test_an_accepted_article_refuses_edit_and_takes_refine(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self.accepted_article(tmp)
+            write(d, "sections/method.tex", "changed\n")
+            row, err = v.add_row(d, "edit", "e", "Claude")
+            self.assertIsNone(row)
+            self.assertIn("use refine", err)
+            row, err = v.add_row(d, "refine", "Changed the method", "Claude")
+            self.assertIsNone(err)
+            self.assertEqual((row["version"], row["kind"]), ("1.1", "refined"))
+
+    def test_refine_is_refused_before_acceptance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = make_article(tmp)
+            v.add_row(d, "draft", "First draft", "Claude")
+            write(d, "sections/intro.tex", "a\n")
+            self.assertIn("use edit", v.add_row(d, "refine", "r", "Claude")[1])
+
+    def test_status_follows_acceptance_and_counts_refinements(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self.accepted_article(tmp)
+            self.assertTrue(v.status_text(v.load(d)["rows"]).startswith("accepted as v1.0"))
+            for i in range(2):
+                write(d, "sections/method.tex", f"r{i}\n")
+                v.add_row(d, "refine", f"r{i}", "Claude")
+            self.assertTrue(v.status_text(v.load(d)["rows"]).endswith("refined since (2 changes)"))
+            self.assertEqual(v.accepted_version(v.load(d)["rows"]), "1.0")
+
+    def test_refinements_stay_visible_until_the_article_is_accepted_again(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self.accepted_article(tmp)
+            for i in range(3):
+                write(d, "sections/method.tex", f"r{i}\n")
+                v.add_row(d, "refine", f"r{i}", "Claude")
+            v.add_row(d, "review", "Reviewed", "User")  # a review does not fold them
+            shown = [r["version"] for r in v.display_rows(v.load(d)["rows"])]
+            self.assertEqual(shown, ["0.1", "0.2", "1.0", "1.1", "1.2", "1.3", "2.0"])
+            v.add_row(d, "accept", "Accepted again", "User", condensed="Three refinements.")
+            shown = v.display_rows(v.load(d)["rows"])
+            self.assertEqual([r["version"] for r in shown], ["0.1", "0.2", "1.0", "1.1–1.3", "2.0", "3.0"])
+            self.assertEqual(shown[3]["summary"], "Three refinements.")
+
+    def test_edits_still_fold_when_a_review_closes_their_version(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = make_article(tmp)
+            v.add_row(d, "draft", "First draft", "Claude")
+            for i in range(3):
+                write(d, "sections/intro.tex", f"{i}\n")
+                v.add_row(d, "edit", f"e{i}", "Claude")
+            v.add_row(d, "review", "Reviewed", "User")
+            shown = [r["version"] for r in v.display_rows(v.load(d)["rows"])]
+            self.assertEqual(shown, ["0.1", "0.2–0.4", "1.0"])
+
+
 if __name__ == "__main__":
     unittest.main()

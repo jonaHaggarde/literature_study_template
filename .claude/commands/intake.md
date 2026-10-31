@@ -27,7 +27,9 @@ not polished. You record; you do not decide, advise or propose solutions.
    for equations and tables, so say so when a row depends on one.
 
 3. **Digest into rows.** One row per claim, in the table in `intake.md`:
-   `| I-n | kind | statement | source |`.
+   `| I-n | section | kind | statement | source |`.
+   - Section: the definition article section the row serves: `problem`, `goal`, `scope`,
+     `stakeholders`, `constraints`, `success`, `assumptions`, or `other`.
    - Kinds: `fact`, `goal`, `constraint`, `preference`, `said`, `suspicion`, `unknown`,
      `out-of-bounds`. A hunch is a `suspicion`, never a `fact`; the user's own words go in
      as `said`, quoted.
@@ -38,19 +40,25 @@ not polished. You record; you do not decide, advise or propose solutions.
      `conflicts with I-n` in the second statement. Do not choose between them.
    - Keep values exactly as given (units, tolerances). Do not round, convert or infer.
 
-4. **Find what is missing.** Check the rows against this list and note what no row answers:
-   why the project exists; who it is for and who decides; what already exists; deadlines;
-   given constraints (budget, rules, equipment, people); what is already known; what is only
-   suspected; what is out of bounds; how success is judged.
+4. **See what is missing.** Run `python study/scripts/intake_check.py --coverage`. It lists,
+   for each definition section, the rows that answer it and the rows left `unknown`.
 
-5. **Interview.** Ask only about the gaps from step 4, three or four questions at a time,
-   in plain chat. Record each answer the same turn as a row with source
-   `interview YYYY-MM-DD`. An unanswered question becomes an `unknown` row, so the gap is
-   visible later. Stop when the user says they are done; do not insist on completeness.
+5. **Interview.** Your task is to gather enough to write the **first draft of the definition
+   article**, nothing more. Ask only about sections with no answer, three or four questions
+   at a time, in plain chat. Record each answer the same turn as a row with source
+   `interview YYYY-MM-DD`. An unanswered question becomes an `unknown` row, so the gap stays
+   visible. The interview ends in one of two ways:
+   - the user tells you to stop or to start the article; or
+   - you judge that every section has an answer: say so, name what is still `unknown`, and
+     suggest writing the draft. The user decides.
+   Do not insist on completeness. Do not interview about anything a section does not need.
 
-6. **Check and report.** Run `python study/scripts/intake_check.py`. Then say, in a few
-   lines: how many rows by kind, which gaps are still `unknown`, and which rows conflict.
-   The next step is the definition article; the user decides when to start it.
+6. **Check, report, and point to the next step.** Run `python study/scripts/intake_check.py`.
+   Say in a few lines: rows by section, what is still `unknown`, which rows conflict. Then
+   always suggest the next step: **the definition article** (`articles/definition`, from
+   this digest). The user's acceptance of that article is the `definition` gate. Until it
+   passes, `study/ai_instructions/scope.md` is not written and no papers are gathered or
+   converted.
 
 ## Rules
 
