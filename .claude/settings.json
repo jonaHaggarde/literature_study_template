@@ -53,7 +53,9 @@
       "Bash(python study/scripts/vision_pages.py approve *)",
       "Bash(python study/scripts/vision_pages.py ticket *)",
       "Bash(python scripts/vision_pages.py approve *)",
-      "Bash(python scripts/vision_pages.py ticket *)"
+      "Bash(python scripts/vision_pages.py ticket *)",
+      "Bash(python study/scripts/article_version.py * review *)",
+      "Bash(python scripts/article_version.py * review *)"
     ]
   }
 }
