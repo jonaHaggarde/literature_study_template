@@ -51,6 +51,7 @@ import build_bibliography as bibliography  # noqa: E402
 import article_version  # noqa: E402
 import intake_check  # noqa: E402
 import scope_sync  # noqa: E402
+import gate  # noqa: E402
 import style_check  # noqa: E402
 import build_decision_trees as decision_trees  # noqa: E402
 
@@ -577,6 +578,13 @@ def check_scope_sync():
         log("WARN", "scope", message)
     elif code != "no-pipeline":
         log("INFO", "scope", message)
+
+
+def check_gates():
+    """Gates (gate.py): a gate that is open while its article changes, and an accepted article
+    with no gate record behind it. Warnings only: the user decides what to do with either."""
+    for message in gate.problems_for_validator():
+        log("WARN", "gate", message)
 
 
 def check_intake():
@@ -1148,6 +1156,7 @@ def main():
     check_article_versions()
     check_intake()
     check_scope_sync()
+    check_gates()
     check_article_style()
     check_usage_log()
     check_ocr()

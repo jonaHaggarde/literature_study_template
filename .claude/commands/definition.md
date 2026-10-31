@@ -59,10 +59,10 @@ states what that section must contain and must not contain; it is the specificat
 
 4. **Report** in a few lines: the sections drafted and the ones left; how many statements are
    `\inferred`; the `TBD`s; the conflicts; the preferences set aside. Point to
-   `articles/definition.pdf`. Say it is to be read on paper, and that the user records their
-   review (`review`) and, when satisfied, the acceptance (`accept`) with
-   `python study/scripts/article_version.py definition review --summary "..."` or `accept ...`;
-   both are theirs to run.
+   `articles/definition.pdf`. Say it is to be read on paper. The user records a review with
+   `python study/scripts/article_version.py definition review --summary "..."`, and passes the
+   gate with `/gate definition`: you brief them, they open and close it
+   (`python study/scripts/gate.py close definition --summary "..."`). Both are theirs to run.
 
 ## revise (drafted, not accepted)
 

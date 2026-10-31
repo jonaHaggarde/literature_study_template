@@ -186,7 +186,7 @@ substantial edit to an article (a claim, number, source, equation, table row or 
 run `python study/scripts/article_version.py <name> edit --summary "one line"` in the same
 turn, and tell the user which article moved to which version.
 
-- **Never run `review` or `accept`.** The major number is the user's, bumped after their own
+- **Never run `review`, `accept`, `gate.py open`, `gate.py close` or `gate.py skip`.** The major number is the user's, bumped after their own
   review; `accept` is a review that also passes the article's gate.
 - **After acceptance, `edit` is refused.** An accepted article changes only when the user
   asks, with `refine --summary "..."`, which prompts them each time. Do not refine an
@@ -195,6 +195,10 @@ turn, and tell the user which article moved to which version.
   `study/scripts/scope_sync.py check` will say `scope.md` is stale. Do not update it after
   each refinement: say so, suggest updating it, and do it when the user says they are ready.
   If they forget, warn them once at the start of literature work.
+
+- **Gates are the user's decision.** `/gate` briefs them (facts from `gate.py briefing`, your
+  own critique, both short) and `/understand` runs the check. Neither blocks the gate; the
+  user passes it with `gate.py close`. There is no gate report.
 
 The reason: the user reads these articles on paper at gates and must be able to trust that
 what they reviewed is what they are shown.
