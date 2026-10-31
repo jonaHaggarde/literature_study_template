@@ -2,10 +2,11 @@
 
 OCR (see `../README.md`) reads a scanned PDF as text. It is good on prose and
 bad on equations, symbols and tables. When a page that matters is one of those,
-the only fix is to have a model *look at the page image* and transcribe it. That
+the only fix is to have a model *look at the page image* and record the equations,
+tables and figures on it (not the prose, which OCR already has). That
 works well (equations and block diagrams came out readable in testing), and it
-**costs real tokens**: each page is an image to read plus a transcription to
-write. The cost has **not been measured**: the image alone is roughly 3,000 tokens at the size tested (by the usual width times height over 750 rule of thumb), and the transcription adds more, depending on how dense the page is. It is thousands of tokens per page, not a handful. A long scanned thesis read this way would
+**costs real tokens**: each page is an image to read plus the items to
+write. The cost has **not been measured**: the image alone is roughly 3,000 tokens at the size tested (by the usual width times height over 750 rule of thumb), and the items add more, depending on how many equations and tables the page has. It is thousands of tokens per page, not a handful. A long scanned thesis read this way would
 be expensive, and a coordinator that fanned out one subagent per page could spend
 a great deal before anyone noticed.
 
