@@ -168,6 +168,16 @@ missing diagram. A document with no process, ordering, or structure to
 draw should not be forced to invent one, and a hard check on a judgment
 call is the kind of check people start routing around.
 
+## Writing articles
+
+Before writing or editing the text of an article or a gate report, read
+`study/ai_instructions/article-style.md`. The one failure it exists to prevent is the same
+content twice in different words (in a sentence, a section, or across sections); that style
+helps in chat and costs the reader time in an article. After writing, run
+`python study/scripts/style_check.py <article>`, fix every problem it reports and decide each
+judgment call. A phrase the user flags in a review goes into
+`study/ai_instructions/style-phrases.txt`.
+
 ## Articles are never edited silently
 
 Every article under `articles/` has a version history (`articles/README.md`). After a

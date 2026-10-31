@@ -43,9 +43,8 @@ states what that section must contain and must not contain; it is the specificat
    - A section with no rows keeps its `\todo`; say so in your report.
    - The assumption register's "Added in" is the version this draft will have, `v0.1`.
    - Write the abstract last, four sentences at most.
-   - **Style until the style file exists:** each fact once, never restated; no filler openers;
-     no summary paragraphs; a table wherever the skeleton has one; a sentence that carries no
-     claim, number or source is deleted.
+   - **Style:** follow `study/ai_instructions/article-style.md` (read it first). Each fact
+     once, never restated in other words; list the claims, write, then cut.
 
 3. **Record, build, check.**
    - `python study/scripts/article_version.py definition draft --restart --summary "First draft from intake.md"`
@@ -53,6 +52,8 @@ states what that section must contain and must not contain; it is the specificat
    - `python study/scripts/build_articles.py --only definition`
    - `python study/scripts/validate_repo.py` (it fails on an `\intake{I-n}` that does not exist).
      Fix what it reports.
+   - `python study/scripts/style_check.py definition`: fix every problem, and decide each
+     judgment call.
 
 4. **Report** in a few lines: the sections drafted and the ones left; how many statements are
    `\inferred`; the `TBD`s; the conflicts; the preferences set aside. Point to

@@ -68,6 +68,10 @@ Folders starting with `_` (the templates) are ignored by the build and the valid
   refinements fold only when the article is accepted again. `versions.json` keeps all rows.
   The validator compares each article with its last version and warns about a change with
   no row, and fails on it in CI.
+- **Dense writing.** The text follows `study/ai_instructions/article-style.md`: each fact
+  once, never restated in other words (an abstract and a conclusion may restate), numbers
+  over adjectives. `python study/scripts/style_check.py <name>` reports what it can find;
+  the validator warns about clear problems and never fails on style.
 - **Derived files are never hand-edited.** `references.bib` and
   `sections/references.tex` and `sections/versions.tex` in each article, and the review's
   `sections/comparison_rows.tex`, are regenerated (by `build_articles.py`, and by
