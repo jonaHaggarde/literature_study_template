@@ -9,7 +9,7 @@ these diagrams summarize graphically — that file is the authoritative
 text version if the two ever disagree. Not depicted here, to keep these
 diagrams readable: `ai_instructions/batch-orchestration.md`,
 `delegation.md`, `long-running-sessions.md`, `mcp.md`, and
-`../project_documents/source-access.md` — situational extensions to
+`../intake/own/source-access.md` — situational extensions to
 diagram 2's pipeline, read directly rather than via a diagram.
 
 ## 1. Starting a new study
@@ -25,11 +25,11 @@ a session that will also touch project content at the root.
 flowchart TD
     A["'Use this template' on GitHub<br/>(or clone + re-init git)"] --> B["Rename repo for the new topic"]
     B --> C["Run scripts/setup.ps1 or setup.sh<br/>creates .venv, installs dependencies"]
-    C --> D["User drops ../project_documents/<br/>brief, proposal, provided material"]
+    C --> D["User drops ../intake/received/<br/>brief, proposal, provided material"]
     D --> E["cd study, then open Claude Code there<br/>(working dir matters - see note above)"]
     E --> F["study/CLAUDE.md auto-loads as the memory file,<br/>points straight at ai_instructions/README.md"]
     F --> G{"Is ai_instructions/scope.md<br/>still the placeholder?"}
-    G -- yes --> H["Claude reads ../project_documents/<br/>and interviews the user about the topic"]
+    G -- yes --> H["Claude reads ../intake/received/<br/>and interviews the user about the topic"]
     H --> I["Claude writes a real scope.md:<br/>in scope / out of scope / what counts as a gap"]
     G -- no --> J["Scope already defined"]
     I --> K["Study is ready for real work"]
@@ -116,7 +116,7 @@ that makes judgment calls, and it's also what triggers the scripts.
 flowchart LR
     subgraph INPUTS["Inputs, user-provided"]
         PDFs["PDFs/"]
-        ProjDocs["../project_documents/"]
+        ProjDocs["../intake/received/"]
     end
 
     CLAUDE(["Claude<br/>judgment calls"])

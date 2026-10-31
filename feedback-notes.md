@@ -209,7 +209,7 @@ cover: an institutional repository can serve a full file with no auth while
 its page says "request a copy". Proposal: a `leads.md` tracking each lead
 (found, fetched, blocked with DOI, user-fetched, deferred) so blocked items
 survive between sessions, and a short rule in
-`project_documents/source-access.md` for verifying whether a file is really
+`intake/own/source-access.md` for verifying whether a file is really
 open access. Possibly an `/acquire` command. Small (docs and a template file)
 to medium (command).
 

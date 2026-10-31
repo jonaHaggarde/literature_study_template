@@ -13,17 +13,28 @@ Usage (from study/):
     python scripts/intake_check.py --next   # print the next free ID
 """
 
+import hashlib
+import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 import _console  # noqa: F401  (UTF-8 console output on Windows)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import ocr_support  # noqa: E402
 from build_bibliography import ARTICLES_DIR, COMMENT_RE, article_dirs  # noqa: E402
 
-INTAKE_PATH = ARTICLES_DIR.parent / "intake" / "intake.md"
+INTAKE_DIR = ARTICLES_DIR.parent / "intake"
+INTAKE_PATH = INTAKE_DIR / "intake.md"
+MANIFEST_PATH = INTAKE_DIR / ".converted.json"
+SOURCE_FOLDERS = ("own", "received")
+TEXT_SUFFIXES = {".md", ".txt", ".tex", ".csv", ".json"}
+UNREADABLE_SUFFIXES = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".gif", ".webp",
+                       ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".odt", ".odp", ".ods"}
+LOW_YIELD_CHARS_PER_PAGE = 40
 KINDS = ("fact", "goal", "constraint", "preference", "said", "unknown", "suspicion", "out-of-bounds")
 
 ROW_RE = re.compile(r"^\|\s*(I-\d+)\s*\|(.*)\|\s*$")
@@ -85,6 +96,74 @@ def check_all(intake_path=INTAKE_PATH, articles_dir=ARTICLES_DIR):
         for rid in sorted(set(cited_ids(adir)) - known):
             out.append(("FAIL", f"articles/{adir.name}: \\intake{{{rid}}} is not in intake/intake.md"))
     return out, len(rows)
+
+
+# ---- the files the user hands over ---------------------------------------------------------
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for block in iter(lambda: fh.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def source_files(intake_dir=INTAKE_DIR):
+    """Every file the user put under intake/own/ or intake/received/, sorted."""
+    files = []
+    for folder in SOURCE_FOLDERS:
+        base = intake_dir / folder
+        if base.exists():
+            files += [p for p in sorted(base.rglob("*")) if p.is_file() and p.name != "README.md"]
+    return files
+
+
+def pdfs(intake_dir=INTAKE_DIR):
+    return [p for p in source_files(intake_dir) if p.suffix.lower() == ".pdf"]
+
+
+def unreadable(intake_dir=INTAKE_DIR):
+    """Files that are not converted and not text: images and office documents."""
+    return [p for p in source_files(intake_dir) if p.suffix.lower() in UNREADABLE_SUFFIXES]
+
+
+def load_manifest(intake_dir=INTAKE_DIR):
+    path = intake_dir / MANIFEST_PATH.name
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def pending(intake_dir=INTAKE_DIR):
+    """PDFs with no converted .md next to them, or whose content changed since conversion."""
+    manifest = load_manifest(intake_dir)
+    out = []
+    for pdf in pdfs(intake_dir):
+        rel = pdf.relative_to(intake_dir).as_posix()
+        if not pdf.with_suffix(".md").exists() or manifest.get(rel, {}).get("hash") != sha256_file(pdf):
+            out.append(pdf)
+    return out
+
+
+def build_markdown(pdf_name, sha, pages, extraction="layout", ocr_suspect=None, today=None):
+    """The converted text of a PDF, to sit next to it. Starts with a line saying what it is."""
+    total = sum(len(p.get("text", "")) for p in pages)
+    lines = [
+        f"<!-- Converted from {pdf_name} (sha256 {sha[:12]}, {(today or date.today()).isoformat()}) by "
+        "study/scripts/convert_intake.py. A machine conversion, not authored: the text is the "
+        "source's, and tables and equations may be wrong. Regenerated when the PDF changes; do not edit. -->",
+        "",
+    ]
+    if extraction == "plain-text-fallback":
+        lines += ["<!-- WARNING: layout extraction timed out, so tables, equations and structure are "
+                  "lost or scrambled. Treat anything that depends on one as unread. -->", ""]
+    if pages and total / len(pages) < LOW_YIELD_CHARS_PER_PAGE and extraction != "ocr":
+        lines += ["<!-- WARNING: almost no text, so this PDF is probably a scan and OCR did not run. "
+                  "Nothing here has been read. -->", ""]
+    if extraction == "ocr":
+        lines += [ocr_support.notice(ocr_suspect or []), ""]
+    for i, page in enumerate(pages, start=1):
+        tag = " (ocr)" if page.get("ocr") else ""
+        lines += [f"<!-- page: {i}{tag} -->", "", page.get("text", "").strip(), ""]
+    return "\n".join(lines)
 
 
 def main():

@@ -77,7 +77,7 @@ Creates `.venv/` and installs dependencies. Activate it afterward with
 ## Getting started
 
 1. Drop material handed down from outside the project (a brief,
-   a proposal, a specification) into `../project_documents/`.
+   a proposal, a specification) into `../intake/received/`.
 2. **Start Claude Code with this folder (`study/`) as its working
    directory** — `cd` here first, then launch it, so `CLAUDE.md` in this
    folder loads automatically as its memory file and points straight at

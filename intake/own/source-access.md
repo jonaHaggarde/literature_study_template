@@ -3,8 +3,8 @@
 Where documents can actually be sourced from, so a recommendation to "go
 find this paper" points somewhere real instead of nowhere. This is
 personal and institutional — tied to real subscriptions and affiliations
-— which is why it lives in `project_documents/` rather than in
-`../study/ai_instructions/`: it is ground truth about *your* situation,
+— which is why it lives in `intake/own/` rather than in
+`../../study/ai_instructions/`: it is ground truth about *your* situation,
 not a convention of this template.
 
 **The list below is a real, working default, not a placeholder.** It
@@ -54,14 +54,14 @@ courts have found this to constitute copyright infringement (Elsevier v.
 Sci-Hub, ACS v. Sci-Hub, among others), and this file feeds a workflow
 that's part of a public template, not a one-off personal note. If a
 specific paper genuinely isn't reachable through any channel above,
-that's a real gap worth logging in `../study/topics/gaps.md`, not a
+that's a real gap worth logging in `../../study/topics/gaps.md`, not a
 reason to route around it.
 
 ## How this feeds the workflow
 
-When `../study/topics/gaps.md` or a lead from
-`../study/reference-index.md` names a source not yet in the catalog (see
-`../study/ai_instructions/workflow.md`, "Finding a new source on a
+When `../../study/topics/gaps.md` or a lead from
+`../../study/reference-index.md` names a source not yet in the catalog (see
+`../../study/ai_instructions/workflow.md`, "Finding a new source on a
 specific/narrow topic" and "Gap-flagging"), suggest checking
 institutional access first for likely-paywalled venues, open access
 next, and use Google Scholar to actually locate the paper/DOI to start
@@ -69,7 +69,7 @@ from. If it isn't reachable through any of these, say so plainly and log
 it as a gap rather than letting the recommendation just trail off.
 
 If a source-acquisition MCP server is attached to this session, it
-short-circuits most of this — see `../study/ai_instructions/mcp.md` for
+short-circuits most of this — see `../../study/ai_instructions/mcp.md` for
 what such a server can and cannot be trusted to do.
 
 ## Open access is something you check, not something you assume
@@ -79,5 +79,5 @@ licensed: a university repository can serve a PDF at full size while its own
 page offers only "request a copy". Before treating a file as openly accessible,
 look for an explicit licence or open-access statement on the publisher or the
 DOI landing page. If there is none, record the lead as `blocked` in
-`../study/leads.md` with that note, and let the user decide. Do not use sources
+`../../study/leads.md` with that note, and let the user decide. Do not use sources
 that bypass a paywall.

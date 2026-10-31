@@ -7,8 +7,10 @@ written.
 your files + interview  →  intake.md (Claude's digest)  →  articles/definition
 ```
 
-- **Your files go here untouched:** briefs, emails, rulebooks, earlier reports, notes. Claude
-  never edits them.
+- **Your files go here untouched,** in one of two folders so you can always tell whose they
+  are: `own/` for what you wrote, `received/` for what someone else gave you (a client, a
+  university, a rulebook). Claude never edits either. A PDF is converted to markdown next to
+  itself (`convert_intake.py`), so it is read from text and not from the PDF again.
 - **The interview** adds what the files do not say. Claude asks; the answers are recorded.
 - **`intake.md`** is Claude's digest of both. It is for Claude, not for reading, and it is
   not reviewed: each line has an ID (`I-12`) and names the file or interview answer it came

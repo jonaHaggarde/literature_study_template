@@ -12,21 +12,28 @@ not polished. You record; you do not decide, advise or propose solutions.
 
 ## How to run it
 
-1. **Preflight.** Read `intake/README.md` and `intake/intake.md`. List the other files in
-   `intake/`. If `intake.md` already has rows, you are extending it: never renumber, reuse
+1. **Preflight.** Read `intake/README.md` and `intake/intake.md`. List the files in
+   `intake/own/` (written by the user) and `intake/received/` (given to the user by someone
+   else). If `intake.md` already has rows, you are extending it: never renumber, reuse
    or delete an ID. Get the next free one with `python study/scripts/intake_check.py --next`.
 
-2. **Read the user's files.** Every file in `intake/` except `README.md` and `intake.md`.
-   Never edit them. Text and markdown are read directly. For a PDF, a scan or a large
-   document, say what you cannot read and ask the user for text; never render page images
-   (`study/ai_instructions/vision-budget.md`).
+2. **Convert, then read.** Run `python study/scripts/convert_intake.py`. It turns each new or
+   changed PDF into a `.md` next to it (scans are OCR'd). From then on read the `.md`, never
+   the PDF again. Never edit any file in `own/` or `received/`; a converted `.md` is a machine
+   conversion and is regenerated, not edited. Text and markdown are read directly. The script
+   lists images and Word, PowerPoint and Excel files as not converted: tell the user which
+   and ask for a PDF or text. Never render page images or read a scan's pages yourself
+   (`study/ai_instructions/vision-budget.md`); OCR'd pages are marked `(ocr)` and are unreliable
+   for equations and tables, so say so when a row depends on one.
 
 3. **Digest into rows.** One row per claim, in the table in `intake.md`:
    `| I-n | kind | statement | source |`.
    - Kinds: `fact`, `goal`, `constraint`, `preference`, `said`, `suspicion`, `unknown`,
      `out-of-bounds`. A hunch is a `suspicion`, never a `fact`; the user's own words go in
      as `said`, quoted.
-   - Source: the file and the place in it (page, heading), or `interview YYYY-MM-DD`.
+   - Source: the file and the place in it (page, heading), or `interview YYYY-MM-DD`. Cite
+     the original (`received/brief.pdf, p. 3`), not its converted `.md`. A statement from
+     `received/` is what someone else said; one from `own/` is what the user said.
    - One claim per row. If two sources disagree, add both rows and write
      `conflicts with I-n` in the second statement. Do not choose between them.
    - Keep values exactly as given (units, tolerances). Do not round, convert or infer.

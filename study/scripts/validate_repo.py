@@ -553,6 +553,14 @@ def check_intake():
     found, count = intake_check.check_all()
     for severity, message in found:
         log(severity, "intake", message)
+    for pdf in intake_check.pending():
+        log("WARN", "intake",
+            f"intake/{pdf.relative_to(intake_check.INTAKE_DIR).as_posix()}: not converted yet (or changed since); "
+            "run `python study/scripts/convert_intake.py`")
+    for path in intake_check.unreadable():
+        log("INFO", "intake",
+            f"intake/{path.relative_to(intake_check.INTAKE_DIR).as_posix()}: an image or office file is not "
+            "converted; give a PDF or text, or decide on the vision step")
     log("INFO", "intake", f"{count} intake line(s)")
 
 

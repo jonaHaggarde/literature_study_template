@@ -7,7 +7,7 @@
 
   Keep the finished version SHORT (a page or so). This gets read in full
   at the start of every session; it is not the place for the full project
-  brief — that's what project_documents/ is for. This is the distilled
+  brief — that's what intake/received/ is for. This is the distilled
   "what counts as in-scope" reference that makes gap-flagging possible.
 -->
 

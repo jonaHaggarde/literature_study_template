@@ -62,15 +62,15 @@ its own scope evolves; a stale scope.md produces both false gaps (things
 correctly excluded, flagged as missing) and real misses (things inside
 scope, never flagged because scope.md never mentioned that area).
 
-## Relationship to project_documents/
+## Relationship to intake/received/
 
-`../../project_documents/` — at the repo root, outside `study/` — holds
+`../../intake/received/` — at the repo root, outside `study/` — holds
 material handed down from outside the project: a brief, a proposal, a
 specification, whatever explains why this study exists. Those documents
 are the source of truth but can be long.
 `scope.md` is a short, Claude-maintained *distillation* of them, kept small
 enough to read in full every session without burning context — update it
-whenever `project_documents/` changes or a conversation reveals the
+whenever `intake/received/` changes or a conversation reveals the
 existing distillation is wrong or incomplete, don't let it silently drift
 out of sync.
 

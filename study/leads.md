@@ -26,7 +26,7 @@ file is what stops those from being forgotten between sessions.
   copy". That does not make the file openly licensed. Look for an explicit
   licence or open-access statement on the publisher or landing page; if there
   is none, record it as `blocked` with that note and let the user decide.
-  See `../project_documents/source-access.md` for the channels this study can
+  See `../intake/own/source-access.md` for the channels this study can
   actually use.
 
 ## Table

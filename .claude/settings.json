@@ -46,7 +46,15 @@
       "Bash(python study/scripts/build_bibliography.py:*)",
       "Bash(python scripts/build_bibliography.py:*)",
       "Bash(python study/scripts/build_articles.py:*)",
-      "Bash(python scripts/build_articles.py:*)"
+      "Bash(python scripts/build_articles.py:*)",
+      "Bash(python study/scripts/article_version.py * edit *)",
+      "Bash(python study/scripts/article_version.py * check)",
+      "Bash(python study/scripts/article_version.py * render)",
+      "Bash(python study/scripts/article_version.py * draft*)",
+      "Bash(python scripts/article_version.py * edit *)",
+      "Bash(python scripts/article_version.py * check)",
+      "Bash(python scripts/article_version.py * render)",
+      "Bash(python scripts/article_version.py * draft*)"
     ],
     "ask": [
       "Agent(page-reader)",

@@ -30,7 +30,7 @@ interpret, never recommend, and never edit anything.
    not themselves read — and must be labeled as such.
 
 Outside `study/`, the same rules apply to `ideation/`, `theory/`,
-`meetings/`, `decisions.md`, and `project_documents/`.
+`meetings/`, `decisions.md`, and `intake/received/`.
 
 ## Return format — this is the whole point of your existence
 
