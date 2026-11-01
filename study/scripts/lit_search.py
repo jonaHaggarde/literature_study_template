@@ -441,17 +441,28 @@ def render_round(rnd, previous):
     for i, p in enumerate(picks, 1):
         out.append(f"{i}. {p['reason']}")
 
+    fetch = rnd.get("fetch", {})
     manual = [(i, p, rnd["candidates"][p["id"]]) for i, p in enumerate(picks, 1)
-              if rnd["candidates"][p["id"]]["access"] != "open copy found"]
+              if rnd["candidates"][p["id"]]["access"] != "open copy found"
+              or fetch.get(p["id"], {}).get("state") == "blocked"]
     if manual:
         out += ["", "## To fetch by hand", "",
-                "No open copy was found for these. Save each PDF into one folder under the "
-                "filename shown; a script matches the files back to their leads. If a paper "
-                "has no open copy listed, Scholar's \"All versions\" link often finds one.", ""]
+                "No open copy was found, or the one found could not be fetched. Save each PDF "
+                "into study/searches/inbox/ (the filename shown is only a suggestion); "
+                "`lit_fetch.py match` matches the files back to their leads. Scholar's "
+                "\"All versions\" link often finds an open copy.", ""]
         for i, p, c in manual:
             link = f"https://doi.org/{c['doi']}" if c["doi"] else c["landing"]
             out.append(f"- {i}. {cell(venue_cell(c))}: [{link}]({link}), save as `{filename(c)}`, "
                        f"[Scholar]({scholar_link(c)})")
+
+    if fetch:
+        out += ["", "## Fetch results", ""]
+        for i, p in enumerate(picks, 1):
+            rec = fetch.get(p["id"])
+            if rec:
+                detail = rec.get("file") or rec.get("reason", "")
+                out.append(f"- {i}. {rec['state']}: {detail}")
 
     out += ["", "## Queries run", "",
             "| Angle | Query | Returned | New | Already held |", "|---|---|---|---|---|"]

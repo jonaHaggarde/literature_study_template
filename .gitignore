@@ -1,6 +1,9 @@
 # Source PDFs: kept local only. Large binaries + copyright, not repo material.
 /study/PDFs/**
 !/study/PDFs/.gitkeep
+# Papers you saved by hand and files that failed the title check: local only, like PDFs/
+/study/searches/inbox/
+/study/searches/rejected/
 
 # Python
 .venv/
