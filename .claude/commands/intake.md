@@ -38,6 +38,10 @@ not polished. You record; you do not decide, advise or propose solutions.
      `received/` is what someone else said; one from `own/` is what the user said.
    - One claim per row. If two sources disagree, add both rows and write
      `conflicts with I-n` in the second statement. Do not choose between them.
+   - When the user then settles it, or changes their mind, or answers a question left
+     `unknown`, add a new row that says `supersedes I-n` in its statement. Never edit or
+     delete the old row. A superseded row no longer counts as an answer, an unknown or a
+     conflict, and the definition cites the new one.
    - Keep values exactly as given (units, tolerances). Do not round, convert or infer.
 
 4. **See what is missing.** Run `python study/scripts/intake_check.py --coverage`. It lists,
@@ -47,11 +51,17 @@ not polished. You record; you do not decide, advise or propose solutions.
    article**, nothing more. Ask only about sections with no answer, three or four questions
    at a time, in plain chat. Record each answer the same turn as a row with source
    `interview YYYY-MM-DD`. An unanswered question becomes an `unknown` row, so the gap stays
-   visible. The interview ends in one of two ways:
+   visible; put the owner and resolve-by date in its statement when the user volunteers
+   them, and do not ask for them one by one. The interview ends in one of two ways:
    - the user tells you to stop or to start the article; or
    - you judge that every section has an answer: say so, name what is still `unknown`, and
      suggest writing the draft. The user decides.
    Do not insist on completeness. Do not interview about anything a section does not need.
+   One thing every study needs is its **working language**: the language the sources are in,
+   the language the notes and analysis are written in, and what to do with a quotation in
+   another language (translate it, keep the original, or both). Ask it with the constraints
+   questions, as a `constraints` row, so the definition can carry it and `scope.md` can be
+   written from it.
 
 6. **Check, report, and point to the next step.** Run `python study/scripts/intake_check.py`.
    Say in a few lines: rows by section, what is still `unknown`, which rows conflict. Then

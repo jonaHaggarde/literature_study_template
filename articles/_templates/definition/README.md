@@ -11,8 +11,8 @@ The accepted statement of what the project is. Everything after it rests on it, 
 | Contains no | solutions, literature, requirements on a design |
 
 **Run `/definition`** to draft it from `intake.md`, to revise it after your review, to refine
-it after acceptance, and to write `scope.md` from it once accepted. It never runs `review` or
-`gate.py close`; those are yours. In a fork the first real draft replaces the skeleton's row and is
+it after acceptance, and to write `scope.md` from it once accepted. It never runs `review`, and runs `gate.py open` and `gate.py close` only when you tell
+it to. In a fork the first real draft replaces the skeleton's row and is
 version `0.1`.
 
 **Varies per project:** the constraints section is dropped when nothing is given; the

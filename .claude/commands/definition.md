@@ -34,8 +34,13 @@ states what that section must contain and must not contain; it is the specificat
      `\intake{I-4,I-9}`, at the end of the sentence or the table cell, or marked `\inferred`
      when it is your inference. Keep inferences few; the user confirms or strikes each one.
    - **Values exactly as given** (units, tolerances). Never round, convert or tidy.
-   - `unknown` rows: write `TBD` in the section, with an owner and a resolve-by date if the
-     intake gives them, and an open row in the assumption register.
+   - **Working language** goes in the constraints table as its own row (sources, notes and
+     analysis, quotations), because `scope.md` is written from the definition and has a
+     section for it. When intake has no row for it, write `TBD` and say so in the report.
+   - `unknown` rows: write `TBD` in the section, with the owner and resolve-by date the intake
+     gives, and an open row in the assumption register. In a study with one person the owner is
+     that person, and a resolve-by date nobody gave is written "not set", never invented
+     (a demanded date produces a made-up one).
    - `suspicion` rows are assumptions (status open), never facts.
    - Rows marked `conflicts with I-n`: set both out in an `\openissue{...}` naming both IDs.
      Do not choose.
@@ -59,16 +64,17 @@ states what that section must contain and must not contain; it is the specificat
 
 4. **Report** in a few lines: the sections drafted and the ones left; how many statements are
    `\inferred`; the `TBD`s; the conflicts; the preferences set aside. Point to
-   `articles/definition.pdf`. Say it is to be read on paper. The user records a review with
-   `python study/scripts/article_version.py definition review --summary "..."`, and passes the
-   gate with `/gate definition`: you brief them, they open and close it
-   (`python study/scripts/gate.py close definition --summary "..."`). Both are theirs to run.
+   `articles/definition.pdf`. Say it is to be read on paper. The gate is passed with `/gate definition`: you brief them,
+   and when they tell you to, you run `gate.py open` and then
+   `gate.py close definition --summary "..."`, which records the acceptance. No `review`
+   comes first.
 
 ## revise (drafted, not accepted)
 
 The user brings review comments. For each: if it is new information, add a row to
 `intake/intake.md` first (kind `said`, source `interview YYYY-MM-DD`) and cite its ID in the
-text, so the trace stays whole. Make the change, then
+text, so the trace stays whole. If it replaces what an earlier row said, the new row says
+`supersedes I-n`. Make the change, then
 `article_version.py definition edit --summary "..."`, rebuild, and report which sections
 moved and the new version.
 

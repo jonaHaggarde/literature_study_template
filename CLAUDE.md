@@ -186,8 +186,13 @@ substantial edit to an article (a claim, number, source, equation, table row or 
 run `python study/scripts/article_version.py <name> edit --summary "one line"` in the same
 turn, and tell the user which article moved to which version.
 
-- **Never run `review`, `accept`, `gate.py open`, `gate.py close` or `gate.py skip`.** The major number is the user's, bumped after their own
-  review; `accept` is a review that also passes the article's gate.
+- **Never run `review` or `accept`.** The major number is the user's, bumped after their own
+  review.
+- **Run `gate.py open`, `gate.py close` or `gate.py skip` only when the user tells you to, in
+  that message.** "Looks good" or "I have reviewed it" is not that: say what the command is
+  and ask. Each sits behind a permission prompt, which is the user's second confirmation.
+  `close` is `accept` plus the gate record, so no `review` comes before it; `review` is for a
+  review that is not at a gate.
 - **After acceptance, `edit` is refused.** An accepted article changes only when the user
   asks, with `refine --summary "..."`, which prompts them each time. Do not refine an
   accepted article on your own initiative.
@@ -198,7 +203,11 @@ turn, and tell the user which article moved to which version.
 
 - **Gates are the user's decision.** `/gate` briefs them (facts from `gate.py briefing`, your
   own critique, both short) and `/understand` runs the check. Neither blocks the gate; the
-  user passes it with `gate.py close`. There is no gate report.
+  user passes it by running `gate.py close` or by telling you to. There is no gate report.
+
+The reason for the gate rule: the decision to pass a gate is the user's, not the typing of the
+command, and a command run only on their word in chat, behind a prompt, keeps it deliberate
+without making them type it every time.
 
 The reason: the user reads these articles on paper at gates and must be able to trust that
 what they reviewed is what they are shown.

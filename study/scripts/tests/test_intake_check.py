@@ -80,8 +80,61 @@ class Citations(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = self.make(tmp, "Claim.\\intake{I-7} % \\intake{I-8}\n")
             found, _ = ic.check_all(root / "intake" / "intake.md", root / "articles")
-            self.assertEqual(len(found), 1)
-            self.assertIn("I-7", found[0][1])
+            fails = [f for f in found if f[0] == "FAIL"]
+            self.assertEqual(len(fails), 1)
+            self.assertIn("I-7", fails[0][1])
+
+    def test_live_rows_the_definition_does_not_cite_are_reported_as_info(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self.make(tmp, "Goal.\\intake{I-1}\n")
+            found, _ = ic.check_all(root / "intake" / "intake.md", root / "articles")
+            self.assertEqual([f[0] for f in found], ["INFO"])
+            self.assertIn("I-2", found[0][1])
+            self.assertEqual(ic.uncited(ic.parse_intake(DIGEST), root / "articles" / "nothing"), [])
+
+
+SWAPPED = """| ID | Section | Kind | Statement | Source |
+|---|---|---|---|---|
+| I-1 | scope | fact | Target is a virtual car | interview 2026-11-01 |
+| I-2 | scope | unknown | Exclusions | interview 2026-11-01 |
+| I-3 | scope | suspicion | Real data will exist; conflicts with I-1 | interview 2026-11-01 |
+| I-4 | scope | said | Real car, not virtual; supersedes I-1 | interview 2026-11-01 |
+| I-5 | scope | said | Nothing excluded; supersedes I-2 | interview 2026-11-02 |
+"""
+
+
+class Supersession(unittest.TestCase):
+    rows = ic.parse_intake(SWAPPED)
+
+    def test_a_superseded_row_stays_but_no_longer_counts(self):
+        self.assertEqual(ic.superseded(self.rows), {"I-1": "I-4", "I-2": "I-5"})
+        self.assertEqual([r[0] for r in ic.live(self.rows)], ["I-3", "I-4", "I-5"])
+        self.assertEqual(ic.coverage(self.rows)[0]["scope"], (3, 0))   # the unknown was answered
+
+    def test_a_conflict_is_open_until_one_side_is_superseded(self):
+        self.assertEqual(ic.open_conflicts(self.rows), [])
+        unresolved = ic.parse_intake("| I-1 | scope | fact | a | s |\n| I-2 | scope | fact | b; conflicts with I-1 | s |\n")
+        self.assertEqual(ic.open_conflicts(unresolved), [("I-1", "I-2")])
+
+    def test_superseding_a_missing_or_later_row_is_a_problem(self):
+        rows = ic.parse_intake("| I-1 | scope | fact | supersedes I-9 | s |\n| I-2 | scope | fact | supersedes I-3 | s |\n"
+                               "| I-3 | scope | fact | c | s |\n")
+        text = " ".join(ic.problems(rows))
+        self.assertIn("I-9, which is not in the digest", text)
+        self.assertIn("can only replace an earlier one", text)
+        self.assertEqual(ic.problems(self.rows), [])
+
+    def test_the_definition_citing_a_superseded_row_is_a_warning(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "intake").mkdir()
+            (root / "intake" / "intake.md").write_text(SWAPPED, encoding="utf-8")
+            art = root / "articles" / "definition"
+            (art / "sections").mkdir(parents=True)
+            (art / "main.tex").write_text("\\begin{document}\\end{document}\n", encoding="utf-8")
+            (art / "sections" / "scope.tex").write_text("Virtual.\\intake{I-1} Real.\\intake{I-4}\n", encoding="utf-8")
+            found, _ = ic.check_all(root / "intake" / "intake.md", root / "articles")
+            self.assertIn(("WARN", "articles/definition: cites I-1, which I-4 supersedes"), found)
 
 
 class Handover(unittest.TestCase):

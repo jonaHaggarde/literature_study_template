@@ -89,6 +89,10 @@ explains the mechanism.
   rationale's decision tree (from `decision_tree.md`, status `candidate` marks an alternative that
   goes on to a trial). The hand-written section `\input`s the generated file, so the explanation
   is hand-written and the numbers and picture are not. The validator warns about a stale file.
+- **TBD is explained in the article.** `\tbdnote` (in `common/preamble.tex`) prints one line under
+  the status box saying that TBD marks a value nobody can give yet and names an owner and, where
+  set, a resolve-by date. The definition, requirements and specification templates include it;
+  any article that writes TBD should too, so a reader never meets the word undefined.
 - **Dense writing.** The text follows `study/ai_instructions/article-style.md`: each fact
   once, never restated in other words (an abstract and a conclusion may restate), numbers
   over adjectives. `python study/scripts/style_check.py <name>` reports what it can find;

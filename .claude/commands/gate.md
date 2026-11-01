@@ -1,5 +1,5 @@
 ---
-description: Show where the gates stand, or open a gate and brief the user before the decision. Never closes one.
+description: Show where the gates stand, or open a gate and brief the user before the decision. Closes one only when the user says so.
 argument-hint: "[optional: gate id, e.g. map | review | concept | split | adhoc]"
 ---
 
@@ -45,14 +45,15 @@ with `--article specification-<name>` on `open`, `briefing`, `understand`, `clos
 `/gate adhoc` is a pause with no article and no acceptance, for when the user wants to look
 at the whole study (or the validator's volume nudge suggests it). Open it the same way
 (`gate.py open adhoc`, the user's call). The briefing is about the study as a whole: entries
-since the last gate, open issues and `	odo` markers across the articles, articles with
+since the last gate, open issues and `\todo` markers across the articles, articles with
 unrecorded changes, plus your own critique of where the study stands (gaps, one-sided
 coverage, anything you are unsure of). `/understand adhoc` asks the questions over the dossiers
 instead of an article. It closes with `gate.py close adhoc --summary "..."` and unlocks nothing.
 
 ## Closing
 
-Never run `close` or `skip` yourself. When the user says the gate has passed, tell them the
-command and let them run it:
-`python study/scripts/gate.py close <gate> --summary "..."` (this is `accept` plus the gate
-record). It prints what the gate unlocks; carry that out when they ask.
+Run `close` or `skip` only when the user tells you to in that message. "Looks good" is not
+that: say the command and ask. Both sit behind a permission prompt.
+`python study/scripts/gate.py close <gate> --summary "..."` is `accept` plus the gate record,
+so no `article_version.py review` comes before it. It prints what the gate unlocks; carry that
+out when they ask.
