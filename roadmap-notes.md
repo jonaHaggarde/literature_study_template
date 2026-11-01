@@ -1,7 +1,8 @@
 # Roadmap notes: how a study moves through phases
 
-**Status: ideas, not designed, not built.** Written 2026-10-29 from a
-discussion. Nothing here is a convention yet. It is parked so the larger
+**Status: a design note, partly built.** Written 2026-10-29 from a
+discussion; the gates, intake and article parts it anticipated are built (last section). The
+rest is not a convention yet. It is parked so the larger
 direction is not lost while the review article was built (`articles/review/`,
 now merged). When a part is built, it moves to a `dev-<feature>` branch and
 into the real docs.
@@ -103,7 +104,7 @@ they can meet.
 A **slide deck a new user opens and reads before using the repo**,
 explaining the whole flow and every gate: what each phase is for, what is
 frozen at each gate, what the user is expected to read and do. Depends on
-the gate design, so it is built after it. Not started.
+the gate design, which is now built (2026-10-31), so it can be written. Not started.
 
 ## Scanned PDFs and OCR (built 2026-10-30, branch `dev-ocr`)
 
@@ -127,8 +128,9 @@ tested, and a live `page-reader` launch was not exercised (see `feedback-notes.m
 
 - Phase 1 workflow and the review article: `articles/review/` (merged into
   `development` 2026-10-30; moved into `articles/` on `dev-articles-layout`).
-- Gate events: `dev-gate-events`.
-- OCR and scanned PDFs: `dev-ocr` (built, not yet merged).
+- Gates: built on `development` (`articles/gates/`, `study/scripts/gate.py`). `dev-gate-events`
+  holds the earlier parked design (printable report, debrief), superseded by the no-report decision.
+- OCR and scanned PDFs: built and merged into `development` (branch `dev-ocr` deleted).
 - What real usage says about the template (bug table, engine features,
   structure and larger ideas, suggested order): `feedback-notes.md`.
 - Everything above beyond phase 1: this file only.
@@ -142,3 +144,59 @@ installed. `review` was the awkward one: its table builder and the validator che
 its absence, and `/article-review` creates it when missing. The skeleton row at 0.1 stays, and
 the first real draft replaces it with `draft --restart`, so a first draft is 0.1. Opening a gate
 is expected to create its article once the gate machinery exists.
+
+## Gates, intake and generated parts (built 2026-10-31 to 2026-11-01)
+
+What the sections above called open is now built on `development`. Each item says what was
+decided and why, so it is not reverted for being inconvenient.
+
+**Pipeline before the survey.** `/intake` (interview, decided over a form because an interview
+can follow up an unknown or a contradiction at once) builds `intake/intake.md`, Claude's digest
+with `I-n` IDs. `/definition` drafts `articles/definition` from it, every statement tagged with
+its IDs or marked inferred. Accepting it (the `definition` gate) writes `scope.md`; no papers are
+gathered before that. A row can replace an earlier one with `supersedes I-n`, and
+`intake_check.py --uncited` lists rows the definition left out.
+
+**Gates.** Six, in `articles/gates/definitions.json`: `definition` (light), `map` (light),
+`review` (full), `requirements` (medium, skippable), `concept` (full), `split` (full), plus an
+`adhoc` stop-and-look with no article. `gate.py` keeps a record per gate with a hash of the
+tracked files (soft freeze: the validator warns when an open gate's article changes). The gate
+record, not the version row, is what `scope_sync` and the requirements warning read.
+
+- **No gate report.** A separate document duplicated the version table, the chat briefing and the
+  check, and cost reading time for no new information.
+- **No rest day.** A forced wait between report and decision was disliked and had no reason that
+  survived discussion.
+- **`/understand` is a chat mode**, not a document: open question first, then questions on
+  conclusions and gaps. It ends in a suggestion (`ready` or `slower`) with no effect on the
+  gate, because its purpose is to slow the user down, not to block. Not offered for `definition`
+  or `requirements`.
+- **Gate commands run on the user's word in chat**, behind a permission prompt. `close` is
+  `accept` plus the gate record, so no `review` precedes it.
+- **Amendments:** a later specification article opens under the passed `split` gate.
+- **Volume nudge:** an INFO line after 15 processed entries since the last gate.
+
+**Assumptions have levels.** Top-level assumptions are `suspicion` rows in intake; an assumption
+that matters to one article lives in that article's own section; chat-only premises go nowhere.
+On "assume" Claude asks where it belongs, then runs the workflow. Reason: a register that took
+everything would bury the top-level ones.
+
+**Generated parts.** `build_article_parts.py` writes the map's coverage counts per method family
+(counts only, no "found by" field), the requirements' traceability table (gaps flagged) and the
+rationale's decision tree as TikZ, from the same table as the mermaid diagram (new status
+`candidate`). The hand-written section `\input`s the generated file. `\tbdnote` prints what TBD
+means under the status box of the articles that use it.
+
+**Page-reader.** It records only equations, tables and figures below the OCR text and never
+transcribes prose; the merge keeps OCR text and replaces earlier items. Reason: a verbatim page
+transcription was blocked once by a content filter, and prose is what OCR already reads well.
+
+**Tried once, then discarded (2026-11-01).** A trial intake and definition on a throwaway branch
+gave six fixes, all merged: gate-command rule, no `review` before `close`, `supersedes`, a
+working-language row, when a register row may be removed, and TBD owner and date.
+
+**Still untested.** The page-reader against the real filter (needs an approved ticket, also
+measures tokens); OCR on tables and non-English text; the style thresholds (Jaccard 0.6 and 0.4
+are first guesses); whether the briefings and the ad hoc gate earn their reading time; the
+TikZ tree's layout beyond compiling. CI skips the LaTeX tests (no `pdflatex` on the runner).
+The next real test is the author's own large study.
