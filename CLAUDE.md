@@ -20,11 +20,24 @@ This repo has two halves, and keeping them apart is the point:
 
 Routing, for a session starting at the repo root:
 
-- A first session ("let's start") in a fresh repo: do the setup yourself, never hand the user a
-  script to run. If `study/.venv` does not exist, run `study/scripts/setup.ps1` (Windows) or
-  `study/scripts/setup.sh`, say in a line what it installed, report a failure plainly, and carry
-  on with the intake route below. The user's "let's start" is the consent. Why: a setup step the
-  user has to remember is one they skip, and it only installs a few packages into `study/.venv`.
+- A first session ("let's start") in a fresh repo: three things, in this order, without asking,
+  each reported in a line. The user's "let's start" is the consent. Never hand the user a script
+  to run.
+  1. **Set up.** If `study/.venv` does not exist, run `study/scripts/setup.ps1` (Windows) or
+     `study/scripts/setup.sh`, say what it installed, and report a failure plainly. Why: a setup
+     step the user has to remember is one they skip, and it only installs a few packages into
+     `study/.venv`.
+  2. **Show the onboarding deck.** It is a Slides artifact, which belongs to one account, so a
+     fresh repo has no published copy. If `.claude/deck-url` (git-ignored) holds a link, open that
+     with the Artifact tool. Otherwise publish the source in `onboarding-deck/` as a Slides
+     artifact (quickstart first), save the link in `.claude/deck-url`, and open it in the app.
+     Say in a line that it is a ten-slide introduction and that reading it is optional. If
+     publishing fails, say so and carry on; the deck is never a blocker. Why: a new user should
+     see the process drawn once before being interviewed, and the source in the repo is what
+     makes that possible for every copy of the template.
+  3. **Recommend the next step.** `/intake` (the interview that starts the project), and that
+     `/where` shows the status at any time. One short paragraph, no menu of options. Then carry
+     on with the intake route below if the user says go.
 - Starting a project, or `scope.md` still a placeholder → `/intake`, then the definition
   article (`articles/definition`), then the user accepts it (the `definition` gate), then
   `scope.md` is written from it, and only then are papers gathered. Always steer the user to

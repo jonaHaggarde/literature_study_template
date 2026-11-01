@@ -169,8 +169,9 @@ infrastructure.
 6. **Open Claude Code**, either at the repo root (the root `CLAUDE.md`
    loads and routes literature work into `study/`) or with `cd study`
    first (`study/CLAUDE.md` loads and points straight at the operating
-   manual). Then just say you're ready to start. Claude's first job is
-   getting `study/ai_instructions/scope.md` written — everything
+   manual). Then just say you're ready to start. Claude first sets
+   up the environment, opens the onboarding deck (`onboarding-deck/`) in the app and recommends the
+   next step. The first real job is getting `study/ai_instructions/scope.md` written — everything
    downstream, gap-flagging in particular, depends on that being real
    rather than a placeholder. It will suggest `/intake` first (your files
    and an interview), then the definition article, which you review and
