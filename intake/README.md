@@ -26,6 +26,11 @@ your files + interview  →  intake.md (Claude's digest)  →  articles/definiti
 The article `articles/definition` is the document the user reviews and accepts. If `intake.md`
 and the definition disagree, the definition wins.
 
+A row replaces an earlier one by saying `supersedes I-n`: the user settled a conflict,
+changed their mind, or answered a question left `unknown`. The old row stays, so the trace
+to what was said earlier stays whole, but it no longer counts. `intake_check.py --uncited`
+lists the rows the definition does not cite, so nothing the user said is dropped unnoticed.
+
 Run `/intake` to start or extend it. `python study/scripts/intake_check.py` (also run by the
 validator) fails on a duplicate ID, a line with no source, or a `\intake{I-n}` in an article
 whose ID does not exist.

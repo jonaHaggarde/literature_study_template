@@ -12,6 +12,13 @@ Usage (from study/):
     python scripts/intake_check.py          # report problems, exit 1 if any
     python scripts/intake_check.py --next   # print the next free ID
     python scripts/intake_check.py --coverage   # rows per definition section, and what is missing
+    python scripts/intake_check.py --uncited    # live rows the definition article does not cite
+
+A row can replace an earlier one by saying `supersedes I-n` in its statement (the user changed
+their mind, or answered a question left `unknown`). The earlier row stays, because IDs are
+never reused and the trace must stay whole, but it no longer counts: not as an answer, not as an
+unknown, not as one side of a conflict. Two rows that say `conflicts with` each other stay an
+open conflict until one of them is superseded.
 """
 
 import hashlib
@@ -43,6 +50,8 @@ ALL_SECTIONS = SECTIONS + ("other",)
 
 ROW_RE = re.compile(r"^\|\s*(I-\d+)\s*\|(.*)\|\s*$")
 CITE_RE = re.compile(r"\\intake\{([^}]*)\}")
+SUPERSEDES_RE = re.compile(r"\bsupersedes\s+(I-\d+)", re.I)
+CONFLICT_RE = re.compile(r"\bconflicts with\s+(I-\d+)", re.I)
 
 
 def parse_intake(text):
@@ -58,13 +67,46 @@ def parse_intake(text):
     return rows
 
 
+def superseded(rows):
+    """{replaced ID: ID of the row that replaces it}, from `supersedes I-n` in a statement."""
+    out = {}
+    for rid, _section, _kind, statement, _source in rows:
+        for old in SUPERSEDES_RE.findall(statement):
+            out[old] = rid
+    return out
+
+
+def live(rows):
+    """The rows that still count: those no later row supersedes."""
+    gone = superseded(rows)
+    return [r for r in rows if r[0] not in gone]
+
+
+def open_conflicts(rows):
+    """[(id, id)] pairs that say `conflicts with` and where neither side is superseded."""
+    gone = superseded(rows)
+    known = {r[0] for r in rows}
+    pairs = []
+    for rid, _section, _kind, statement, _source in rows:
+        for other in CONFLICT_RE.findall(statement):
+            if other in known and rid not in gone and other not in gone:
+                pairs.append((other, rid))
+    return pairs
+
+
 def problems(rows):
     """Plain-language problems in the digest itself."""
     found, seen = [], set()
+    known = {r[0] for r in rows}
     for rid, section, kind, statement, source in rows:
         if rid in seen:
             found.append(f"{rid} appears more than once")
         seen.add(rid)
+        for old in SUPERSEDES_RE.findall(statement):
+            if old not in known:
+                found.append(f"{rid}: supersedes {old}, which is not in the digest")
+            elif int(old[2:]) >= int(rid[2:]):
+                found.append(f"{rid}: supersedes {old}, but a row can only replace an earlier one")
         if section not in ALL_SECTIONS:
             found.append(f"{rid}: section '{section}' is not one of {', '.join(ALL_SECTIONS)}")
         if kind not in KINDS:
@@ -79,9 +121,9 @@ def problems(rows):
 def coverage(rows):
     """{section: (rows that answer it, rows left unknown)} for each definition section, and
     the sections with no answering row. A row of kind `unknown` marks a question asked and not
-    answered, so it does not count as an answer."""
+    answered, so it does not count as an answer. A superseded row counts for nothing."""
     table = {sec: [0, 0] for sec in SECTIONS}
-    for _rid, section, kind, _statement, _source in rows:
+    for _rid, section, kind, _statement, _source in live(rows):
         if section in table:
             table[section][1 if kind == "unknown" else 0] += 1
     missing = [sec for sec in SECTIONS if table[sec][0] == 0]
@@ -104,15 +146,33 @@ def cited_ids(article_dir):
     return ids
 
 
+def uncited(rows, definition_dir):
+    """IDs of the live rows the definition article does not cite. Empty when the article has no
+    citations yet, since nothing has been drafted to compare with."""
+    cited = set(cited_ids(definition_dir)) if definition_dir.exists() else set()
+    if not cited:
+        return []
+    return [r[0] for r in live(rows) if r[0] not in cited]
+
+
 def check_all(intake_path=INTAKE_PATH, articles_dir=ARTICLES_DIR):
     """[(severity, message)] for the digest and for the articles citing it."""
     out = []
     rows = parse_intake(intake_path.read_text(encoding="utf-8")) if intake_path.exists() else []
     out += [("FAIL", p) for p in problems(rows)]
     known = {r[0] for r in rows}
+    gone = superseded(rows)
+    for a, b in open_conflicts(rows):
+        out.append(("WARN", f"{a} and {b} conflict and neither is superseded; the definition must set both out"))
     for adir in article_dirs(articles_dir):
-        for rid in sorted(set(cited_ids(adir)) - known):
+        cited = set(cited_ids(adir))
+        for rid in sorted(cited - known):
             out.append(("FAIL", f"articles/{adir.name}: \\intake{{{rid}}} is not in intake/intake.md"))
+        for rid in sorted(cited & set(gone)):
+            out.append(("WARN", f"articles/{adir.name}: cites {rid}, which {gone[rid]} supersedes"))
+    missing = uncited(rows, articles_dir / "definition")
+    if missing:
+        out.append(("INFO", f"{len(missing)} intake row(s) are not cited by the definition: {', '.join(missing)}"))
     return out, len(rows)
 
 
@@ -197,11 +257,16 @@ def main():
         print("Every definition section has an answer: ready to suggest a draft." if not missing
               else f"No answer yet for: {', '.join(missing)}.")
         return 0
+    if "--uncited" in sys.argv:
+        missing = uncited(rows, ARTICLES_DIR / "definition")
+        print(", ".join(missing) if missing else "Every live intake row is cited by the definition.")
+        return 0
     found, count = check_all()
     for severity, message in found:
         print(f"{severity}: {message}")
-    print(f"{count} intake line(s); {len(found)} problem(s).")
-    return 1 if found else 0
+    failures = [f for f in found if f[0] == "FAIL"]
+    print(f"{count} intake line(s); {len(failures)} problem(s).")
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":
