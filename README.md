@@ -56,10 +56,11 @@ CLAUDE.md               repo-wide conventions; routes literature work into study
 README.md               this file
 decisions.md            decision log, with the literature-basis / project-context split
 timeline.md             milestones, dependencies, blockers
-intake/received/      material handed down from outside — nothing self-authored
 ideation/               unverified brainstorming, never citable as literature
 theory/                 explainers of background concepts, for teammates
 meetings/               one file per counterparty, plus internal.md
+roadmap-notes.md        where the template is heading, what was built and why (template maintenance)
+feedback-notes.md       what real use says about the template: bugs, features, suggested order
 intake/                 what you hand over before anything is written: own/ (you wrote it), received/ (given to you)
 articles/                      the LaTeX articles, one folder each (definition, map, review, ...), their PDFs, shared preamble
 requirements/           OPTIONAL module (engineering-leaning): where requirements sit in the pipeline; delete if unused
@@ -79,6 +80,29 @@ instructions Claude follows. Keeping it self-contained is deliberate:
 it is what makes it possible to drop a newer version of the engine into
 an existing project later.
 
+## How a study moves
+
+A study runs through a fixed order of steps, and after each article you stop at a **gate**: you
+read it, and you decide whether the study moves on. Claude briefs you at a gate but never decides
+it, because the decision is the point. `/where` draws where you are.
+
+```mermaid
+flowchart LR
+  I[Intake interview] --> D[Definition]
+  D -->|definition gate| S[scope.md, papers]
+  S --> M[Map]
+  M -->|map gate| R[Survey, review article]
+  R -->|survey gate| Q[Requirements, optional]
+  Q -->|requirements gate| C[Rationale]
+  C -->|concept gate| P[Specification]
+  P -->|split gate| X[Implementation repo]
+```
+
+Intake, the definition and the map come before any decision about the thing being built; the
+review article reports the field and decides nothing. Decisions start at the concept stage.
+`articles/README.md` describes the articles and the gates, and `study/ai_instructions/` is the
+manual Claude follows for the literature work in between.
+
 ## Usage log
 
 Every repo made from this template quietly keeps `.claude/usage-log.md`: a short
@@ -94,7 +118,7 @@ feedback, copy the file to wherever the template is maintained.
 
 ## What ships in `.claude/`
 
-Five agent definitions and five slash commands, all in Claude Code's
+Five agent definitions and eleven slash commands, all in Claude Code's
 own format:
 
 | | What it is |
@@ -109,6 +133,12 @@ own format:
 | `page-reader` | Records the equations, tables and figures on a few page images of an OCR'd scan, only under a ticket, with no other tools. |
 | `/vision-read` | Read a few equation or table pages of a scan from their images, under a token budget and with approval. |
 | `/article-review` | Build the review article: preflight, cards, table, verification pass, checks. |
+| `/intake` | Start of the pipeline: read what is in `intake/`, interview you, build the digest `intake.md`. |
+| `/definition` | Draft, revise or refine the definition article from the digest, and write `scope.md` from it once accepted. |
+| `/new-article` | Create an article from its template when the work reaches it. |
+| `/gate` | Show where the gates stand; open one and brief you before the decision. |
+| `/understand` | The understanding check at a gate: questions in chat, answered from memory, ending in a suggestion. |
+| `/where` | A picture of where the study stands: the gates, what is next, intake coverage, catalog, articles. |
 
 `study/ai_instructions/delegation.md` explains what each is for, why the
 model tiers sit where they do, and the rule that matters most — that the
@@ -127,12 +157,10 @@ infrastructure.
    for a personal one-off study than a fork, which stays attached to this
    repo's network. Otherwise, download/clone and re-init git yourself.
 2. Rename the repo for your topic.
-3. Run the one-time setup:
-   ```powershell
-   cd study
-   .\scripts\setup.ps1        # or ./scripts/setup.sh on macOS/Linux
-   ```
-4. Drop your source PDFs into `study/PDFs/`.
+3. There is no setup step for you to run: on your first "let's start" (step 6) Claude creates
+   the environment itself (a virtual environment in `study/.venv`). To do it by hand instead, see
+   `study/README.md`.
+4. Papers: put the PDFs you have into `study/PDFs/`, or ask Claude to search for them.
 5. Drop material you were handed from outside — a brief, a proposal, a
    specification — into `intake/received/`, and check
    `intake/own/source-access.md` against your own situation. It

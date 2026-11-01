@@ -185,8 +185,11 @@ such source is known — something already cited by a document in this
 catalog may be exactly it. Report matches as unverified leads
 (title/authors/venue/year only, never read).
 
-This repo cannot fetch or download sources on its own. Two ways forward,
-in order:
+Acquisition is its own step, tracked in `../leads.md` (its rules and its states: found, fetched,
+blocked, user-fetched, converted, deferred). Claude searches and fetches with the session's web
+tools where it can. About half of the finds cannot be fetched automatically (bot-protected hosts,
+paywalls, request-a-copy pages); those are recorded as `blocked` for the user to fetch by hand.
+To resolve a lead into real metadata, two ways, in order:
 
 - If a **source-acquisition MCP server** is attached to the session (a
   bibliographic-metadata service, a preprint repository, a reference

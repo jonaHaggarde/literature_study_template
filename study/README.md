@@ -38,6 +38,21 @@ study/
     ocr_support.py                     <- OCR tool discovery and OCR of scans (run it alone to see what is missing)
     vision_pages.py                    <- the budgeted way to read page images: plan, approve, ticket, record
     verification.py                    <- records and reports which method cards the row-verifier has checked
+    merge_worker_report.py           <- merges a note-extractor worker's report into catalog.md and the notes
+    convert_intake.py                <- converts the PDFs in ../intake/ to markdown next to them
+    intake_check.py                  <- checks ../intake/intake.md: IDs, supersedes, coverage per section, uncited rows
+    scope_sync.py                    <- keeps scope.md in step with the accepted definition (check, stamp)
+    new_article.py                   <- creates an article from a template in ../articles/_templates/
+    article_version.py               <- the version history of one article (draft, edit, refine, review, accept)
+    gate.py                          <- the gates: status, open, briefing, understand, close, skip, refreeze
+    build_articles.py                <- builds every article to a PDF
+    build_bibliography.py            <- writes each article's references from what it cites
+    build_article_parts.py           <- the generated parts: map coverage, requirements traceability, decision tree
+    tree_latex.py                    <- the decision tree as TikZ (imported, not run)
+    style_check.py                   <- advisory style check of an article
+    status.py, status_svg.py         <- the status snapshot and its picture (/where)
+    texutil.py, _console.py          <- shared helpers (imported, not run)
+    tests/                           <- unit tests: python -m unittest discover -s scripts/tests
     validate_repo.py                 <- structural health check + --fix, rerun after every batch
     requirements.txt
   templates/
@@ -65,6 +80,8 @@ enforces survived contact with a real corpus, and every one a human
 maintained drifted.
 
 ## One-time setup
+
+Claude runs this itself on the first session, so you normally never do. By hand:
 
 ```powershell
 cd study
