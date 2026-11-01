@@ -20,6 +20,11 @@ This repo has two halves, and keeping them apart is the point:
 
 Routing, for a session starting at the repo root:
 
+- A first session ("let's start") in a fresh repo: do the setup yourself, never hand the user a
+  script to run. If `study/.venv` does not exist, run `study/scripts/setup.ps1` (Windows) or
+  `study/scripts/setup.sh`, say in a line what it installed, report a failure plainly, and carry
+  on with the intake route below. The user's "let's start" is the consent. Why: a setup step the
+  user has to remember is one they skip, and it only installs a few packages into `study/.venv`.
 - Starting a project, or `scope.md` still a placeholder → `/intake`, then the definition
   article (`articles/definition`), then the user accepts it (the `definition` gate), then
   `scope.md` is written from it, and only then are papers gathered. Always steer the user to

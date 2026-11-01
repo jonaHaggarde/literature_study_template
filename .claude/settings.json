@@ -68,7 +68,8 @@
       "Bash(python scripts/gate.py status*)",
       "Bash(python scripts/gate.py briefing *)",
       "Bash(python scripts/gate.py understand *)",
-      "Bash(python scripts/gate.py refreeze *)"
+      "Bash(python scripts/gate.py refreeze *)",
+      "Bash(python study/scripts/status.py*)"
     ],
     "ask": [
       "Agent(page-reader)",

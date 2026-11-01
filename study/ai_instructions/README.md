@@ -1,7 +1,12 @@
 # Claude instructions
 
 Read this folder first, in this order, at the start of every session in
-this repo:
+this repo.
+
+**Before step 1, the environment.** If `../.venv` does not exist, set it up yourself: run
+`../scripts/setup.ps1` (Windows) or `../scripts/setup.sh`, say what it installed, and carry on.
+The user does not run scripts to get started; their "let's start" is the consent.
+
 
 1. **`scope.md`** — what this study is actually about. Everything else
    depends on this being real. If it still looks like the placeholder

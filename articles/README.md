@@ -12,7 +12,7 @@ articles/
   _templates/       one template per article (ignored by the build and the validator)
   <name>/           a created article: main.tex, sections/, versions.json, references.bib (generated)
   <name>.pdf        generated; PDFs sit here, directly in articles/
-  gates/            reserved for gate definitions and records (not built yet)
+  gates/            definitions.json (the gates) and one record per gate
   .build/           LaTeX auxiliary files (ignored)
 ```
 
@@ -42,7 +42,7 @@ explains the mechanism.
   Several specification documents are separate articles (`specification-<name>`),
   never one document with several parts.
 - **A shared preamble.** `common/preamble.tex` holds the packages and the generic
-  macros (`\todo`, `\openissue`). Each `main.tex` starts with its `\documentclass`
+  macros (`\todo`, `\openissue`, `\intake`, `\inferred`, `\tbdnote`). Each `main.tex` starts with its `\documentclass`
   and `\input{../common/preamble}`. Notation that belongs to one article (its
   symbols) goes in that article's own `main.tex`.
 - **A bibliography per article, only if it cites sources.** Articles do not cite
@@ -75,11 +75,12 @@ explains the mechanism.
   The validator compares each article with its last version and warns about a change with
   no row, and fails on it in CI.
 - **Gates.** An article is accepted at a gate (`articles/gates/definitions.json` lists them;
-  `/gate` shows where they stand). A gate runs `open` (the user, once the entry checks pass),
+  `/gate` shows where they stand). A gate runs `open` (on the user's word, once the entry checks pass),
   a briefing in chat (script facts that need attention, and Claude's critique), for most gates
   the `/understand` check (questions in chat, answered from memory; Claude ends with a
-  suggestion, ready or slower, which has no effect), then `close`, which is `accept` plus
-  `articles/gates/<id>.json`, so the article's status and the gate record cannot disagree.
+  suggestion, ready or slower, which has no effect), then `close` (also on the user's word),
+  which is `accept` plus `articles/gates/<id>.json`: no `review` comes first, and the
+  article's status and the gate record cannot disagree.
   While a gate is open the article stands still; the validator warns if it changes. There is
   no gate report: the version table is the record, the briefing and the check are the
   conversation, and a document nobody asked for would only duplicate both.

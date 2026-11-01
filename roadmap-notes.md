@@ -128,6 +128,7 @@ tested, and a live `page-reader` launch was not exercised (see `feedback-notes.m
 
 - Phase 1 workflow and the review article: `articles/review/` (merged into
   `development` 2026-10-30; moved into `articles/` on `dev-articles-layout`).
+- Status view: `study/scripts/status.py`, `status_svg.py`, `/where` (built, on `development`).
 - Gates: built on `development` (`articles/gates/`, `study/scripts/gate.py`). `dev-gate-events`
   holds the earlier parked design (printable report, debrief), superseded by the no-report decision.
 - OCR and scanned PDFs: built and merged into `development` (branch `dev-ocr` deleted).
@@ -200,3 +201,52 @@ measures tokens); OCR on tables and non-English text; the style thresholds (Jacc
 are first guesses); whether the briefings and the ad hoc gate earn their reading time; the
 TikZ tree's layout beyond compiling. CI skips the LaTeX tests (no `pdflatex` on the runner).
 The next real test is the author's own large study.
+
+## Status view (built 2026-11-01)
+
+A picture of where the study stands, shown in chat by `/where`. `status.py` collects one
+snapshot from the files (gates with state and a next-step sentence, intake coverage, whether
+`scope.md` follows the definition, catalog counts and method families, each article's version and
+open markers). `status_svg.py` draws it as one SVG and `status.py --md` writes the same facts as
+markdown with a mermaid diagram. `STATUS.svg` and `STATUS.md` are written at the repo root and
+git-ignored.
+
+- **A script draws it, not Claude.** An inline drawing means writing the whole graphic on every
+  call, which costs tokens each time. The script writes it once from the same facts the validator
+  and the gates use, `SendUserFile` shows it, and it looks the same every time.
+- **SVG written directly, no dependencies.** Mermaid rendered to an image needs mermaid-cli (Node
+  and a headless browser); matplotlib is a heavy dependency for a template that needs only Python
+  and optionally LaTeX. The picture has its own light background, so it reads in a light or dark
+  viewer.
+- **Chat drives, the picture shows.** HTML as the main interface was rejected: it invites decisions
+  to move out of the chat. The earlier `dev-gui-dashboard` prototype went that way (a local server
+  that launches `claude`, its own JSON data model); only its page ideas (milestones, gaps) carry
+  over.
+- **Allow rule.** `/where` asks permission each time until the user adds
+  `Bash(python study/scripts/status.py*)` to `.claude/settings.json`; Claude cannot add allow rules.
+
+**Not built.** A gaps view: there is no structured list of gaps to read (`/gap-check` produces
+prose), so it waits for a parseable gaps list. A milestone timeline over dates. The picture shows
+sources per family, not quality. Whether the picture earns its place is untested on a real study.
+
+## Next up (from the onboarding-deck review, 2026-11-01)
+
+The author's priorities after building the gates and the status view, in order of importance.
+
+1. **The search-and-select engine.** How Claude finds papers on the scope and chooses which to read
+   is "one of the most important pieces of the project" and has had the least design. Look at it
+   closely. `study/leads.md` already holds the acquisition rules (states found, fetched, blocked,
+   user-fetched, converted, deferred; check open access before assuming it); `workflow.md` wrongly
+   said the repo "cannot fetch or download sources on its own" until it was corrected on
+   2026-11-01. Still to decide and write down: how candidates are searched and ranked, what a
+   download needs from the user, and how paywalled sources go through the user's institutional access.
+2. **The summarising engine must not invent.** Look closely at how notes, catalog entries and method
+   cards are produced and checked (`note-extractor`, the `row-verifier` pass, `verification.py`):
+   what stops a summary from stating something the paper does not say, and how a number or a
+   quotation is confirmed against the converted text.
+3. **Progress shown during literature searches**, for example a progress bar for a search or a
+   batch, in the spirit of the status view (`status.py`, `/where`).
+
+The onboarding deck itself is a Slides artifact (ten slides), not a file in the repo. It tells new
+users that Claude sets up the environment and can search for papers, so items 1 and the setup rule
+in the root `CLAUDE.md` keep it true.
