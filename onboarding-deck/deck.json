@@ -1,0 +1,18 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-11-01T12:00:00Z"},
+  "lists": "css",
+  "title": "Literature Study Template: Start Here",
+  "cover": "cover",
+  "order": ["cover", "idea", "path", "gates", "roles", "intake", "literature", "articles", "commands", "start"],
+  "sections": {
+    "intro": {"description": "What the template does and who does what.", "start": "cover"},
+    "flow": {"description": "The order of the work and where you stop.", "start": "path"},
+    "steps": {"description": "The two kinds of work and what happens at a gate.", "start": "intake"},
+    "use": {"description": "The articles, the rules, the commands and the first day.", "start": "articles"}
+  },
+  "faces": {
+    "eb-garamond": {"family": "EB Garamond", "href": "https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400..700&display=swap"},
+    "ibm-plex-sans": {"family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap"}
+  }
+}

@@ -27,3 +27,4 @@ Thumbs.db
 # Built articles: PDFs directly in articles/, LaTeX auxiliary files in articles/.build/
 /articles/*.pdf
 /articles/.build/
+/.claude/deck-url
