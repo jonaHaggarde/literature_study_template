@@ -106,7 +106,7 @@ own format:
 | `/process-batch` | The full batch loop: parallel workers, central merge, ratify, validate, commit. |
 | `/gap-check` | Audit coverage against scope and report what is genuinely thin. |
 | `row-verifier` | Cheap (Haiku) check of one note's method cards against its extracted text, for the article's verification pass. |
-| `page-reader` | Transcribes a few page images of an OCR'd scan, only under a ticket, with no other tools. |
+| `page-reader` | Records the equations, tables and figures on a few page images of an OCR'd scan, only under a ticket, with no other tools. |
 | `/vision-read` | Read a few equation or table pages of a scan from their images, under a token budget and with approval. |
 | `/article-review` | Build the review article: preflight, cards, table, verification pass, checks. |
 

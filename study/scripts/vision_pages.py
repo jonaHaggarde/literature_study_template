@@ -13,8 +13,8 @@ The point of the design is that spending is hard to do by accident:
            folder that exists for that ticket only, records them in the page ledger,
            and refuses to issue another ticket until this one is recorded.
            Also not pre-approved, so every batch is a visible decision.
-  record   merges the page-reader agent's transcription into the note and marks
-           those pages `(vision)`.
+  record   adds the equations, tables and figures the page-reader found below each
+           page's OCR text in the note and marks those pages `(vision)`.
 
 No ticket means no images, so an agent has nothing to read.
 
@@ -217,14 +217,25 @@ def parse_transcription(text):
     return out
 
 
+VISION_ITEMS_MARK = "<!-- vision-items: equations, tables and figures read from the page image; where the OCR text above disagrees, this is the reading to trust -->"
+VISION_ITEMS_RE = re.compile(r"\n*<!-- vision-items:.*?-->\n.*\Z", re.DOTALL)
+
+
 def merge_vision_pages(note_text, texts):
-    """Replace each page's block in a note with its transcription, marked (vision)."""
+    """Add each page's image-read items (equations, tables, figures) below its OCR text, and
+    mark the page (vision). The OCR prose stays: the page-reader no longer transcribes prose,
+    which OCR gets right and which costs most of the output. A second reading of the same page
+    replaces the earlier items and keeps the OCR text."""
     for n, body in texts.items():
-        block = re.compile(r"^<!-- page: " + str(n) + r"(?: \((?:ocr|vision)\))? -->\n.*?(?=^<!-- page: \d+|\Z)",
+        block = re.compile(r"^<!-- page: " + str(n) + r"(?: \((?:ocr|vision)\))? -->\n(.*?)(?=^<!-- page: \d+|\Z)",
                            re.MULTILINE | re.DOTALL)
         if not block.search(note_text):
             raise Refused(f"the note has no page marker for page {n}")
-        note_text = block.sub(lambda _m: f"<!-- page: {n} (vision) -->\n\n{body}\n\n", note_text, count=1)
+
+        def rebuild(m, n=n, body=body):
+            ocr = VISION_ITEMS_RE.sub("", m.group(1)).strip()
+            return f"<!-- page: {n} (vision) -->\n\n{ocr}\n\n{VISION_ITEMS_MARK}\n{body}\n\n"
+        note_text = block.sub(rebuild, note_text, count=1)
     return note_text
 
 
@@ -248,7 +259,8 @@ def record(store, tid, manifest, note_path_for, tokens=None):
                       "nothing was merged")
     empty = [p for p, body in texts.items() if len(body) < 20]
     if empty:
-        raise Refused(f"page(s) {empty} have no real transcription; nothing was merged")
+        raise Refused(f"page(s) {empty} have no items and no `[no equations, tables or figures]` line; "
+                      "nothing was merged")
     note = note_path_for(r["doc"])
     note.write_text(merge_vision_pages(note.read_text(encoding="utf-8"), texts), encoding="utf-8")
     entry = manifest[r["doc"]]

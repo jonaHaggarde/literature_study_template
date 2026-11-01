@@ -48,14 +48,16 @@ to overspend. **Follow it exactly. The process is the point.**
 
 6. **Record.** `python study/scripts/vision_pages.py record R1-T1 --tokens N`, with N
    the token usage the harness reported for the page-reader run (leave `--tokens` out only if
-   no figure was reported). It merges the
-   transcription into the note, marks those pages `(vision)`, and refuses (merging
-   nothing) if the transcription does not cover exactly the ticket's pages.
+   no figure was reported). It adds the
+   equations, tables and figures the reader found below each page's OCR text, marks those pages
+   `(vision)`, and refuses (merging nothing) if the file does not cover exactly the ticket's pages.
+   The reader does not transcribe prose: OCR keeps that, and copying whole pages of text out
+   was both the expensive part and the part a content filter objected to.
 
 7. **Report and stop.** Say which pages are now `(vision)`, what is left in the
    request, and the measured usage so far (`status`). If a method card rested on
    these pages, say so: its `read_from: ocr` line can be updated once the user has
-   looked at the transcription.
+   looked at the items.
 
 If the page-reader's file is missing or wrong, `record` will refuse. Do not rerun
 the agent blindly: tell the user, and `abandon` the ticket only if they agree (its

@@ -11,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import article_version as av  # noqa: E402
+import gate  # noqa: E402
 import scope_sync as ss  # noqa: E402
 
 
@@ -25,6 +26,13 @@ def make(tmp, scope_text="<!-- placeholder -->\nTemplate\n"):
     scope.write_text(scope_text, encoding="utf-8")
     av.add_row(d, "draft", "First draft", "Claude")
     return d, scope
+
+
+def accept(d):
+    """What `gate.py close definition` does: accept the article and record the gate."""
+    row, _ = av.add_row(d, "accept", "a", "User")
+    gate.save_record({"id": "definition", "article": "definition", "outcome": "passed",
+                      "accepted_version": row["version"]}, d.parent / "gates")
 
 
 def real_scope():
@@ -56,7 +64,7 @@ class States(unittest.TestCase):
             self.assertEqual(ss.state(scope, d)[0], "waiting")
             av.add_row(d, "review", "r", "User")
             self.assertEqual(ss.state(scope, d)[0], "waiting")  # a review is not acceptance
-            av.add_row(d, "accept", "a", "User")
+            accept(d)
             self.assertEqual(ss.state(scope, d)[0], "ready")
 
     def test_a_real_scope_with_no_accepted_definition_is_the_fallback_route(self):
@@ -67,7 +75,7 @@ class States(unittest.TestCase):
     def test_accepted_but_unstamped_then_stamped_then_stale_after_a_refinement(self):
         with tempfile.TemporaryDirectory() as tmp:
             d, scope = make(tmp, real_scope())
-            av.add_row(d, "accept", "a", "User")
+            accept(d)
             self.assertEqual(ss.state(scope, d)[0], "unstamped")
             self.assertTrue(ss.stamp(scope, d)[0])
             self.assertEqual(ss.state(scope, d)[0], "ok")
@@ -81,7 +89,7 @@ class States(unittest.TestCase):
     def test_a_change_to_a_section_scope_is_not_drawn_from_does_not_make_it_stale(self):
         with tempfile.TemporaryDirectory() as tmp:
             d, scope = make(tmp, real_scope())
-            av.add_row(d, "accept", "a", "User")
+            accept(d)
             ss.stamp(scope, d)
             (d / "sections" / "stakeholders.tex").write_text("other\n", encoding="utf-8")
             av.add_row(d, "refine", "stakeholders", "Claude")
@@ -93,14 +101,14 @@ class Stamping(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             d, scope = make(tmp, real_scope())
             self.assertFalse(ss.stamp(scope, d)[0])
-            av.add_row(d, "accept", "a", "User")
+            accept(d)
             scope.write_text("<!-- placeholder -->\n", encoding="utf-8")
             self.assertFalse(ss.stamp(scope, d)[0])
 
     def test_stamping_twice_replaces_the_header_and_keeps_the_text(self):
         with tempfile.TemporaryDirectory() as tmp:
             d, scope = make(tmp, real_scope())
-            av.add_row(d, "accept", "a", "User")
+            accept(d)
             ss.stamp(scope, d)
             ss.stamp(scope, d)
             text = scope.read_text(encoding="utf-8")
@@ -114,7 +122,7 @@ class ConvertWarning(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             d, _ = make(tmp)
             self.assertIsNotNone(ss.convert_warning(d))
-            av.add_row(d, "accept", "a", "User")
+            accept(d)
             self.assertIsNone(ss.convert_warning(d))
             self.assertIsNone(ss.convert_warning(Path(tmp) / "nope"))
 

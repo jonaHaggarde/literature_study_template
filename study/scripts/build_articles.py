@@ -71,10 +71,13 @@ def generate_derived(name, scripts=SCRIPTS):
     steps = []
     if name == "review":
         steps.append("build_review_table.py")
+    if name in ("map", "requirements", "rationale"):
+        steps.append(f"build_article_parts.py {name}")
     steps.append("build_bibliography.py")
     article_version.write_table(ARTICLES_DIR / name)
     for step in steps:
-        proc = run([sys.executable, str(scripts / step)], cwd=scripts.parent, timeout=120)
+        script, *step_args = step.split()
+        proc = run([sys.executable, str(scripts / script), *step_args], cwd=scripts.parent, timeout=120)
         if proc.returncode != 0:
             return f"{step} failed: {(proc.stderr or proc.stdout).strip()[-200:]}"
     return None

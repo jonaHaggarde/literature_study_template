@@ -15,6 +15,8 @@ One row per answer. Columns:
   question   the question, as a question (given on at least one of its rows)
   answer     one possible answer to it
   status     chosen    the path continues from this answer
+             candidate survives as an alternative to be settled later (a trial); drawn as a
+                       leaf, not rejected
              explored  examined and rejected
              identified  listed, never examined
   then       chosen rows only: the next question id, or END
@@ -44,7 +46,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 IDEATION_DIR = REPO_ROOT.parent / "ideation"
 
 COLUMNS = ["Q", "question", "answer", "status", "then", "method", "source", "motivation"]
-STATUSES = ("chosen", "explored", "identified")
+STATUSES = ("chosen", "candidate", "explored", "identified")
 
 TABLE_RE = re.compile(r"(<!--\s*decision-tree\s*-->)(.*?)(<!--\s*/decision-tree\s*-->)", re.S)
 DIAGRAM_RE = re.compile(r"\s*<!--\s*decision-tree-diagram[^>]*-->.*?<!--\s*/decision-tree-diagram\s*-->", re.S)
@@ -120,7 +122,8 @@ def validate(rows):
             if r["then"]:
                 problems.append(f"{q}: only a chosen answer has a 'then'")
             if not r["method"]:
-                problems.append(f"{q}: a rejected answer must name the method it would give")
+                problems.append(f"{q}: a {'candidate' if st == 'candidate' else 'rejected'} answer must name the "
+                                "method it would give")
     # every question reachable from the root along chosen answers
     reach, cur = set(), order[0]
     while cur and cur != "END" and cur not in reach:
@@ -133,8 +136,8 @@ def validate(rows):
 
 
 def stats(rows):
-    rejected = [r for r in rows if r["status"] in ("explored", "identified")]
-    explored = sum(1 for r in rejected if r["status"] == "explored")
+    rejected = [r for r in rows if r["status"] in ("explored", "identified", "candidate")]
+    explored = sum(1 for r in rejected if r["status"] in ("explored", "candidate"))
     order = question_order(rows)
     decided = sum(1 for q in order if any(r["Q"] == q and r["status"] == "chosen" for r in rows))
     unwritten = sum(1 for r in rows if r["status"] in ("chosen", "explored") and not r["motivation"])
@@ -181,7 +184,8 @@ def render_mermaid(rows):
             else:
                 n += 1
                 leaf = f"L_{q}_{n}"
-                note = "explored" if r["status"] == "explored" else "not examined"
+                note = {"explored": "explored", "candidate": "candidate, to be settled",
+                        "identified": "not examined"}[r["status"]]
                 out.append(f'  {leaf}["{_label(r["method"])}<br/>({note})"]:::{r["status"]}')
                 edges.append(f'  {q} -->|"{ans}"| {leaf}')
     out += edges
@@ -192,6 +196,7 @@ def render_mermaid(rows):
         "  classDef open fill:#FAEEDA,stroke:#854F0B,color:#412402",
         "  classDef recommended fill:#E1F5EE,stroke:#0F6E56,stroke-width:3px,color:#04342C",
         "  classDef explored fill:#F1EFE8,stroke:#5F5E5A,color:#2C2C2A",
+        "  classDef candidate fill:#E6F1FB,stroke:#185FA5,stroke-width:2px,color:#042C53",
         "  classDef identified fill:#FFFFFF,stroke:#888780,color:#444441,stroke-dasharray:4 3",
     ]
     return "\n".join(out)

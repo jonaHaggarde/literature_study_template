@@ -30,5 +30,12 @@ Run `/intake` to start or extend it. `python study/scripts/intake_check.py` (als
 validator) fails on a duplicate ID, a line with no source, or a `\intake{I-n}` in an article
 whose ID does not exist.
 
-**Not decided yet:** whether the intake is an interview, a form, or both. `/intake` runs the
-interview.
+**The intake is an interview** (decided): `/intake` asks, you answer, Claude records. A form
+would hide what the questions are for, and an interview can follow up on an unknown or a
+contradiction at once.
+
+**Assumptions start here.** A `suspicion` row is a top-level assumption; the definition's
+register is drawn from those rows. New top-level assumptions made later in the study go in
+as new rows (source `study <date>`), and reach the definition when you ask for a refinement.
+An assumption that matters to one article only lives in that article's own assumptions
+section (see "Assumptions made along the way" in the root `CLAUDE.md`).

@@ -181,11 +181,21 @@ class Record(Env):
         self.write_out(tid, [5, 6])
         self.record(tid)
         text = self.note.read_text(encoding="utf-8")
-        self.assertIn("<!-- page: 5 (vision) -->\n\na real transcription of the page 5", text)
+        self.assertIn("<!-- page: 5 (vision) -->\n\nocr text of page 5\n\n<!-- vision-items:", text)
+        self.assertIn("a real transcription of the page 5", text)
         self.assertIn("<!-- page: 6 (vision) -->", text)
         self.assertIn("<!-- page: 7 (ocr) -->\n\nocr text of page 7", text)  # untouched
         self.assertIn("written", text)  # the note's own sections survive
         self.assertEqual(self.manifest["scan.pdf"]["vision_pages"], [5, 6])
+
+    def test_merging_a_page_again_replaces_the_items_and_keeps_the_ocr_text(self):
+        text = self.note.read_text(encoding="utf-8")
+        for body in ("first reading of the equations", "second reading of the equations"):
+            text = v.merge_vision_pages(text, {5: body})
+        self.assertIn("second reading of the equations", text)
+        self.assertNotIn("first reading", text)
+        self.assertEqual(text.count("<!-- vision-items:"), 1)
+        self.assertEqual(text.count("ocr text of page 5"), 1)
 
     def test_a_transcription_that_misses_a_page_merges_nothing(self):
         rid = self.approved((5, 6))

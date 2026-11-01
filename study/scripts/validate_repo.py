@@ -52,6 +52,7 @@ import article_version  # noqa: E402
 import intake_check  # noqa: E402
 import scope_sync  # noqa: E402
 import gate  # noqa: E402
+import build_article_parts  # noqa: E402
 import style_check  # noqa: E402
 import build_decision_trees as decision_trees  # noqa: E402
 
@@ -585,6 +586,35 @@ def check_gates():
     with no gate record behind it. Warnings only: the user decides what to do with either."""
     for message in gate.problems_for_validator():
         log("WARN", "gate", message)
+    message = gate.nudge(gate.catalog_count())
+    if message:
+        log("INFO", "gate", message)
+
+
+def check_article_parts():
+    """The computed parts of the map, requirements and rationale articles (build_article_parts.py):
+    a stale generated file, an invalid decision table, and gaps in the requirements traceability
+    (a requirement with no path up, a primary one with no source) are warnings."""
+    for adir in bibliography.article_dirs():
+        if adir.name not in ("map", "requirements", "rationale"):
+            continue
+        try:
+            changed, problems = build_article_parts.build(adir.name, check=True)
+        except Exception as err:  # a broken method card must not hide the other checks
+            log("WARN", "article-parts", f"articles/{adir.name}: could not check generated parts ({err})")
+            continue
+        for name in changed:
+            log("WARN", "article-parts", f"articles/{adir.name}/sections/{name} is stale; run "
+                f"`python scripts/build_article_parts.py {adir.name}`")
+        for problem in problems:
+            log("WARN", "article-parts", f"articles/{adir.name}: {problem}")
+        if adir.name == "requirements":
+            read = lambda f: (adir / "sections" / f).read_text(encoding="utf-8") if (adir / "sections" / f).exists() else ""
+            _, _, gaps = build_article_parts.traceability(read("primary.tex"), read("derived.tex"))
+            for gap in gaps[:8]:
+                log("WARN", "traceability", f"articles/requirements: {gap}")
+            if len(gaps) > 8:
+                log("WARN", "traceability", f"articles/requirements: {len(gaps) - 8} more gap(s)")
 
 
 def check_intake():
@@ -943,7 +973,7 @@ def requirements_too_early_reasons(scope_placeholder, n_processed, article_unfin
     elif n_processed == 0:
         reasons.append("no document has been processed into the catalog yet, so there is no survey to ground values in")
     if article_unfinished:
-        reasons.append("the review article is not finished (its 'not verified' status banner is still in place)")
+        reasons.append("the review article has not passed its gate (`review`)")
     return reasons
 
 
@@ -963,8 +993,7 @@ def check_requirements(entries):
     scope_placeholder = (not scope.exists()) or "<!-- placeholder -->" in scope.read_text(encoding="utf-8")
     n_processed = sum(1 for i, f in entries
                       if i != "EXAMPLE" and f["summary"] and "TODO" not in f["summary"])
-    main_tex = REPO_ROOT.parent / "articles" / "review" / "main.tex"
-    article_unfinished = main_tex.exists() and "not verified" in main_tex.read_text(encoding="utf-8")
+    article_unfinished = not gate.passed("review")
     reasons = requirements_too_early_reasons(scope_placeholder, n_processed, article_unfinished)
     if reasons:
         log(
@@ -1157,6 +1186,7 @@ def main():
     check_intake()
     check_scope_sync()
     check_gates()
+    check_article_parts()
     check_article_style()
     check_usage_log()
     check_ocr()

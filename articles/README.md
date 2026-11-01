@@ -83,6 +83,12 @@ explains the mechanism.
   While a gate is open the article stands still; the validator warns if it changes. There is
   no gate report: the version table is the record, the briefing and the check are the
   conversation, and a document nobody asked for would only duplicate both.
+- **Computed parts are generated.** `python study/scripts/build_article_parts.py <name>` (run by
+  the build) writes the map's coverage counts per method family, the requirements' traceability
+  tables (each derived requirement's path up to the primary ones, gaps flagged) and the
+  rationale's decision tree (from `decision_tree.md`, status `candidate` marks an alternative that
+  goes on to a trial). The hand-written section `\input`s the generated file, so the explanation
+  is hand-written and the numbers and picture are not. The validator warns about a stale file.
 - **Dense writing.** The text follows `study/ai_instructions/article-style.md`: each fact
   once, never restated in other words (an abstract and a conclusion may restate), numbers
   over adjectives. `python study/scripts/style_check.py <name>` reports what it can find;
