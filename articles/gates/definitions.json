@@ -1,9 +1,10 @@
 {
-  "_comment": "The gates of the study, in order. A fork edits this file to change them. `article` is the folder under articles/ a gate accepts (for a family gate, the prefix: the folder is chosen when the gate opens). `after` lists the gates that must have passed or been skipped. `understand` says whether the gate has the /understand check. `skippable` says whether `gate.py skip` is allowed.",
+  "_comment": "The gates of the study, in order. A fork edits this file to change them. `article` is the folder under articles/ a gate accepts (for a family gate, the prefix: the folder is chosen when the gate opens). `after` lists the gates that must have passed or been skipped. `understand` says whether the gate has the /understand check. `start` (optional) is what to do before the gate's article exists. `skippable` says whether `gate.py skip` is allowed.",
   "nudge": {"documents": 15},
   "gates": [
     {"id": "definition", "title": "Definition", "weight": "light", "article": "definition",
      "after": [], "understand": false, "skippable": false,
+     "start": "Start with /intake (an interview), then /definition drafts the article from it.",
      "unlocks": "write scope.md from the definition (/definition scope), then gather and convert papers; create the map (/new-article map)"},
     {"id": "map", "title": "Map", "weight": "light", "article": "map",
      "after": ["definition"], "understand": true, "skippable": false,

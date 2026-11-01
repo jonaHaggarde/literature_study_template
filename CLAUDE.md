@@ -25,6 +25,9 @@ Routing, for a session starting at the repo root:
   `scope.md` is written from it, and only then are papers gathered. Always steer the user to
   this route; the original route (filling in `scope.md` together) remains as a fallback.
   See `intake/README.md`.
+- Where things stand, what is next, what is missing → `/where`: a picture of the gates, the
+  intake coverage, the catalog and the articles, drawn by `study/scripts/status.py` from the
+  files. It only shows; every decision still happens here in chat.
 - Literature work (processing PDFs, answering a question from the
   catalog, building a dossier, gap-flagging) → read
   `study/ai_instructions/README.md` and follow its read order. Working
