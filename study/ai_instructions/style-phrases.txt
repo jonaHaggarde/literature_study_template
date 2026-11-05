@@ -14,8 +14,6 @@
 #   [attribution]       a claim with no named source: a problem unless a citation is in the sentence
 #   [copula]            a stand-in for "is" or "has": a judgment call ("acts as a low-pass filter" can be
 #                       the technical description; "serves as a testament" cannot)
-#
-# Many entries follow the pattern categories of theclaymethod/unslop, written here in our own words.
 
 [always]
 it is important to note

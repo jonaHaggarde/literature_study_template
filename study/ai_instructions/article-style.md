@@ -45,9 +45,8 @@ other words Y"), in neighbouring sentences, or in two sections. Everything below
 15. **Run `python study/scripts/style_check.py <article>` before reporting a draft or an
     edit.** Fix every *problem*. Decide each *judgment call*, and keep it if it is right.
 
-**Patterns that read as machine-written** (the categories follow theclaymethod/unslop; the
-wording and the reasons are ours. Each is a judgment call, not a ban: some have a legitimate
-technical use, and the check only asks)
+**Patterns that read as machine-written** (each is a judgment call, not a ban: some have a
+legitimate technical use, and the check only asks)
 
 16. **Say what it is, not what it is not.** "Not X but Y" and "it is not X, it is Y" only where
     someone really holds X, and then with a citation.
@@ -68,9 +67,8 @@ technical use, and the check only asks)
 23. **No chatbot residue:** sign-offs, offers to help, "great question", references to a
     knowledge cutoff. These mean a draft was pasted without being read.
 
-Not adopted from the same catalogue: its voice-learning and rewrite modes. In an article a
-sentence that fails is deleted or made into a claim, never reworded by a model, because rewording
-can move a claim.
+A sentence that fails is deleted or made into a claim, never reworded by a model, because
+rewording can move a claim.
 
 ## What the check does and does not do
 

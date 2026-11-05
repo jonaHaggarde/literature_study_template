@@ -59,7 +59,7 @@ EM_DASH_MIN_WORDS = 300
 EVEN_SENTENCES = 12        # fewest sentences in a file before the rhythm is judged
 EVEN_SPREAD = 0.30         # standard deviation over mean sentence length, below which it is flagged
 
-# Patterns of machine-written prose, after the categories catalogued by theclaymethod/unslop.
+# Patterns of machine-written prose.
 # Matched on whole sentences, so a legitimate technical use still reads as a judgment call.
 NEG_PARALLEL = re.compile(
     r"\bnot (?:just|only|merely|simply) [^.;?!]{2,80}?,? but (?:also )?"
