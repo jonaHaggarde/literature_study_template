@@ -19,9 +19,10 @@ corpus server actually comes from delegating retrieval to a
 
 `workflow.md`'s "Finding a new source on a specific/narrow topic" ends
 at a genuine dead end: a lead grepped out of `reference-index.md` is a
-bare title and author list, and this repo has no way to fetch or resolve
-it. The user is handed off to `../../intake/own/source-access.md`
-and left to search manually.
+bare title and author list. `scripts/lit_search.py` resolves a title against OpenAlex
+(`/find-papers`) and `scripts/lit_fetch.py` fetches open copies, so the dead end that remains is a
+paper behind a paywall, which goes to the user with the pointers in
+`../../intake/own/source-access.md`.
 
 A **source-acquisition MCP server** closes exactly that gap. Servers
 worth attaching, if a fork's field is covered by one:

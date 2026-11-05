@@ -185,6 +185,11 @@ such source is known — something already cited by a document in this
 catalog may be exactly it. Report matches as unverified leads
 (title/authors/venue/year only, never read).
 
+Searching for **new** papers on a scope item or gap is `/find-papers`
+(`../search-engine-design.md`): `scripts/lit_search.py` searches OpenAlex and proposes a table of
+at most 15, and `scripts/lit_fetch.py` fetches only what the user numbers. The rest of this section
+is for resolving one lead you already have.
+
 Acquisition is its own step, tracked in `../leads.md` (its rules and its states: found, fetched,
 blocked, user-fetched, converted, deferred). Claude searches and fetches with the session's web
 tools where it can. About half of the finds cannot be fetched automatically (bot-protected hosts,

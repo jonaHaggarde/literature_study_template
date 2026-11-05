@@ -240,6 +240,9 @@ The author's priorities after building the gates and the status view, in order o
    said the repo "cannot fetch or download sources on its own" until it was corrected on
    2026-11-01. Still to decide and write down: how candidates are searched and ranked, what a
    download needs from the user, and how paywalled sources go through the user's institutional access.
+   **Status 2026-11-05 (branch `dev-search-engine`):** designed (`study/search-engine-design.md`),
+   `lit_search.py` and `lit_fetch.py` built with tests, and the `/find-papers` command written.
+   Not yet done: a full round on a real topic, the progress display and `/where` coverage matrix.
 2. **The summarising engine must not invent.** Look closely at how notes, catalog entries and method
    cards are produced and checked (`note-extractor`, the `row-verifier` pass, `verification.py`):
    what stops a summary from stating something the paper does not say, and how a number or a

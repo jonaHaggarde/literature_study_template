@@ -127,6 +127,7 @@ own format:
 | `note-extractor` | Fills a catalog entry and note sections for a named list of documents. Carries the full worker contract. |
 | `dossier-synthesist` | Drafts one topic dossier: comparison table, recommendation, open questions. |
 | `/lit` | Answer a literature question — scout locates, the session concludes. |
+| `/find-papers` | Search for new papers on a scope item or gap, propose a table, fetch only the numbers you approve. |
 | `/process-batch` | The full batch loop: parallel workers, central merge, ratify, validate, commit. |
 | `/gap-check` | Audit coverage against scope and report what is genuinely thin. |
 | `row-verifier` | Cheap (Haiku) check of one note's method cards against its extracted text, for the article's verification pass. |
