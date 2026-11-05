@@ -142,5 +142,61 @@ class Length(unittest.TestCase):
             self.assertTrue(any(r.startswith("sentence of") for r in rules(sc.check_article(d, PHRASES))))
 
 
+class MachinePatterns(unittest.TestCase):
+    def found(self, **sections):
+        with tempfile.TemporaryDirectory() as tmp:
+            return sc.check_article(article(tmp, **sections), PHRASES)
+
+    def test_not_x_but_y_is_a_judgment_and_a_plain_negation_is_not(self):
+        found = self.found(intro="The filter is not only fast, but also stable under load.\n"
+                                  "The filter is not stable above 20 Hz.\n")
+        hits = [f for f in found if f.rule.startswith("not X but Y")]
+        self.assertEqual([f.line for f in hits], [1])
+        self.assertEqual(hits[0].severity, "judgment")
+
+    def test_a_trailing_significance_clause_is_flagged_unless_it_carries_a_number(self):
+        found = self.found(intro="The gain falls at low speed, highlighting the need for a better model.\n"
+                                  "The gain falls by 12 percent at low speed, highlighting the lag.\n")
+        self.assertEqual([f.line for f in found if f.rule.startswith("trailing clause")], [1])
+
+    def test_a_stand_in_verb_is_a_judgment(self):
+        found = self.found(intro="The observer serves as the basis for every later stage of the design.\n")
+        self.assertIn("stand-in for a plain verb (is, has)", rules(found, "judgment"))
+
+    def test_questions_and_exclamations_are_flagged(self):
+        found = self.found(intro="What does the estimator do when the signal drops out entirely?\n"
+                                  "The estimator holds its last value for two seconds!\n")
+        self.assertEqual(sorted(f.rule for f in found if f.rule in
+                                ("question in the text of an article", "exclamation mark")),
+                         ["exclamation mark", "question in the text of an article"])
+
+    def test_inflated_significance_and_chatbot_residue_are_problems(self):
+        found = self.found(intro="The result is a testament to the quality of the data we collected.\n"
+                                  "Great question, the estimator converges within four seconds of start.\n")
+        self.assertEqual(rules(found, "problem").count("filler phrase"), 2)
+
+    def test_many_em_dashes_are_a_judgment_call(self):
+        body = " ".join(f"Sentence {w} adds the term {w} to the model" for w in
+                        ["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta"])
+        text = "\n".join(f"{body} — and {i} more." for i in range(1, 6)) + "\n"
+        self.assertIn("many em-dashes", rules(self.found(intro=text)))
+
+    def test_sentences_of_one_length_are_flagged_and_varied_ones_are_not(self):
+        even = "".join(f"Sensor {n} reports value {n} after the fixed delay of ten.\n" for n in
+                       ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m"])
+        varied = "".join(s + "\n" for s in [
+            "The delay is 12 ms.", "Each of the four wheel speed sensors reports at 200 Hz and is read in "
+            "the same task as the yaw rate gyro of the inertial unit.", "Noise is white.",
+            "The bias drifts slowly with temperature, so it is estimated online.", "GPS arrives at 20 Hz.",
+            "Between GPS fixes the estimator integrates the inertial signals and corrects the drift with "
+            "the wheel speeds whenever the slip is small enough.", "Slip is limited to 5 percent.",
+            "The filter has six states.", "Its covariance is reset at every start.",
+            "A fault in one sensor is detected by comparing it with the other three in the same group "
+            "and with the model prediction.", "The estimate is logged.", "Tests ran on three tracks.",
+            "Results follow."])
+        self.assertIn("sentences all about the same length", rules(self.found(intro=even)))
+        self.assertNotIn("sentences all about the same length", rules(self.found(intro=varied)))
+
+
 if __name__ == "__main__":
     unittest.main()

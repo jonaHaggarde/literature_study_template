@@ -12,6 +12,8 @@
 #   [repeat]            a judgment call when the article uses it three or more times
 #   [hedge-stack]       two hedges in a row: a problem
 #   [attribution]       a claim with no named source: a problem unless a citation is in the sentence
+#   [copula]            a stand-in for "is" or "has": a judgment call ("acts as a low-pass filter" can be
+#                       the technical description; "serves as a testament" cannot)
 
 [always]
 it is important to note
@@ -55,6 +57,29 @@ re:in (today's|the modern) (world|landscape)
 re:rapidly (evolving|changing)
 re:ever-(evolving|changing|growing)
 re:despite (these |the )?challenges
+a testament to
+paves the way
+pave the way
+re:opens? (up )?(new )?(avenues|possibilities|doors)
+re:underscor(e|es|ed|ing) (the )?(importance|need|significance|value)
+re:the future (looks|is) bright
+re:exciting (possibilities|opportunities|times)
+re:marks? a (pivotal|turning|significant|major) (moment|point|shift)
+the key takeaway
+the bottom line
+let's dive
+let us dive
+without further ado
+here's the thing
+here is the thing
+the real question is
+as an ai
+i hope this helps
+great question
+feel free to
+let me know if
+as of my last
+knowledge cutoff
 
 [unless-conclusion]
 in summary
@@ -84,6 +109,23 @@ effective
 effectively
 seamless
 optimal
+tapestry
+realm
+intricate
+multifaceted
+nuanced
+holistic
+synergy
+showcase
+showcases
+foster
+fosters
+harness
+streamline
+unveil
+elevate
+shed light on
+re:underscor\w+
 
 [repeat]
 furthermore
@@ -118,3 +160,22 @@ it is generally accepted
 many researchers
 some researchers
 re:it has been (shown|argued|suggested) that
+critics argue
+observers note
+industry reports suggest
+according to experts
+scholars have argued
+many believe
+it is often said
+it is commonly believed
+re:some (argue|say|believe|claim) that
+
+[copula]
+serves as
+stands as
+acts as
+functions as
+represents a
+boasts
+features a
+offers a

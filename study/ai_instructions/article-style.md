@@ -45,6 +45,31 @@ other words Y"), in neighbouring sentences, or in two sections. Everything below
 15. **Run `python study/scripts/style_check.py <article>` before reporting a draft or an
     edit.** Fix every *problem*. Decide each *judgment call*, and keep it if it is right.
 
+**Patterns that read as machine-written** (each is a judgment call, not a ban: some have a
+legitimate technical use, and the check only asks)
+
+16. **Say what it is, not what it is not.** "Not X but Y" and "it is not X, it is Y" only where
+    someone really holds X, and then with a citation.
+17. **No trailing clause that announces significance.** ", highlighting the importance of ...",
+    ", underscoring ...", ", paving the way for ...": give the consequence as a claim with its
+    number, or cut the clause.
+18. **Plain verbs.** "is" and "has", not "serves as", "stands as", "boasts", "features". Keep
+    "acts as" or "functions as" when it is the technical description.
+19. **No inflated significance or endorsement.** Not "a testament to", "a pivotal moment",
+    "opens new avenues", "the future looks bright". State the result and its size.
+20. **Name the source or drop the attribution.** "Some argue", "critics note", "industry reports
+    suggest" are claims with no one behind them.
+21. **No stand-in vocabulary** such as tapestry, realm, multifaceted, holistic, showcase,
+    foster, harness. The plain word is almost always shorter and exact.
+22. **Punctuation and rhythm.** Em-dashes sparingly (the check asks above four per thousand
+    words), no questions or exclamations in the text, and sentence lengths that vary. A text in
+    which every sentence has the same length reads as generated.
+23. **No chatbot residue:** sign-offs, offers to help, "great question", references to a
+    knowledge cutoff. These mean a draft was pasted without being read.
+
+A sentence that fails is deleted or made into a claim, never reworded by a model, because
+rewording can move a claim.
+
 ## What the check does and does not do
 
 `style_check.py` is advisory: it never fails a build. It reports **problems** (clear cases)
@@ -56,6 +81,8 @@ and **judgment calls** (a person decides).
 | a claim with no named source ("studies show") with no citation in the sentence | problem |
 | a sentence whose content another sentence already carries | problem |
 | an evaluative word with no number or citation in its sentence | judgment |
+| inflated-significance phrases, chatbot residue | problem |
+| not X but Y, a trailing significance clause, a stand-in verb, a question or exclamation, many em-dashes, even sentence length | judgment |
 | a nearby sentence, or a second clause, that restates | judgment |
 | a sentence over 40 words; many hedges; a list of bare phrases; a connective used 3 times | judgment |
 
