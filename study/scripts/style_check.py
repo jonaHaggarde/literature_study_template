@@ -27,6 +27,7 @@ Usage (from study/):
 """
 
 import re
+import statistics
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -53,6 +54,21 @@ HEDGES_PER_1000 = 8
 HEDGE_MIN_WORDS = 300
 BARE_ITEMS = 4
 BARE_ITEM_WORDS = 3
+EM_DASHES_PER_1000 = 4
+EM_DASH_MIN_WORDS = 300
+EVEN_SENTENCES = 12        # fewest sentences in a file before the rhythm is judged
+EVEN_SPREAD = 0.30         # standard deviation over mean sentence length, below which it is flagged
+
+# Patterns of machine-written prose, after the categories catalogued by theclaymethod/unslop.
+# Matched on whole sentences, so a legitimate technical use still reads as a judgment call.
+NEG_PARALLEL = re.compile(
+    r"\bnot (?:just|only|merely|simply) [^.;?!]{2,80}?,? but (?:also )?"
+    r"|\bit(?:'s| is) not [^.;?!]{2,60}[,;:] ?it(?:'s| is)\b"
+    r"|\bnot (?:a|an|the) [^.;?!,]{2,50}, but (?:a|an|the)\b", re.I)
+TRAILING_SIGNIFICANCE = re.compile(
+    r",\s+(?:highlighting|underscoring|showcasing|emphasi[sz]ing|reflecting|demonstrating|illustrating|"
+    r"signall?ing|ensuring|fostering|cementing|solidifying|paving the way)\b", re.I)
+SUPPORT = re.compile(r"\d|\\cite")
 
 STOP = set("""a an the and or but if then than that this these those of to in on at by for with from as is are was
 were be been being it its into onto over under not no nor so such can could may might will would shall should
@@ -217,6 +233,7 @@ def analyse_file(label, text, exempt_file, phrases):
     phrase_hits("unless-conclusion", "problem", "summary phrase outside a conclusion", skip_in_exempt=True)
     phrase_hits("hedge-stack", "problem", "stacked hedges")
     phrase_hits("attribution", "problem", "claim with no named source", skip_with_cite=True)
+    phrase_hits("copula", "judgment", "stand-in for a plain verb (is, has)")
 
     for s in sentences:   # evaluative words with nothing behind them
         has_support = bool(re.search(r"\d|\\cite", s.original))
@@ -228,6 +245,19 @@ def analyse_file(label, text, exempt_file, phrases):
                 findings.append(Finding(label, s.line, "judgment", "evaluative word with no number or source",
                                         f"'{m.group(0)}' in: {excerpt(s.text.strip())}"))
                 break
+
+    for s in sentences:   # the shapes of machine-written prose
+        if NEG_PARALLEL.search(s.text):
+            findings.append(Finding(label, s.line, "judgment", "not X but Y: say what it is",
+                                    excerpt(s.text.strip())))
+        if not SUPPORT.search(s.original) and TRAILING_SIGNIFICANCE.search(s.text):
+            findings.append(Finding(label, s.line, "judgment", "trailing clause that announces significance",
+                                    excerpt(s.text.strip())))
+        if s.text.rstrip().endswith("?"):
+            findings.append(Finding(label, s.line, "judgment", "question in the text of an article",
+                                    excerpt(s.text.strip())))
+        elif "!" in s.text:
+            findings.append(Finding(label, s.line, "judgment", "exclamation mark", excerpt(s.text.strip())))
 
     for s in sentences:   # very long sentences
         n = len(re.findall(r"[A-Za-z]+", s.text))
@@ -256,6 +286,20 @@ def analyse_file(label, text, exempt_file, phrases):
             findings.append(Finding(label, 1, "judgment", "many hedges",
                                     f"{hedges} hedge words in {len(words)} words; state the uncertainty once, "
                                     "with its size"))
+
+    prose_words = re.findall(r"[A-Za-z]+", prose)
+    dashes = len(re.findall(r"---|\u2014", prose))
+    if len(prose_words) >= EM_DASH_MIN_WORDS and dashes * 1000 / len(prose_words) > EM_DASHES_PER_1000:
+        findings.append(Finding(label, 1, "judgment", "many em-dashes",
+                                f"{dashes} in {len(prose_words)} words; a comma, colon or full stop usually "
+                                "does the job"))
+
+    lengths = [len(re.findall(r"[A-Za-z]+", s.text)) for s in sentences if not s.exempt]
+    if len(lengths) >= EVEN_SENTENCES and statistics.mean(lengths) > 0:
+        spread = statistics.pstdev(lengths) / statistics.mean(lengths)
+        if spread < EVEN_SPREAD:
+            findings.append(Finding(label, 1, "judgment", "sentences all about the same length",
+                                    f"spread {spread:.2f} of the mean length; uniform rhythm reads as generated"))
 
     for m in re.finditer(r"(?:^[ \t]*\\item\b[^\n]*\n?){%d,}" % BARE_ITEMS, stage1, re.M):   # bare noun-phrase lists
         items = [re.sub(r"\\item\s*", "", ln).strip() for ln in m.group(0).splitlines() if ln.strip()]
