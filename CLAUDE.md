@@ -46,6 +46,10 @@ Routing, for a session starting at the repo root:
 - Where things stand, what is next, what is missing → `/where`: a picture of the gates, the
   intake coverage, the catalog and the articles, drawn by `study/scripts/status.py` from the
   files. It only shows; every decision still happens here in chat.
+- Finding new papers on a scope item or gap → `/find-papers`: Claude searches, proposes a table of
+  at most 15, and downloads only the numbers the user approves. The design and its reasons are in
+  `study/search-engine-design.md`. Papers behind a paywall are the user's to fetch with their own
+  access; Claude never uses their login.
 - Literature work (processing PDFs, answering a question from the
   catalog, building a dossier, gap-flagging) → read
   `study/ai_instructions/README.md` and follow its read order. Working

@@ -14,6 +14,7 @@ Usage (from study/):
     python scripts/lit_search.py angles --round 1 "plain words: the problem as a layperson says it" ...
     python scripts/lit_search.py search --round 1 --angle plain --query "..." [--reviews] [--from-year 2015]
     python scripts/lit_search.py seed --round 1 --work W123 --direction references|cited-by
+    python scripts/lit_search.py show --round 1 W123 W456   # the record and abstract, to judge fit
     python scripts/lit_search.py pick --round 1 --id W123 --reason "..." --covers "..." [--slot unfamiliar]
     python scripts/lit_search.py table --round 1        # writes round-01.md and prints the table
     python scripts/lit_search.py approve --round 1 1,2,3,6   # the user's numbers -> rows in leads.md
@@ -562,6 +563,18 @@ def show_candidates(found, rnd):
               f"{c['title'][:80]}{mark}")
 
 
+def describe(c, chars=900):
+    """What Claude reads to judge fit: the record's own words, never a summary of them."""
+    abstract = c["abstract"][:chars] + ("..." if len(c["abstract"]) > chars else "")
+    return "\n".join([
+        f"{c['id']}  {c['title']}",
+        f"  {c['first_author']}, {c['year']}, {venue_cell(c)}, {c['type']}, cited {c['cited']}, "
+        f"{c['access']}",
+        f"  topics: {', '.join(c['topics']) or 'none listed'}",
+        f"  found via: {via_text(c)}",
+        f"  abstract: {abstract or 'none in the record (the publisher withholds it)'}"])
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -583,6 +596,9 @@ def main(argv=None):
     p.add_argument("--work", required=True, help="OpenAlex id (W123...) or a DOI")
     p.add_argument("--direction", choices=["references", "cited-by"], required=True)
     p.add_argument("--limit", type=int, default=PER_PAGE)
+    p = sub.add_parser("show", help="the record of some candidates, abstract included")
+    p.add_argument("--round", type=int)
+    p.add_argument("ids", nargs="+")
     p = sub.add_parser("pick")
     p.add_argument("--round", type=int)
     p.add_argument("--id", required=True)
@@ -624,6 +640,12 @@ def main(argv=None):
         print(f"{args.direction} of \"{(seed.get('title') or '')[:70]}\": {len(found)} returned, "
               f"{new} new, {n_held} held, {n_prop} proposed before.")
         show_candidates(found, rnd)
+    elif args.cmd == "show":
+        for wid in args.ids:
+            if wid in rnd["candidates"]:
+                print(describe(rnd["candidates"][wid]) + "\n")
+            else:
+                print(f"{wid}: not a candidate of round {rnd['round']}\n")
     elif args.cmd == "pick":
         add_pick(rnd, args.id, args.reason, args.covers, args.slot)
         save_round(rnd)

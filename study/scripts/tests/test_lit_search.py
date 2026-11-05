@@ -174,6 +174,15 @@ class Search(Base):
         self.assertTrue(any("openalex:W20|W21" in u for u in self.urls))
 
 
+class Show(Base):
+    def test_describe_gives_the_records_own_words_and_says_when_there_is_no_abstract(self):
+        with_abs = ls.candidate(work("W1", "Alpha", abstract="a plain abstract", topics=["Control"]))
+        text = ls.describe(with_abs)
+        self.assertIn("abstract: a plain abstract", text)
+        self.assertIn("topics: Control", text)
+        self.assertIn("publisher withholds", ls.describe(ls.candidate(work("W2", "Beta"))))
+
+
 class Picks(Base):
     def test_only_returned_papers_can_be_proposed(self):
         rnd = self.start()

@@ -21,6 +21,9 @@ file is what stops those from being forgotten between sessions.
   `PDFs/`, not converted), `blocked` (could not be fetched; the access note
   says why), `user-fetched` (the user obtained it by hand), `converted` (in
   the catalog), `deferred` (decided not to pursue; say why).
+- **Rows for papers found by `/find-papers` belong to the scripts.** `lit_search.py approve` adds
+  them as `found` and `lit_fetch.py` moves them to `fetched`, `blocked` or `user-fetched`; edit by
+  hand only the rows you added yourself.
 - **Check open access before assuming it.** An institutional repository can
   serve a full file with no login while its own page offers only "request a
   copy". That does not make the file openly licensed. Look for an explicit
