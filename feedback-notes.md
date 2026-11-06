@@ -234,7 +234,7 @@ proposed three names for the same detection concept. F1's structured block
 lets a script list near-duplicates across workers before the coordinator
 merges (fuzzy match, as the catalog already does for titles). Small, after F1.
 
-**F7. Scope drift warning.** A new project goal (tyre modelling for a later
+**F7. Scope drift warning.** A new project goal (added for a later
 phase) silently contradicted an out-of-scope line in the scope file that
 governs catalog verdicts, and nothing noticed. The planned project
 definition document (`roadmap-notes.md`) is the structural fix, since scope
@@ -285,7 +285,7 @@ changes only for a bigger change. Proposal: a spec is one stable file with a
 revision-notes section; superseded drafts are deleted, decided ones kept.
 Docs only.
 
-**S6. A rule and a folder for confidential inputs.** A confidential tyre file
+**S6. A rule and a folder for confidential inputs.** A confidential data file
 had to stay out of a repo with a shared remote. Proposal: ship a gitignored
 `confidential/` folder with a README, the rule that no value or
 value-derived number is copied into tracked results, and a check that the
@@ -296,8 +296,8 @@ README must say so.)
 bench living in the study repo for a month (interim, before the plant model
 arrived), then moving out; and a rule set it needed: group into subfolders at
 about 15 files with a one-line path helper, a results folder that is ignored
-by default, figures tracked only when placeholder-only (tyre-file figures
-forced into an ignored folder *by the code*), each output tied to a named
+by default, figures tracked only when placeholder-only (figures from the
+confidential file forced into an ignored folder *by the code*), each output tied to a named
 decision question with a note on how to read it, and comparisons on an equal
 task, not an equal input. This cuts against "implementation lives in a
 separate repo", so the phase model needs an explicit *phase 2.5: interim

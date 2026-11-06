@@ -108,6 +108,9 @@ Creates `.venv/` and installs dependencies. Activate it afterward with
 
 ## Adding PDFs
 
+To find new papers first, `/find-papers` searches, proposes a table and fetches what you
+approve into `PDFs/`; see `search-engine-design.md`.
+
 `/process-batch` runs this whole loop, including parallel workers for a
 real backlog. By hand:
 
