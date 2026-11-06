@@ -63,6 +63,7 @@ roadmap-notes.md        where the template is heading, what was built and why (t
 feedback-notes.md       what real use says about the template: bugs, features, suggested order
 intake/                 what you hand over before anything is written: own/ (you wrote it), received/ (given to you)
 articles/                      the LaTeX articles, one folder each (definition, map, review, ...), their PDFs, shared preamble
+onboarding-deck/        source of the ten-slide introduction Claude opens on the first "let's start"
 requirements/           OPTIONAL module (engineering-leaning): where requirements sit in the pipeline; delete if unused
 study/                  the literature-review engine — self-contained
 .claude/                agent definitions, slash commands, permissions
@@ -75,8 +76,8 @@ anyway. Each states not just what belongs in it but what **doesn't**: in
 practice the folders that stay clean are the ones with an explicit
 exclusion rule.
 
-`study/` is the engine — catalog, notes, dossiers, scripts, and the
-instructions Claude follows. Keeping it self-contained is deliberate:
+`study/` is the engine — catalog, notes, dossiers, scripts (among them the paper search and
+fetch, `lit_search.py` and `lit_fetch.py`), and the instructions Claude follows. Keeping it self-contained is deliberate:
 it is what makes it possible to drop a newer version of the engine into
 an existing project later.
 
@@ -103,6 +104,15 @@ review article reports the field and decides nothing. Decisions start at the con
 `articles/README.md` describes the articles and the gates, and `study/ai_instructions/` is the
 manual Claude follows for the literature work in between.
 
+## Finding papers
+
+`/find-papers` runs one search round for a scope item or a gap. Claude writes the search angles
+from `scope.md` before any query, searches OpenAlex (survey papers first), and proposes a table
+of at most 15 papers with a reason for each. Nothing is downloaded until you answer with numbers,
+for example "download 1,2,3,6". Open copies are fetched and checked against the title; papers
+behind a paywall are listed for you to fetch with your own access, and the script matches the files
+you save back to their leads. The design and its reasons are in `study/search-engine-design.md`.
+
 ## Usage log
 
 Every repo made from this template quietly keeps `.claude/usage-log.md`: a short
@@ -118,7 +128,7 @@ feedback, copy the file to wherever the template is maintained.
 
 ## What ships in `.claude/`
 
-Five agent definitions and eleven slash commands, all in Claude Code's
+Five agent definitions and twelve slash commands, all in Claude Code's
 own format:
 
 | | What it is |
